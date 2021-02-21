@@ -12,19 +12,19 @@ module.exports = {
 	ignorePatterns: [ "test/*"],
 	parser: "@typescript-eslint/parser",
 	extends: [
-		'plugin:@typescript-eslint/recommended',
-		'prettier/@typescript-eslint',
-		'plugin:prettier/recommended',
+		"plugin:@typescript-eslint/recommended",
+		"prettier/@typescript-eslint",
+		"plugin:prettier/recommended",
 	],
 	parserOptions: {
 		sourceType: "module",
-		ecmaVersion: '2018',
+		ecmaVersion: "2018",
 		project: "tsconfig.json",
 	},
 	plugins: ["prefer-arrow", "import", "@typescript-eslint"],
 	rules: {
 		// Disabled Rules
-		'@typescript-eslint/explicit-function-return-type': 'off',
+		"@typescript-eslint/explicit-function-return-type": "off",
 		"@typescript-eslint/class-name-casing": "off",
 		"@typescript-eslint/interface-name-prefix": "off",
 		"@typescript-eslint/no-explicit-any": "off",
@@ -39,26 +39,26 @@ module.exports = {
 		// Enabled rules
 		"@typescript-eslint/adjacent-overload-signatures": "error",
 		"@typescript-eslint/array-type": "error",
-		'@typescript-eslint/await-thenable': 'error',
-		'@typescript-eslint/naming-convention': [
-			'error',
-			// { selector: 'default', format: ['camelCase', 'snake_case'] },
-			{ selector: 'variable', format: ['camelCase', 'UPPER_CASE'] },
-			{ selector: 'parameter', format: ['camelCase'], leadingUnderscore: 'allow' },
+		"@typescript-eslint/await-thenable": "error",
+		"@typescript-eslint/naming-convention": [
+			"error",
+			// { selector: "default", format: ["camelCase", "snake_case"] },
+			{ selector: "variable", format: ["camelCase", "UPPER_CASE"] },
+			{ selector: "parameter", format: ["camelCase"], leadingUnderscore: "allow" },
 			{
-				selector: 'memberLike',
-				modifiers: ['private'],
-				format: ['camelCase'],
-				leadingUnderscore: 'require',
+				selector: "memberLike",
+				modifiers: ["private"],
+				format: ["camelCase"],
+				leadingUnderscore: "require",
 			},
-			{ selector: 'typeLike', format: ['PascalCase'] },
+			{ selector: "typeLike", format: ["PascalCase"] },
 		],
-		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
-		'@typescript-eslint/no-unused-vars': 'warn',
-		'@typescript-eslint/no-unnecessary-qualifier': 'error',
-		'@typescript-eslint/no-for-in-array': 'error',
-		'@typescript-eslint/promise-function-async': 'error',
-		'@typescript-eslint/restrict-plus-operands': 'error',
+		"@typescript-eslint/no-unnecessary-type-assertion": "error",
+		"@typescript-eslint/no-unused-vars": "warn",
+		"@typescript-eslint/no-unnecessary-qualifier": "error",
+		"@typescript-eslint/no-for-in-array": "error",
+		"@typescript-eslint/promise-function-async": "error",
+		"@typescript-eslint/restrict-plus-operands": "error",
 		"@typescript-eslint/ban-types": "error",
 		"@typescript-eslint/consistent-type-assertions": "error",
 		"@typescript-eslint/consistent-type-definitions": "error",
@@ -78,8 +78,7 @@ module.exports = {
 				"FunctionExpression": {
 					"parameters": "first"
 				}
-			},
-            { "SwitchCase": 1 }
+			}
 		],
 		"@typescript-eslint/member-delimiter-style": [
 			"error",
@@ -163,9 +162,9 @@ module.exports = {
 		"one-var": ["error", "never"],
 		"prefer-arrow/prefer-arrow-functions": "error",
 		"prefer-const": [
-			'error',
+			"error",
 			{
-				destructuring: 'all',
+				destructuring: "all",
 				ignoreReadBeforeAssign: true,
 			},
         ],
@@ -181,6 +180,6 @@ module.exports = {
 		],
 		"spaced-comment": "error",
 		"use-isnan": "error",
-		'no-mixed-spaces-and-tabs': ['warn'],
+		"no-mixed-spaces-and-tabs": ["warn"],
 	}
 };
