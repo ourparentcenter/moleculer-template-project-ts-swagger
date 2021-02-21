@@ -33,7 +33,7 @@ describe("Test 'products' service", () => {
 				service.transformDocuments.mockClear();
 				service.entityChanged.mockClear();
 
-				const res = await broker.call("products.increaseQuantity", {
+				const res = await broker.call("v1.products.increaseQuantity", {
 					id: "123",
 					value: 10,
 				});
@@ -63,7 +63,7 @@ describe("Test 'products' service", () => {
 				service.transformDocuments.mockClear();
 				service.entityChanged.mockClear();
 
-				const res = await broker.call("products.decreaseQuantity", {
+				const res = await broker.call("v1.products.decreaseQuantity", {
 					id: "123",
 					value: 10,
 				});
@@ -91,14 +91,14 @@ describe("Test 'products' service", () => {
 
 				expect.assertions(2);
 				try {
-					await broker.call("products.decreaseQuantity", {
+					await broker.call("v1.products.decreaseQuantity", {
 						id: "123",
 						value: -5,
 					});
 				} catch (err) {
 					expect(err).toBeInstanceOf(Errors.ValidationError);
 					expect(err.data).toEqual([{
-						action: "products.decreaseQuantity",
+						action: "v1.products.decreaseQuantity",
 						actual: -5,
 						field: "value",
 						message: "The 'value' field must be a positive number.",
@@ -160,7 +160,7 @@ describe("Test 'products' service", () => {
 		describe("Test before 'create' hook", () => {
 
 			it("should add quantity with zero", async () => {
-				await broker.call("products.create", {
+				await broker.call("v1.products.create", {
 					id: "111",
 					name: "Test product",
 					price: 100,

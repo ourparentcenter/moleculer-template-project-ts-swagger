@@ -1,7 +1,7 @@
 'use strict';
 import moleculer, { Context } from 'moleculer';
 import { Action, Method, Service } from 'moleculer-decorators';
-import DbConnection from "@Mixins/dbMixins/db.mixin";
+import DbConnection from "../../mixins/dbMixins/db.mixin";
 const DbMixin = new DbConnection("products").start();
 
 /**

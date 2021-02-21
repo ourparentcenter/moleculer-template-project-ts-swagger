@@ -4,7 +4,7 @@ process.env.TEST = "true";
 
 import { ServiceBroker } from "moleculer";
 import DbService from "moleculer-db";
-import DbMixin from "../../../mixins/dbmixins/db.mixin";
+import DbMixin from "../../../mixins/dbMixins/db.mixin";
 
 describe("Test DB mixin", () => {
 
