@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-import { existsSync } from "fs";
-import { sync } from "mkdirp";
-import { Context, Service, ServiceSchema } from "moleculer";
-import DbService from "moleculer-db";
+import { existsSync } from 'fs';
+import { sync } from 'mkdirp';
+import { Context, Service, ServiceSchema } from 'moleculer';
+import DbService from 'moleculer-db';
 
 export default class Connection implements Partial<ServiceSchema>, ThisType<Service>{
 
@@ -48,7 +48,7 @@ export default class Connection implements Partial<ServiceSchema>, ThisType<Serv
 					if (count === 0) {
 						this.logger.info(`The '${this.collection}' collection is empty. Seeding the collection...`);
 						await this.seedDB();
-						this.logger.info("Seeding is done. Number of records:", await this.adapter.count());
+						this.logger.info('Seeding is done. Number of records:', await this.adapter.count());
 					}
 				}
 			},
@@ -59,7 +59,7 @@ export default class Connection implements Partial<ServiceSchema>, ThisType<Serv
 		if (process.env.MONGO_URI) {
 			// Mongo adapter
 			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			const   MongoAdapter = require("moleculer-db-adapter-mongo");
+			const MongoAdapter = require('moleculer-db-adapter-mongo');
 			this.schema.adapter = new MongoAdapter(process.env.MONGO_URI);
 			this.schema.collection = this.collection;
 		} else if (process.env.TEST) {
@@ -70,8 +70,8 @@ export default class Connection implements Partial<ServiceSchema>, ThisType<Serv
 			// NeDB file DB adapter
 
 			// Create data folder
-			if (!existsSync("./data")) {
-				sync("./data");
+			if (!existsSync('./data')) {
+				sync('./data');
 			}
 			// @ts-ignore
 			this.schema.adapter = new DbService.MemoryAdapter({ filename: `./data/${this.collection}.db` });
