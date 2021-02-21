@@ -3,7 +3,7 @@
 process.env.TEST = "true";
 
 import { Context, Errors, ServiceBroker } from "moleculer";
-import TestService from "../../../services/products.service";
+import TestService from "../../../services/productService/products.service";
 
 describe("Test 'products' service", () => {
 

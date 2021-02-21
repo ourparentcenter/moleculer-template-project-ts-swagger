@@ -31,6 +31,17 @@ module.exports = function(values) {
         ],
         when(answers) { return answers.needTransporter; },
         default: "NATS"
+	  },
+      {
+        type: "list",
+        name: "watcher",
+        message: "Select a file watcher",
+        choices: [
+          { name: "ts-node (recommended)", value: "ts-node" },
+          { name: "ts-node-dev", value: "ts-node-dev" }
+        ],
+        when(answers) { return answers.watcher; },
+        default: "ts-node-dev"
       },
       {
         type: "confirm",
@@ -109,6 +120,12 @@ module.exports = function(values) {
         name: "lint",
         message: "Use ESLint to lint your code?",
         default: true
+	  },
+	  {
+        type: "confirm",
+        name: "swagger",
+        message: "Use Swagger?",
+        default: true
       }
     ],
 
@@ -129,7 +146,8 @@ module.exports = function(values) {
       "public/**/*": "apiGW",
 
       "services/products.service.ts": "dbService",
-      "mixins/db.mixin.ts": "dbService",
+	  "mixins/dbmixins/db.mixin.ts": "dbService",
+	  "mixins/openapi/openapi.mixin.ts": "swagger",
       "test/mixins/db.mixin.spec.ts": "dbService",
       "test/integration/products.service.spec.ts": "dbService",
       "test/unit/services/products.spec.ts": "dbService",
