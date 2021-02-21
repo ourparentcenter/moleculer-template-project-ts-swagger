@@ -2,10 +2,10 @@
 /**
  * Mixin for all dbs to seed data
  */
+import { writeFileSync, readFileSync } from 'fs';
 import { Errors } from 'moleculer';
 import ApiGateway from 'moleculer-web';
 import SwaggerUI from 'swagger-ui-dist';
-import { writeFileSync, readFileSync } from 'fs';
 import _ from 'lodash';
 import swaggerJSDoc from 'swagger-jsdoc';
 import * as pkg from '../../../package.json';

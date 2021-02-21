@@ -56,7 +56,9 @@ module.exports = {
 				const service = opts.parentCtx.service;
 				const token = service.schema.authToken;
 
-				if (!opts.meta) opts.meta = {};
+				if (!opts.meta) {
+					opts.meta = {};
+				}
 
 				opts.meta.$authToken = token;
 			}

@@ -26,7 +26,7 @@ describe("Test 'products' service", () => {
 			createdAt: Date.now(),
 		};
 
-		describe("Test 'products.increaseQuantity'", () => {
+		describe("Test 'v1.products.increaseQuantity'", () => {
 
 			it("should call the adapter updateById method & transform result", async () => {
 				service.adapter.updateById.mockImplementation(async () => record);
@@ -56,7 +56,7 @@ describe("Test 'products' service", () => {
 
 		});
 
-		describe("Test 'products.decreaseQuantity'", () => {
+		describe("Test 'v1.products.decreaseQuantity'", () => {
 
 			it("should call the adapter updateById method & transform result", async () => {
 				service.adapter.updateById.mockClear();

@@ -5,7 +5,7 @@ import { sync } from 'mkdirp';
 import { Context, Service, ServiceSchema } from 'moleculer';
 import DbService from 'moleculer-db';
 
-export default class Connection implements Partial<ServiceSchema>, ThisType<Service>{
+export default class Connection implements Partial<ServiceSchema>, ThisType<Service> {
 
 	private cacheCleanEventName: string;
 	private collection: string;
@@ -37,7 +37,7 @@ export default class Connection implements Partial<ServiceSchema>, ThisType<Serv
 				 * @param {Context} ctx
 				 */
 				entityChanged: async (type: string, json: any, ctx: Context) => {
-					await  ctx.broadcast(this.cacheCleanEventName);
+					await ctx.broadcast(this.cacheCleanEventName);
 				},
 			},
 			async started() {
@@ -55,7 +55,7 @@ export default class Connection implements Partial<ServiceSchema>, ThisType<Serv
 		};
 	}
 
-	public start(){
+	public start() {
 		if (process.env.MONGO_URI) {
 			// Mongo adapter
 			// eslint-disable-next-line @typescript-eslint/no-var-requires
