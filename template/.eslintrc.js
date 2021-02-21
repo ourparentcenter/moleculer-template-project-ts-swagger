@@ -72,14 +72,14 @@ module.exports = {
 			"warn",
 			4,
 			{
-				FunctionDeclaration: {
-					parameters: "first"
+				"FunctionDeclaration": {
+					"parameters": "first"
 				},
-				FunctionExpression: {
-					parameters: "first"
+				"FunctionExpression": {
+					"parameters": "first"
 				}
 			},
-            { SwitchCase: 1 }
+            { "SwitchCase": 1 }
 		],
 		"@typescript-eslint/member-delimiter-style": [
 			"error",
