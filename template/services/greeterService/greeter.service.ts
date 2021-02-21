@@ -12,7 +12,7 @@ import { Action, Service } from 'moleculer-decorators';
 	 */
 	authToken: process.env.GREETER_AUTH_TOKEN,
 })
-class GreeterService extends moleculer.Service {
+export default class GreeterService extends moleculer.Service {
 	/**
 	 *  @swagger
 	 *
@@ -91,4 +91,3 @@ class GreeterService extends moleculer.Service {
 		return `Welcome, ${ctx.params.name}`;
 	}
 }
-module.exports = GreeterService;

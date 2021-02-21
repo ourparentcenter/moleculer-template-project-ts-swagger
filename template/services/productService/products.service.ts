@@ -19,7 +19,7 @@ const DbMixin = new DbConnection("products").start();
 	 */
 	mixins: [DbMixin],
 })
-class ProductService extends moleculer.Service {
+export default class ProductService extends moleculer.Service {
 	/**
 	 * Settings
 	 */
@@ -345,4 +345,3 @@ class ProductService extends moleculer.Service {
 	 *          description: Server error
 	 */
 }
-module.exports = ProductService;
