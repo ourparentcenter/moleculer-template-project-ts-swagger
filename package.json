@@ -1,0 +1,28 @@
+{
+  "name": "moleculer-template-project-ts-swagger",
+  "version": "1.0.0",
+  "description": "Project template for Moleculer-based projects with typescript & swagger",
+  "main": "meta.js",
+  "scripts": {
+    "dev": "rimraf tmp && moleculer init . tmp",
+    "build": "moleculer init --answers test/now.sh/answers.json --install . tmp",
+    "test": "moleculer init --answers test/ci/answers.json --install . ci-test",
+    "start": "cd tmp && node node_modules/moleculer/bin/moleculer-runner services"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ourparentcenter/moleculer-template-project-ts-swagger.git"
+  },
+  "keywords": [],
+  "author": "MoleculerJS",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ourparentcenter/moleculer-template-project-ts-swagger/issues"
+  },
+  "homepage": "https://github.com/ourparentcenter/moleculer-template-project-ts-swagger#readme",
+  "devDependencies": {
+    "moleculer-cli": "^0.7.1",
+    "prettier": "^2.2.1",
+    "rimraf": "^3.0.2"
+  }
+}
