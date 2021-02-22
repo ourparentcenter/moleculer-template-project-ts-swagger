@@ -110,7 +110,6 @@ export default class ProductService extends moleculer.Service {
 			$inc: { quantity: ctx.params.value },
 		});
 		// .then((res: Record<string, unknown>) => res.value);
-		console.log(doc);
 		const json = await this.transformDocuments(ctx, ctx.params, doc);
 		await this.entityChanged('updated', json, ctx);
 		return json;

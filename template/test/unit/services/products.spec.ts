@@ -147,6 +147,7 @@ describe("Test 'products' service", () => {
 		const createActionFn = jest.fn();
 		// @ts-ignore
 		broker.createService(TestService, {
+			name: "TestService",
 			actions: {
 				create: {
 					handler: createActionFn,
