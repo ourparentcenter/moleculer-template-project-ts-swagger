@@ -17,12 +17,7 @@ const DbMixin = new DbConnection("products").start();
 	/**
 	 * Mixins
 	 */
-	mixins: [DbMixin],
-
-	/**
-	 * Seed database with demo content
-	 */
-	seed: true
+	mixins: [DbMixin]
 })
 export default class ProductService extends moleculer.Service {
 	/**

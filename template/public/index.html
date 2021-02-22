@@ -529,41 +529,41 @@
 
 					requests: {
 						greeter: [
-							{ id: "hello", action: "greeter.hello", rest: "/api/greeter/hello", response: null, status: null, duration: null },
+							{ id: "hello", action: "greeter.hello", rest: "/api/v1/greeter/hello", response: null, status: null, duration: null },
 
-							{ id: "welcome", action: "greeter.welcome", rest: "/api/greeter/welcome", fields: [
+							{ id: "welcome", action: "greeter.welcome", rest: "/api/v1/greeter/welcome", fields: [
 								{ field: "name", label: "Name", type: "text", paramType: "param", model: "welcomeName" }
 							], response: null, status: null, duration: null }
 						]{{#dbService}},
 						products: [
-							{ id: "list", action: "products.list", rest: "/api/products/", response: null, status: null, duration: null, afterResponse: response => !this.fields.productID && (this.fields.productID = response.rows[0]._id) },
+							{ id: "list", action: "products.list", rest: "/api/v1/products/", response: null, status: null, duration: null, afterResponse: response => !this.fields.productID && (this.fields.productID = response.rows[0]._id) },
 
-							{ id: "create", action: "products.create", rest: "/api/products/", method: "POST", fields: [
+							{ id: "create", action: "products.create", rest: "/api/v1/products/", method: "POST", fields: [
 								{ field: "name", label: "Name", type: "text", paramType: "body", model: "productName" },
 								{ field: "price", label: "Price", type: "number", paramType: "body", model: "productPrice" },
 							], response: null, status: null, duration: null, afterResponse: response => this.fields.productID = response._id  },
 
-							{ id: "get", action: "products.get", rest: "/api/products/:id", method: "GET", fields: [
+							{ id: "get", action: "products.get", rest: "/api/v1/products/:id", method: "GET", fields: [
 								{ field: "id", label: "ID", type: "text", paramType: "url", model: "productID" }
 							], response: null, status: null, duration: null },
 
-							{ id: "update", action: "products.update", rest: "/api/products/:id", method: "PUT", fields: [
+							{ id: "update", action: "products.update", rest: "/api/v1/products/:id", method: "PUT", fields: [
 								{ field: "id", label: "ID", type: "text", paramType: "url", model: "productID" },
 								{ field: "name", label: "Name", type: "text", paramType: "body", model: "productName" },
 								{ field: "price", label: "Price", type: "number", paramType: "body", model: "productPrice" },
 							], response: null, status: null, duration: null },
 
-							{ id: "increase", action: "products.increaseQuantity", rest: "/api/products/:id/quantity/increase", method: "PUT", fields: [
+							{ id: "increase", action: "products.increaseQuantity", rest: "/api/v1/products/:id/quantity/increase", method: "PUT", fields: [
 								{ field: "id", label: "ID", type: "text", paramType: "url", model: "productID" },
 								{ field: "value", label: "Value", type: "number", paramType: "body", model: "productValue" },
 							], response: null, status: null, duration: null },
 
-							{ id: "decrease", action: "products.decreaseQuantity", rest: "/api/products/:id/quantity/decrease", method: "PUT", fields: [
+							{ id: "decrease", action: "products.decreaseQuantity", rest: "/api/v1/products/:id/quantity/decrease", method: "PUT", fields: [
 								{ field: "id", label: "ID", type: "text", paramType: "url", model: "productID" },
 								{ field: "value", label: "Value", type: "number", paramType: "body", model: "productValue" },
 							], response: null, status: null, duration: null },
 
-							{ id: "delete", action: "products.delete", rest: "/api/products/:id", method: "DELETE", fields: [
+							{ id: "delete", action: "products.delete", rest: "/api/v1/products/:id", method: "DELETE", fields: [
 								{ field: "id", label: "ID", type: "text", paramType: "url", model: "productID" }
 							], response: null, status: null, duration: null },
 

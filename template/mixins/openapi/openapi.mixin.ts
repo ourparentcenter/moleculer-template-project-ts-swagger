@@ -8,7 +8,7 @@ import ApiGateway from 'moleculer-web';
 import SwaggerUI from 'swagger-ui-dist';
 import _ from 'lodash';
 import swaggerJSDoc from 'swagger-jsdoc';
-import * as pkg from '../../../package.json';
+import * as pkg from '../../package.json';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MoleculerServerError = Errors.MoleculerServerError;
 
@@ -56,8 +56,8 @@ export const openAPIMixin = (mixinOptions?: any) => {
 							description:
 								'Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects..', // short description of the app
 						},
-						host: 'localhost:1337', // the host or url of the app
-						basePath: '/api', // the basepath of your endpoint
+						host: `${process.env.SWAGGER_HOST}:${process.env.SWAGGER_PORT}`, // the host or url of the app
+						basePath: `${process.env.SWAGGER_BASEPATH}`, // the basepath of your endpoint
 					};
 					// options for the swagger docs
 					const options = {
@@ -67,7 +67,9 @@ export const openAPIMixin = (mixinOptions?: any) => {
 						enableCORS: false,
 
 						// path to the API docs
-						apis: ['./backend/services/**/*.service.ts'],
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore
+						apis: JSON.parse(process.env.SWAGGER_APIS),
 					};
 					// initialize swagger-jsdoc
 					const swaggerSpec = swaggerJSDoc(options);
@@ -89,9 +91,11 @@ export const openAPIMixin = (mixinOptions?: any) => {
 			const indexContent = readFileSync(`${pathToSwaggerUi}/index.html`)
 				.toString()
 				.replace(
-					'https://petstore.swagger.io/v2/swagger.json',
+					// eslint-disable-next-line max-len
+					/(?:(?:https?):\/\/|www\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/gim,
 					`${process.env.BASE_URL}:${process.env.BASE_PORT}/openapi/swagger.json`,
-				);
+				)
+				.replace('layout: "StandaloneLayout"', '');
 			writeFileSync(`${pathToSwaggerUi}/index.html`, indexContent);
 			const route = _.defaultsDeep(mixinOptions.routeOptions, {
 				use: [ApiGateway.serveStatic(SwaggerUI.absolutePath())],
@@ -117,12 +121,13 @@ export const openAPIMixin = (mixinOptions?: any) => {
 								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 								// @ts-ignore
 								this.logger.debug(schema);
-								if (process.env.NODE_ENV != 'production')
+								if (process.env.NODE_ENV != 'production') {
 									writeFileSync(
 										'./swagger.json',
 										JSON.stringify(schema, null, 4),
 										'utf8',
 									);
+								}
 							} catch (err) {
 								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 								// @ts-ignore

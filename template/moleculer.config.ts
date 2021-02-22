@@ -1,5 +1,10 @@
 "use strict";
-import {BrokerOptions, Errors, MetricRegistry, ServiceBroker} from "moleculer";
+import { inspect } from 'util';
+import { BrokerOptions, Errors, MetricRegistry, ServiceBroker } from "moleculer";
+import 'reflect-metadata';
+import ServiceGuard = require('@Middlewares/ServiceGuard');
+import hotreload = require('@Middlewares/HotReloadCHokidar');
+import MoleculerRetryableError = Errors.MoleculerRetryableError;
 
 /**
  * Moleculer ServiceBroker configuration file
@@ -30,7 +35,7 @@ const brokerConfig: BrokerOptions = {
 	// Namespace of nodes to segment your nodes on the same network.
 	namespace: "",
 	// Unique node identifier. Must be unique in a namespace.
-	nodeID: null,
+	nodeID: undefined,
 	// Custom metadata store. Store here what you want. Accessing: `this.broker.metadata`
 	metadata: {},
 
@@ -46,7 +51,7 @@ const brokerConfig: BrokerOptions = {
 			// Line formatter. It can be "json", "short", "simple", "full", a `Function` or a template string like "{timestamp} {level} {nodeID}/{mod}: {msg}"
 			formatter: "full",
 			// Custom object printer. If not defined, it uses the `util.inspect` method.
-			objectPrinter: null,
+			objectPrinter: (o: never) => inspect(o, { depth: 4, colors: true, breakLength: 100 }),
 			// Auto-padding the module name in order to messages begin at the same column.
 			autoPadding: false,
 		},
@@ -59,11 +64,11 @@ const brokerConfig: BrokerOptions = {
 	// More info: https://moleculer.services/docs/0.14/networking.html
 	// Note: During the development, you don't need to define it because all services will be loaded locally.
 	// In production you can set it via `TRANSPORTER=nats://localhost:4222` environment variable.
-	transporter: null,{{#if needTransporter}} // "{{transporter}}"{{/if}}
+	transporter: undefined,{{#if needTransporter}} // "{{transporter}}"{{/if}}
 
 	// Define a cacher.
 	// More info: https://moleculer.services/docs/0.14/caching.html
-    {{#if needCacher}}cacher: "{{cacher}}"{{/if}}{{#unless needCacher}}cacher: null{{/unless}},
+    {{#if needCacher}}cacher: "{{cacher}}"{{/if}}{{#unless needCacher}}cacher: undefined{{/unless}},
 
 	// Define a serializer.
 	// Available values: "JSON", "Avro", "ProtoBuf", "MsgPack", "Notepack", "Thrift".
@@ -86,7 +91,8 @@ const brokerConfig: BrokerOptions = {
 		// Backoff factor for delay. 2 means exponential backoff.
 		factor: 2,
 		// A function to check failed requests.
-		check: (err: Errors.MoleculerError) => err && !!err.retryable,
+		check: (err: Error): boolean =>
+			err && err instanceof MoleculerRetryableError && !!err.retryable,
 	},
 
 	// Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
@@ -133,7 +139,8 @@ const brokerConfig: BrokerOptions = {
 		// Number of milliseconds to switch from open to half-open state
 		halfOpenTime: 10 * 1000,
 		// A function to check failed requests.
-		check: (err: Errors.MoleculerError) => err && err.code >= 500,
+		check: (err: Error): boolean =>
+			err && err instanceof MoleculerRetryableError && err.code >= 500,
 	},
 
 	// Settings of bulkhead feature. More info: https://moleculer.services/docs/0.14/fault-tolerance.html#Bulkhead
@@ -149,7 +156,7 @@ const brokerConfig: BrokerOptions = {
 	// Enable action & event parameter validation. More info: https://moleculer.services/docs/0.14/validating.html
 	validator: true,
 
-	errorHandler: null,
+	errorHandler: undefined,
 
 	// Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
 	metrics: {
@@ -366,10 +373,10 @@ const brokerConfig: BrokerOptions = {
 	},
 
 	// Register custom middlewares
-	middlewares: [],
+	middlewares: [hotreload, ServiceGuard],
 
 	// Register custom REPL commands.
-	replCommands: null,
+	replCommands: undefined,
 	/*
 	// Called after broker created.
 	created : (broker: ServiceBroker): void => {},

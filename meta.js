@@ -33,17 +33,6 @@ module.exports = function(values) {
         default: "NATS"
 	  },
       {
-        type: "list",
-        name: "watcher",
-        message: "Select a file watcher",
-        choices: [
-          { name: "ts-node (recommended)", value: "ts-node" },
-          { name: "ts-node-dev", value: "ts-node-dev" }
-        ],
-        when(answers) { return answers.watcher; },
-        default: "ts-node-dev"
-      },
-      {
         type: "confirm",
         name: "needCacher",
         message: "Would you like to use cache?",
@@ -123,10 +112,27 @@ module.exports = function(values) {
 	  },
 	  {
         type: "confirm",
+        name: "chooseWatcher",
+        message: "Would you like to choose a file watcher?",
+        default: true
+      },
+      {
+        type: "list",
+        name: "watcher",
+        message: "Select a file watcher",
+        choices: [
+          { name: "ts-node (recommended)", value: "TSNODE" },
+          { name: "ts-node-dev", value: "TSNODEDEV" }
+        ],
+        when(answers) { return answers.chooseWatcher; },
+        default: "TSNODE"
+      },
+	  {
+        type: "confirm",
         name: "swagger",
         message: "Use Swagger?",
         default: true
-      }
+	  }
     ],
 
     metalsmith: {
