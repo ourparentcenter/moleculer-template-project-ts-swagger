@@ -77,9 +77,9 @@
     {{/redis}}
     {{#swagger}}
     "@types/swagger-jsdoc": "^6.0.0",
-		"@types/swagger-ui-dist": "^3.43.0",
+		"@types/swagger-ui-dist": "^3.30.0",
     "swagger-jsdoc": "^6.0.6",
-		"swagger-ui-dist": "^3.36.1",
+		"swagger-ui-dist": "^3.43.0",
     {{/swagger}}
     "dotenv": "^8.2.0",
     "moleculer": "^0.14.12",
