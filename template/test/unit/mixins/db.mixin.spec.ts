@@ -21,10 +21,12 @@ describe('Test DB mixin', () => {
 			// @ts-ignore
 			expect(schema.adapter).toBeInstanceOf(DbService.MemoryAdapter);
 			expect(schema.started).toBeDefined();
+			// @ts-ignore
 			expect(schema.events['cache.clean.my-collection']).toBeInstanceOf(Function);
 		});
 
 		it('check cache event handler', async () => {
+			// @ts-ignore
 			jest.spyOn(broker.cacher, 'clean');
 
 			const schema = new DbMixin('my-collection').start();
@@ -32,7 +34,9 @@ describe('Test DB mixin', () => {
 			// @ts-ignore
 			await schema.events['cache.clean.my-collection'].call({ broker, fullName: 'my-service' });
 
+			// @ts-ignore
 			expect(broker.cacher.clean).toBeCalledTimes(1);
+			// @ts-ignore
 			expect(broker.cacher.clean).toBeCalledWith('my-service.*');
 		});
 
@@ -77,6 +81,7 @@ describe('Test DB mixin', () => {
 				broadcast: jest.fn(),
 			};
 
+			// @ts-ignore
 			await schema.methods.entityChanged(null, null, ctx);
 
 			expect(ctx.broadcast).toBeCalledTimes(1);
