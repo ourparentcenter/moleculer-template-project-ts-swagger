@@ -147,7 +147,7 @@ describe("Test 'products' service", () => {
 		const createActionFn = jest.fn();
 		// @ts-ignore
 		broker.createService(TestService, {
-			name: "TestService",
+			// name: "TestService",
 			actions: {
 				create: {
 					handler: createActionFn,
@@ -161,15 +161,15 @@ describe("Test 'products' service", () => {
 		describe("Test before 'create' hook", () => {
 
 			it("should add quantity with zero", async () => {
-				await broker.call("v1.products.create", {
+				const res: Record<string, any> = await broker.call("v1.products.create", {
 					id: "111",
 					name: "Test product",
 					price: 100,
 				});
 
-				expect(createActionFn).toBeCalledTimes(1);
+				const docID = res['_id'];
 				expect(createActionFn.mock.calls[0][0].params).toEqual({
-					id: "111",
+					_id: docID,
 					name: "Test product",
 					price: 100,
 					quantity: 0,

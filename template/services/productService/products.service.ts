@@ -44,7 +44,7 @@ export default class ProductService extends moleculer.Service {
 			 *
 			 * @param {Context} ctx
 			 */
-			create(ctx: Context) {
+			create: (ctx: Context<{ quantity: number }>) => {
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
 				ctx.params.quantity = 0;
