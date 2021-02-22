@@ -26,10 +26,10 @@
     {{#lint}}
     "eslint": "^7.20.0",
     "eslint-plugin-import": "^2.22.1",
-    "eslint-config-prettier": "^7.2.0",
+    "eslint-config-prettier": "^8.0.0",
 		"eslint-plugin-prettier": "^3.3.1",
-    "@typescript-eslint/eslint-plugin": "^4.15.1",
-    "@typescript-eslint/parser": "^4.15.1",
+    "@typescript-eslint/eslint-plugin": "^4.15.2",
+    "@typescript-eslint/parser": "^4.15.2",
     "eslint-plugin-prefer-arrow": "^1.2.3",
     {{/lint}}
     "jest": "^26.6.3",
@@ -76,9 +76,9 @@
     "ioredis": "^4.22.0",
     {{/redis}}
     {{#swagger}}
-    "@types/swagger-jsdoc": "^3.0.2",
-		"@types/swagger-ui-dist": "^3.30.0",
-    "swagger-jsdoc": "^5.0.0",
+    "@types/swagger-jsdoc": "^6.0.0",
+		"@types/swagger-ui-dist": "^3.43.0",
+    "swagger-jsdoc": "^6.0.6",
 		"swagger-ui-dist": "^3.36.1",
     {{/swagger}}
     "dotenv": "^8.2.0",
