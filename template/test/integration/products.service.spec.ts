@@ -3,7 +3,7 @@
 process.env.TEST = "true";
 
 import { ServiceBroker } from "moleculer";
-import TestService from "../../services/productService/products.service";
+import TestService from "../../services/productService/v1.products.service";
 
 describe("Test 'products' service", () => {
 
@@ -22,12 +22,12 @@ describe("Test 'products' service", () => {
 		let newID: string;
 
 		it("should contains the seeded items", async () => {
-			const res = await broker.call("products.list");
+			const res = await broker.call("v1.products.list");
 			expect(res).toEqual({ page: 1, pageSize: 10, rows: [], total: 0, totalPages: 0 });
 		});
 
 		it("should add the new item", async () => {
-			const res: any = await broker.call("products.create", record);
+			const res: any = await broker.call("v1.products.create", record);
 			expect(res).toEqual({
 				_id: expect.any(String),
 				name: "Awesome item",
@@ -36,12 +36,12 @@ describe("Test 'products' service", () => {
 			});
 			newID = res._id;
 
-			const res2 = await broker.call("products.count");
+			const res2 = await broker.call("v1.products.count");
 			expect(res2).toBe(1);
 		});
 
 		it("should get the saved item", async () => {
-			const res = await broker.call("products.get", { id: newID });
+			const res = await broker.call("v1.products.get", { id: newID });
 			expect(res).toEqual({
 				_id: expect.any(String),
 				name: "Awesome item",
@@ -49,7 +49,7 @@ describe("Test 'products' service", () => {
 				quantity: 0,
 			});
 
-			const res2 = await broker.call("products.list");
+			const res2 = await broker.call("v1.products.list");
 			expect(res2).toEqual({
 				page: 1,
 				pageSize: 10,
@@ -60,7 +60,7 @@ describe("Test 'products' service", () => {
 		});
 
 		it("should update an item", async () => {
-			const res = await broker.call("products.update", { id: newID, price: 499 });
+			const res = await broker.call("v1.products.update", { id: newID, price: 499 });
 			expect(res).toEqual({
 				_id: expect.any(String),
 				name: "Awesome item",
@@ -70,7 +70,7 @@ describe("Test 'products' service", () => {
 		});
 
 		it("should get the updated item", async () => {
-			const res = await broker.call("products.get", { id: newID });
+			const res = await broker.call("v1.products.get", { id: newID });
 			expect(res).toEqual({
 				_id: expect.any(String),
 				name: "Awesome item",
@@ -80,7 +80,7 @@ describe("Test 'products' service", () => {
 		});
 
 		it("should increase the quantity", async () => {
-			const res = await broker.call("products.increaseQuantity", { id: newID, value: 5 });
+			const res = await broker.call("v1.products.increaseQuantity", { id: newID, value: 5 });
 			expect(res).toEqual({
 				_id: expect.any(String),
 				name: "Awesome item",
@@ -90,7 +90,7 @@ describe("Test 'products' service", () => {
 		});
 
 		it("should decrease the quantity", async () => {
-			const res = await broker.call("products.decreaseQuantity", { id: newID, value: 2 });
+			const res = await broker.call("v1.products.decreaseQuantity", { id: newID, value: 2 });
 			expect(res).toEqual({
 				_id: expect.any(String),
 				name: "Awesome item",
@@ -100,13 +100,13 @@ describe("Test 'products' service", () => {
 		});
 
 		it("should remove the updated item", async () => {
-			const res = await broker.call("products.remove", { id: newID });
+			const res = await broker.call("v1.products.remove", { id: newID });
 			expect(res).toBe(1);
 
-			const res2 = await broker.call("products.count");
+			const res2 = await broker.call("v1.products.count");
 			expect(res2).toBe(0);
 
-			const res3 = await broker.call("products.list");
+			const res3 = await broker.call("v1.products.list");
 			expect(res3).toEqual({ page: 1, pageSize: 10, rows: [], total: 0, totalPages: 0 });
 		});
 
