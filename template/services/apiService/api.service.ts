@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { IncomingMessage } from 'http';
 import moleculer, { Context } from 'moleculer';
 import ApiGateway from 'moleculer-web';
 import { Method, Service } from 'moleculer-decorators';
-import { openAPIMixin } from '@Mixins/openapi/openapi.mixin'
+import { openAPIMixin } from '@Mixins/openapi/openapi.mixin';
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -12,10 +13,7 @@ import { openAPIMixin } from '@Mixins/openapi/openapi.mixin'
 @Service({
 	name: 'api',
 	authToken: process.env.API_AUTH_TOKEN,
-	mixins: [
-		ApiGateway,
-		openAPIMixin()
-	],
+	mixins: [ApiGateway, openAPIMixin()],
 	// More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
 	settings: {
 		port: process.env.PORT || 3000,

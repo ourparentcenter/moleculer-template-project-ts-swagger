@@ -1,3 +1,7 @@
+/* eslint-disable arrow-parens */
+/* eslint-disable no-shadow */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable complexity */
 /*
@@ -22,14 +26,14 @@ const {
 } = require('../node_modules/moleculer/src/utils');
 
 /* istanbul ignore next */
-module.exports = function HotReloadMiddleware(broker: any) {
+const HotReloadMiddleware = (broker: any) => {
 	const cache = new Map();
 
 	let projectFiles = new Map();
 	let prevProjectFiles = new Map();
 	const hotReloadModules: any[] = [];
 
-	function hotReloadService(service: any) {
+	const hotReloadService = (service: any) => {
 		const relPath = path.relative(process.cwd(), service.__filename);
 
 		broker.logger.info(`Hot reload '${service.name}' service...`, kleur.grey(relPath));
@@ -39,13 +43,13 @@ module.exports = function HotReloadMiddleware(broker: any) {
 				return broker.loadService(service.__filename);
 			}
 		});
-	}
+	};
 
 	/**
 	 * Detect service dependency graph & watch all dependent files & services.
 	 *
 	 */
-	function watchProjectFiles() {
+	const watchProjectFiles = () => {
 		if (!broker.started || !process.mainModule) {
 			return;
 		}
@@ -159,7 +163,7 @@ module.exports = function HotReloadMiddleware(broker: any) {
 							}
 						});
 
-						if (needToReload.size == 0) {
+						if (needToReload.size === 0) {
 							// It means, it's a crashed reloaded service, so we
 							// Didn't find it in the loaded services because
 							// The previous hot-reload failed. We should load it
@@ -171,24 +175,24 @@ module.exports = function HotReloadMiddleware(broker: any) {
 				});
 		});
 
-		if (projectFiles.size == 0) {
+		if (projectFiles.size === 0) {
 			broker.logger.debug(kleur.grey('  No files.'));
 		}
-	}
+	};
 
 	const debouncedWatchProjectFiles = _.debounce(watchProjectFiles, 2000);
 
 	/**
 	 * Stop all file watchers
 	 */
-	function stopAllFileWatcher(items: any) {
+	const stopAllFileWatcher = (items: any) => {
 		items.forEach((watchItem: any) => {
 			if (watchItem.watcher) {
 				watchItem.watcher.close();
 				watchItem.watcher = null;
 			}
 		});
-	}
+	};
 
 	/**
 	 * Get a watch item
@@ -196,7 +200,7 @@ module.exports = function HotReloadMiddleware(broker: any) {
 	 * @param {String} fName
 	 * @returns {Object}
 	 */
-	function getWatchItem(fName: string) {
+	const getWatchItem = (fName: string) => {
 		let watchItem = projectFiles.get(fName);
 		if (watchItem) {
 			return watchItem;
@@ -211,15 +215,12 @@ module.exports = function HotReloadMiddleware(broker: any) {
 		projectFiles.set(fName, watchItem);
 
 		return watchItem;
-	}
+	};
 
-	function isMoleculerConfig(fName: string) {
-		return (
-			fName.endsWith('moleculer.config.js') ||
-			fName.endsWith('moleculer.config.ts') ||
-			fName.endsWith('moleculer.config.json')
-		);
-	}
+	const isMoleculerConfig = (fName: string) =>
+		fName.endsWith('moleculer.config.js') ||
+		fName.endsWith('moleculer.config.ts') ||
+		fName.endsWith('moleculer.config.json');
 
 	/**
 	 * Process module children modules.
@@ -228,7 +229,7 @@ module.exports = function HotReloadMiddleware(broker: any) {
 	 * @param {*} service
 	 * @param {Number} level
 	 */
-	function processModule(mod: any, service = null, level = 0, parents = null) {
+	const processModule = (mod: any, service = null, level = 0, parents = null) => {
 		const fName = mod.filename;
 
 		// Skip node_modules files, if there is parent project file
@@ -256,7 +257,7 @@ module.exports = function HotReloadMiddleware(broker: any) {
 		}
 
 		if (!service) {
-			service = broker.services.find((svc: any) => svc.__filename == fName);
+			service = broker.services.find((svc: any) => svc.__filename === fName);
 		}
 
 		if (service) {
@@ -303,11 +304,11 @@ module.exports = function HotReloadMiddleware(broker: any) {
 				processModule(m, service, service ? level + 1 : 0, parents),
 			);
 		}
-	}
+	};
 
 	const folderWatchers: any[] = [];
 
-	function watchProjectFolders() {
+	const watchProjectFolders = () => {
 		// Debounced Service loader function
 		const needToLoad = new Set();
 		const loadServices = _.debounce(() => {
@@ -358,7 +359,7 @@ module.exports = function HotReloadMiddleware(broker: any) {
 									const fullPath = path.join(folder, filename);
 									const isLoaded = broker.services.some(
 										(svc: Record<string, unknown>) =>
-											svc.__filename == fullPath,
+											svc.__filename === fullPath,
 									);
 
 									if (eventType.toString() === 'rename' && !isLoaded) {
@@ -376,13 +377,13 @@ module.exports = function HotReloadMiddleware(broker: any) {
 				});
 			}
 		}
-	}
+	};
 
-	function stopProjectFolderWatchers() {
+	const stopProjectFolderWatchers = () => {
 		broker.logger.debug('');
 		broker.logger.debug('Stop watching folders.');
 		folderWatchers.forEach((item) => item.watcher && item.watcher.close());
-	}
+	};
 
 	/**
 	 * Expose middleware
@@ -391,24 +392,13 @@ module.exports = function HotReloadMiddleware(broker: any) {
 		name: 'HotReload',
 
 		// After broker started
-		started(broker: any) {
-			/* If (broker.options.hotReload == null) {
-				return;
-			} else if (typeof broker.options.hotReload === 'object') {
-				if (Array.isArray(broker.options.hotReload.modules)) {
-					hotReloadModules = broker.options.hotReload.modules.map(
-						(moduleName: any) => `/node_modules/${moduleName}/`,
-					);
-				}
-			} else if (broker.options.hotReload !== true) {
-				return;
-			} */
-
+		// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+		started() {
 			watchProjectFiles();
-
 			watchProjectFolders();
 		},
 
+		// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 		serviceStarted() {
 			// Re-watch new services if broker has already started and a new service started.
 			if (broker.started) {
@@ -416,8 +406,10 @@ module.exports = function HotReloadMiddleware(broker: any) {
 			}
 		},
 
+		// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 		stopped() {
 			stopProjectFolderWatchers();
 		},
 	};
 };
+module.exports = HotReloadMiddleware;

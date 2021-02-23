@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/explicit-member-accessibility */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 'use strict';
 import moleculer, { Context } from 'moleculer';
 import { Action, Method, Service } from 'moleculer-decorators';
-import DbConnection from "../../mixins/dbMixins/db.mixin";
-const DbMixin = new DbConnection("products").start();
+import DbConnection from '../../mixins/dbMixins/db.mixin';
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const DbMixin = new DbConnection('products').start();
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -17,7 +20,7 @@ const DbMixin = new DbConnection("products").start();
 	/**
 	 * Mixins
 	 */
-	mixins: [DbMixin]
+	mixins: [DbMixin],
 })
 export default class ProductService extends moleculer.Service {
 	/**
@@ -95,7 +98,7 @@ export default class ProductService extends moleculer.Service {
 		required: ['api'],
 		rest: 'PUT /:id/quantity/increase',
 		params: {
-			// id: 'string',
+			// Id: 'string',
 			id: 'string',
 			value: ['number|integer|positive'],
 		},
@@ -184,7 +187,7 @@ export default class ProductService extends moleculer.Service {
 	 */
 	@Method
 	async afterConnected() {
-		// after db connection
+		// After db connection
 	}
 
 	/**

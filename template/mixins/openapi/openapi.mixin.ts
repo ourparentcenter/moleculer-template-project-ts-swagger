@@ -1,3 +1,5 @@
+/* eslint-disable prefer-arrow/prefer-arrow-functions */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 'use strict';
 /**
  * Mixin for all dbs to seed data
@@ -24,7 +26,7 @@ export const openAPIMixin = (mixinOptions?: any) => {
 		schema: null,
 	});
 
-	let shouldUpdateSchema: boolean = true;
+	let shouldUpdateSchema = true;
 	let schema: any = null;
 
 	return {
@@ -54,24 +56,25 @@ export const openAPIMixin = (mixinOptions?: any) => {
 							title: `${pkg.name} API Documentation`, // Title of the documentation
 							version: pkg.version, // Version of the app
 							description:
-								'Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects..', // short description of the app
+								// eslint-disable-next-line max-len
+								'Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects..', // Short description of the app
 						},
-						host: `${process.env.SWAGGER_HOST}:${process.env.SWAGGER_PORT}`, // the host or url of the app
-						basePath: `${process.env.SWAGGER_BASEPATH}`, // the basepath of your endpoint
+						host: `${process.env.SWAGGER_HOST}:${process.env.SWAGGER_PORT}`, // The host or url of the app
+						basePath: `${process.env.SWAGGER_BASEPATH}`, // The basepath of your endpoint
 					};
-					// options for the swagger docs
+					// Options for the swagger docs
 					const options = {
-						// import swaggerDefinitions
+						// Import swaggerDefinitions
 						definition: swaggerDefinition,
 						explorer: true,
 						enableCORS: false,
 
-						// path to the API docs
+						// Path to the API docs
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore
 						apis: JSON.parse(process.env.SWAGGER_APIS),
 					};
-					// initialize swagger-jsdoc
+					// Initialize swagger-jsdoc
 					const swaggerSpec = swaggerJSDoc(options);
 
 					return swaggerSpec;
@@ -121,7 +124,7 @@ export const openAPIMixin = (mixinOptions?: any) => {
 								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 								// @ts-ignore
 								this.logger.debug(schema);
-								if (process.env.NODE_ENV != 'production') {
+								if (process.env.NODE_ENV !== 'production') {
 									writeFileSync(
 										'./swagger.json',
 										JSON.stringify(schema, null, 4),

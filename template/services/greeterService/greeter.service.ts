@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-member-accessibility */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 'use strict';
 import moleculer, { Context } from 'moleculer';
 import { Action, Service } from 'moleculer-decorators';
@@ -16,7 +18,7 @@ export default class GreeterService extends moleculer.Service {
 	/**
 	 *  @swagger
 	 *
-	 *  /greeter/hello:
+	 *  /v1/greeter/hello:
 	 *    get:
 	 *      tags:
 	 *      - "Greeter"
@@ -46,7 +48,7 @@ export default class GreeterService extends moleculer.Service {
 	/**
 	 *  @swagger
 	 *
-	 *  /greeter/welcome:
+	 *  /v1/greeter/welcome:
 	 *    post:
 	 *      tags:
 	 *      - "Greeter"

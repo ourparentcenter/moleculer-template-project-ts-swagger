@@ -1,12 +1,12 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 'use strict';
 
 import { existsSync } from 'fs';
 import { sync } from 'mkdirp';
-import { Context, Service, ServiceSchema } from 'moleculer';
+import { Context, Service, ServiceSchema, ServiceSettingSchema } from 'moleculer';
 import DbService from 'moleculer-db';
 
 export default class Connection implements Partial<ServiceSchema>, ThisType<Service> {
-
 	private cacheCleanEventName: string;
 	private collection: string;
 	private schema: Partial<ServiceSchema> & ThisType<Service>;
@@ -46,16 +46,21 @@ export default class Connection implements Partial<ServiceSchema>, ThisType<Serv
 				if (this.seedDB) {
 					const count = await this.adapter.count();
 					if (count === 0) {
-						this.logger.info(`The '${this.collection}' collection is empty. Seeding the collection...`);
+						this.logger.info(
+							`The '${this.collection}' collection is empty. Seeding the collection...`,
+						);
 						await this.seedDB();
-						this.logger.info('Seeding is done. Number of records:', await this.adapter.count());
+						this.logger.info(
+							'Seeding is done. Number of records:',
+							await this.adapter.count(),
+						);
 					}
 				}
 			},
 		};
 	}
 
-	public start() {
+	public start(): Partial<ServiceSchema<ServiceSettingSchema>> {
 		if (process.env.MONGO_URI) {
 			// Mongo adapter
 			// eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -64,7 +69,6 @@ export default class Connection implements Partial<ServiceSchema>, ThisType<Serv
 			this.schema.collection = this.collection;
 		} else if (process.env.TEST) {
 			// NeDB memory adapter for testing
-			// @ts-ignore
 			this.schema.adapter = new DbService.MemoryAdapter();
 		} else {
 			// NeDB file DB adapter
@@ -73,8 +77,9 @@ export default class Connection implements Partial<ServiceSchema>, ThisType<Serv
 			if (!existsSync('./data')) {
 				sync('./data');
 			}
-			// @ts-ignore
-			this.schema.adapter = new DbService.MemoryAdapter({ filename: `./data/${this.collection}.db` });
+			this.schema.adapter = new DbService.MemoryAdapter({
+				filename: `./data/${this.collection}.db`,
+			});
 		}
 
 		return this.schema;

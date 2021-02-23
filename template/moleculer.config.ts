@@ -1,6 +1,6 @@
 "use strict";
 import { inspect } from 'util';
-import { BrokerOptions, Errors, MetricRegistry, ServiceBroker } from "moleculer";
+import { BrokerOptions, Errors, MetricRegistry } from "moleculer";
 import 'reflect-metadata';
 import ServiceGuard = require('@Middlewares/ServiceGuard');
 import hotreload = require('@Middlewares/HotReloadCHokidar');
