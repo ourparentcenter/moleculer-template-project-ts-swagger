@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc --build tsconfig.json"{{#if_eq watcher "TSNODE"}},
     "dev": "ts-node -r tsconfig-paths/register ./node_modules/moleculer/bin/moleculer-runner.js --repl -E env/dev.env --config moleculer.config.ts"{{/if_eq}}{{#if_eq watcher "TSNODEDEV"}},
-    "dev": "ts-node-dev -r tsconfig-paths/register ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl -E dev.env --config moleculer.config.ts"{{/if_eq}},
+    "dev": "ts-node-dev -r tsconfig-paths/register ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl -E env/dev.env --config moleculer.config.ts"{{/if_eq}},
     "start": "moleculer-runner",
     "cli": "moleculer connect {{transporter}}",
     "ci": "jest --watch",
