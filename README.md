@@ -9,6 +9,7 @@
 - Beautiful static welcome page to test generated services & watch nodes and services.
 - Optional Transporter & Cacher.
 - Metrics & Tracing.
+- Service Guard
 - Docker & Docker Compose & Kubernetes files.
 - Unit tests with [Jest](http://facebook.github.io/jest/).
 - Lint with [ESLint](http://eslint.org/).
@@ -23,26 +24,30 @@
 To install use the [moleculer-cli](https://github.com/moleculerjs/moleculer-cli) tool.
 
 ```bash
-$ moleculer init d0whc3r/moleculer-template-project-ts my-project
+$ moleculer init ourparentcenter/moleculer-template-project-ts-swagger my-project
 ```
 
 ## Prompts
 ```
-$ moleculer init d0whc3r/moleculer-template-project-ts moleculer-demo
+$ moleculer init ourparentcenter/moleculer-template-project-ts moleculer-demo
 
-Template repo: d0whc3r/moleculer-template-project-ts
+Template repo: ourparentcenter/moleculer-template-project-ts-swagger
 Downloading template...
 ? Add API Gateway (moleculer-web) service? Yes
 ? Would you like to communicate with other nodes? Yes
 ? Select a transporter NATS (recommended)
 ? Would you like to use cache? No
 ? Add DB sample service? Yes
-? Add User sample service? (authenticate) Yes
 ? Would you like to enable metrics? Yes
+? Select a reporter solution Prometheus
 ? Would you like to enable tracing? Yes
+? Select a exporter solution Console
 ? Add Docker & Kubernetes sample files? Yes
 ? Use ESLint to lint your code? Yes
-Create 'moleculer-demo' folder...
+? Would you like to choose a file watcher? Yes
+? Select a file watcher ts-node (recommended)
+? Use Swagger? Yes
+Create 'moleculertemplatetest' folder...
 ? Would you like to run 'npm install'? Yes
 ```
 
