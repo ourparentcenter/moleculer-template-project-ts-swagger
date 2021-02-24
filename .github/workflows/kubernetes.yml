@@ -92,8 +92,8 @@ jobs:
             - name: Check pods
               run: kubectl get all
 
-            - run: curl --silent --show-error --fail http://ci-test.127.0.0.1.nip.io/api/greeter/hello
-            - run: curl --silent --show-error --fail http://ci-test.127.0.0.1.nip.io/api/products
+            - run: curl --silent --show-error --fail http://ci-test.127.0.0.1.nip.io/api/v1/greeter/hello
+            - run: curl --silent --show-error --fail http://ci-test.127.0.0.1.nip.io/api/v1/products
 
             - name: Check logs
               run: kubectl logs deployment/products
