@@ -49,7 +49,7 @@ spec:
   - host: {{projectName}}.127.0.0.1.nip.io
     http:
       paths:
-      - path: /api/v1
+      - path: /
         backend:
           serviceName: api
           servicePort: 3000
@@ -142,7 +142,7 @@ spec:
             name: common-env
         env:
           - name: SERVICES
-            value: productsService/products
+            value: productService/products
 
 ---
 #########################################################
