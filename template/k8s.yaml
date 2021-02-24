@@ -80,7 +80,7 @@ spec:
             name: common-env
         env:
           - name: SERVICES
-            value: api
+            value: apiService/api
           - name: PORT
             value: "3000"
         ports:
@@ -113,7 +113,7 @@ spec:
             name: common-env
         env:
           - name: SERVICES
-            value: greeter
+            value: greeterService/greeter
 
 {{#dbService}}
 ---
@@ -142,7 +142,7 @@ spec:
             name: common-env
         env:
           - name: SERVICES
-            value: products
+            value: productsService/products
 
 ---
 #########################################################
