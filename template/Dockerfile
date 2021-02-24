@@ -13,7 +13,7 @@ COPY . .
 # Build and cleanup
 ENV NODE_ENV=production
 RUN npm run build \
- && npm prune
+	&& npm prune
 
 # Start server
-CMD ["node", "./node_modules/moleculer/bin/moleculer-runner.js"]
+CMD ["npm", "run", "start"]

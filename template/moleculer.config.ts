@@ -2,8 +2,8 @@
 import { inspect } from 'util';
 import { BrokerOptions, Errors, MetricRegistry } from 'moleculer';
 import 'reflect-metadata';
-import ServiceGuard = require('@Middlewares/ServiceGuard');
-import hotreload = require('@Middlewares/HotReloadCHokidar');
+import ServiceGuard = require('./middlewares/ServiceGuard');
+import hotreload = require('./middlewares/HotReloadCHokidar');
 import MoleculerRetryableError = Errors.MoleculerRetryableError;
 
 /**
@@ -64,11 +64,11 @@ const brokerConfig: BrokerOptions = {
 	// More info: https://moleculer.services/docs/0.14/networking.html
 	// Note: During the development, you don't need to define it because all services will be loaded locally.
 	// In production you can set it via `TRANSPORTER=nats://localhost:4222` environment variable.
-	transporter: undefined, // "NATS"
+	transporter: undefined,{{#if needTransporter}} // "{{transporter}}"{{/if}}
 
 	// Define a cacher.
 	// More info: https://moleculer.services/docs/0.14/caching.html
-	cacher: undefined,
+	{{#if needCacher}}cacher: '{{cacher}}'{{/if}}{{#unless needCacher}}cacher: undefined{{/unless}},
 
 	// Define a serializer.
 	// Available values: "JSON", "Avro", "ProtoBuf", "MsgPack", "Notepack", "Thrift".
@@ -160,10 +160,11 @@ const brokerConfig: BrokerOptions = {
 
 	// Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
 	metrics: {
-		enabled: true,
+		enabled: {{#if metrics}}true{{/if}}{{#unless metrics}}false{{/unless}},
 		// Available built-in reporters: "Console", "CSV", "Event", "Prometheus", "Datadog", "StatsD"
 		reporter: {
-			type: 'Prometheus',
+			type: '{{reporter}}',
+			{{#if_eq reporter "Console"}}
 			options: {
 				// HTTP port
 				port: 3030,
@@ -175,15 +176,97 @@ const brokerConfig: BrokerOptions = {
 					nodeID: registry.broker.nodeID,
 				}),
 			},
+			{{/if_eq}}
+			{{#if_eq reporter "CSV"}}
+			options: {
+				// Folder of CSV files.
+				folder: './reports/metrics',
+				// CSV field delimiter
+				delimiter: ',',
+				// CSV row delimiter
+				rowDelimiter: '\n',
+				// Saving mode.
+				//   - "metric" - save metrics to individual files
+				//   - "label" - save metrics by labels to individual files
+				mode: 'metric',
+				// Saved metrics types.
+				types: null,
+				// Saving interval in seconds
+				interval: 5,
+				// Custom filename formatter
+				filenameFormatter: null,
+				// Custom CSV row formatter.
+				rowFormatter: null,
+			},
+			{{/if_eq}}
+			{{#if_eq reporter "Event"}}
+			options: {
+				// Event name
+				eventName: '$metrics.snapshot',
+				// Broadcast or emit
+				broadcast: false,
+				// Event groups
+				groups: null,
+				// Send only changed metrics
+				onlyChanges: false,
+				// Sending interval in seconds
+				interval: 5,
+			},
+			{{/if_eq}}
+			{{#if_eq reporter "Datadog"}}
+			options: {
+				// Hostname
+				host: 'my-host',
+				// Base URL
+				baseUrl: 'https://api.datadoghq.eu/api/', // Default is https://api.datadoghq.com/api/
+				// API version
+				apiVersion: 'v1',
+				// Server URL path
+				path: '/series',
+				// Datadog API Key
+				apiKey: process.env.DATADOG_API_KEY,
+				// Default labels which are appended to all metrics labels
+				defaultLabels: (registry: MetricRegistry) => ({
+					namespace: registry.broker.namespace,
+					nodeID: registry.broker.nodeID,
+				}),
+				// Sending interval in seconds
+				interval: 10
+			},
+			{{/if_eq}}
+			{{#if_eq reporter "Prometheus"}}
+			options: {
+				// HTTP port
+				port: 3030,
+				// HTTP URL path
+				path: '/metrics',
+				// Default labels which are appended to all metrics labels
+				defaultLabels: (registry: MetricRegistry) => ({
+					namespace: registry.broker.namespace,
+					nodeID: registry.broker.nodeID,
+				}),
+			},
+			{{/if_eq}}
+			{{#if_eq reporter "StatsD"}}
+			options: {
+				// Server host
+				host: 'localhost',
+				// Server port
+				port: 8125,
+				// Maximum payload size.
+				maxPayloadSize: 1300
+			},
+			{{/if_eq}}
 		},
 	},
 
 	// Enable built-in tracing function. More info: https://moleculer.services/docs/0.14/tracing.html
 	tracing: {
-		enabled: true,
+		enabled: {{#if tracing}}true{{/if}}{{#unless tracing}}false{{/unless}},
 		// Available built-in exporters: "Console", "Datadog", "Event", "EventLegacy", "Jaeger", "Zipkin"
 		exporter: {
-			type: 'Console', // Console exporter is only for development!
+			type: '{{exporter}}', // Console exporter is only for development!
+			{{#if_eq exporter "Console"}}
 			options: {
 				// Custom logger
 				logger: null,
@@ -194,6 +277,98 @@ const brokerConfig: BrokerOptions = {
 				// Gauge width in the row
 				gaugeWidth: 40,
 			},
+			{{/if_eq}}
+			{{#if_eq exporter "Datadog"}}
+			options: {
+				// Datadog Agent URL
+				agentUrl: process.env.DD_AGENT_URL || 'http://localhost:8126',
+				// Environment variable
+				env: process.env.DD_ENVIRONMENT || null,
+				// Sampling priority. More info: https://docs.datadoghq.com/tracing/guide/trace_sampling_and_storage/?tab=java#sampling-rules
+				samplingPriority: 'AUTO_KEEP',
+				// Default tags. They will be added into all span tags.
+				defaultTags: null,
+				// Custom Datadog Tracer options. More info: https://datadog.github.io/dd-trace-js/#tracer-settings
+				tracerOptions: null,
+			},
+			{{/if_eq}}
+			{{#if_eq exporter "Event"}}
+			options: {
+				// Name of event
+				eventName: '$tracing.spans',
+				// Send event when a span started
+				sendStartSpan: false,
+				// Send event when a span finished
+				sendFinishSpan: true,
+				// Broadcast or emit event
+				broadcast: false,
+				// Event groups
+				groups: null,
+				// Sending time interval in seconds
+				interval: 5,
+				// Custom span object converter before sending
+				spanConverter: null,
+				// Default tags. They will be added into all span tags.
+				defaultTags: null
+			},
+			{{/if_eq}}
+			{{#if_eq exporter "Jaeger"}}
+			options: {
+				// HTTP Reporter endpoint. If set, HTTP Reporter will be used.
+				endpoint: null,
+				// UDP Sender host option.
+				host: '127.0.0.1',
+				// UDP Sender port option.
+				port: 6832,
+				// Jaeger Sampler configuration.
+				sampler: {
+					// Sampler type. More info: https://www.jaegertracing.io/docs/1.14/sampling/#client-sampling-configuration
+					type: 'Const',
+					// Sampler specific options.
+					options: {}
+				},
+				// Additional options for `Jaeger.Tracer`
+				tracerOptions: {},
+				// Default tags. They will be added into all span tags.
+				defaultTags: null
+			},
+			{{/if_eq}}
+			{{#if_eq exporter "Zipkin"}}
+			options: {
+				// Base URL for Zipkin server.
+				baseURL: 'http://localhost:9411',
+				// Sending time interval in seconds.
+				interval: 5,
+				// Additional payload options.
+				payloadOptions: {
+				// Set `debug` property in payload.
+				debug: false,
+					// Set `shared` property in payload.
+					shared: false,
+				},
+				// Default tags. They will be added into all span tags.
+				defaultTags: null
+			},
+			{{/if_eq}}
+			{{#if_eq exporter "NewRelic"}}
+			options: {
+				// Base URL for NewRelic server
+				baseURL: 'https://trace-api.newrelic.com',
+				// NewRelic Insert Key
+				insertKey: 'my-secret-key',
+				// Sending time interval in seconds.
+				interval: 5,
+				// Additional payload options.
+				payloadOptions: {
+				// Set `debug` property in payload.
+				debug: false,
+					// Set `shared` property in payload.
+					shared: false,
+				},
+				// Default tags. They will be added into all span tags.
+				defaultTags: null,
+			},
+			{{/if_eq}}
 		},
 	},
 

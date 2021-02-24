@@ -9,7 +9,7 @@ services:
     image: {{projectName}}
     env_file: docker-compose.env
     environment:
-      SERVICES: api
+      SERVICES: apiService/api
       PORT: 3000
 {{#hasDepends}}
     depends_on:
@@ -49,7 +49,7 @@ services:
     image: {{projectName}}
     env_file: docker-compose.env
     environment:
-      SERVICES: greeter
+      SERVICES: greeterService/greeter
 {{#hasDepends}}
     depends_on:
 {{/hasDepends}}
@@ -84,7 +84,7 @@ services:
     image: {{projectName}}
     env_file: docker-compose.env
     environment:
-      SERVICES: products
+      SERVICES: productService/products
     depends_on:
       - mongo
 {{#if_eq transporter "NATS"}}

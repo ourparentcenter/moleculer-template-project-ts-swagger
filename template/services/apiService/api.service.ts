@@ -3,7 +3,7 @@ import { IncomingMessage } from 'http';
 import moleculer, { Context } from 'moleculer';
 import ApiGateway from 'moleculer-web';
 import { Method, Service } from 'moleculer-decorators';
-import { openAPIMixin } from '@Mixins/openapi/openapi.mixin';
+import { openAPIMixin } from '../../mixins/openapi/openapi.mixin';
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
