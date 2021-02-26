@@ -24,7 +24,7 @@
 To install use the [moleculer-cli](https://github.com/moleculerjs/moleculer-cli) tool.
 
 ```bash
-$ moleculer init ourparentcenter/moleculer-template-project-ts-swagger my-project
+$ moleculer init ourparentcenter/moleculer-template-project-ts-swagger#main my-project
 ```
 
 ## Prompts
