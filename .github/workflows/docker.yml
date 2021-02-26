@@ -28,7 +28,7 @@ jobs:
                   key: cache-node-modules-${{ matrix.node-version }}
 
             - name: Install dependencies
-              run: npm install
+              run: npm install && cd frontend && npm install && cd ..
 
             - name: Create answers file
               run: node update-answers.js
