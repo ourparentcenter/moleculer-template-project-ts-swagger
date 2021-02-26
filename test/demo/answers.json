@@ -10,6 +10,6 @@
     "tracing": true,
     "docker": true,
     "lint": true,
-	"frontend": false,
+	"frontend": true,
 	"swagger": true
 }

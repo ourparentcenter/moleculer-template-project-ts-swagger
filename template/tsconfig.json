@@ -22,9 +22,6 @@
 		"allowJs": true,
 		"baseUrl": ".",
 		"paths": {
-			"@/*": [
-				"frontend/src/*"
-			],
 			"@MicroServices/*": [
 				"services/*"
 			],
@@ -93,6 +90,7 @@
 	],
 	"exclude": [
 		"node_modules/**/*",
-		"test"
+		"test",
+		"frontend/**/*"
 	]
 }
