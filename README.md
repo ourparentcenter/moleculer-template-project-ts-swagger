@@ -1,12 +1,12 @@
 # Moleculer template: `project-ts-swagger`
-:mortar_board: Moleculer-based microservices project template for typescript with swagger. [Live demo on now.sh](https://moleculer-demo-project-ts.now.sh/)
+<!-- :mortar_board: Moleculer-based microservices project template for typescript with swagger. [Live demo on now.sh](https://moleculer-demo-project-ts.now.sh/) -->
 
 ## Features
 - Moleculer v0.14 with full-detailed `moleculer.config.ts` file.
 - Common mono-repo project with a demo `greeter` service.
 - Sample database `products` service (with file-based NeDB in development & MongoDB in production).
 - Optional API Gateway service with detailed service settings.
-- Beautiful static welcome page to test generated services & watch nodes and services.
+- Static welcome page made with Quasar to test generated services & watch nodes and services. http://localhost:3000
 - Optional Transporter & Cacher.
 - Metrics & Tracing.
 - Service Guard
@@ -17,7 +17,7 @@
 - User auth with JWT authentication sample
 - Typescript decorators for moleculer [https://github.com/d0whc3r/moleculer-decorators](https://github.com/d0whc3r/moleculer-decorators)
 - Configuration for development/production/testing using environment variables
-- Swagger embedded with demo api and jsdoc
+- Swagger embedded with demo api and jsdoc http://localhost:3000/openapi
 
 
 ## Install
@@ -69,6 +69,6 @@ Create 'moleculertemplatetest' folder...
 moleculer-template-project-ts-swagger is available under the [MIT license](https://tldrlegal.com/license/mit-license).
 
 ## Contact
-Copyright (c) 2021 Our Parent Center
+Copyright (c) 2021 MoleculerJS
 
 [![@moleculerjs](https://img.shields.io/badge/github-moleculerjs-green.svg)](https://github.com/moleculerjs) [![@MoleculerJS](https://img.shields.io/badge/twitter-MoleculerJS-blue.svg)](https://twitter.com/MoleculerJS)
