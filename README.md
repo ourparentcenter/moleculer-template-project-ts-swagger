@@ -6,7 +6,7 @@
 - Common mono-repo project with a demo `greeter` service.
 - Sample database `products` service (with file-based NeDB in development & MongoDB in production).
 - Optional API Gateway service with detailed service settings.
-- Static welcome page made with Quasar to test generated services & watch nodes and services. http://localhost:3000
+- Simplistic static welcome page made with Quasar to test generated services & watch nodes and services. http://localhost:3000
 - Optional Transporter & Cacher.
 - Metrics & Tracing.
 - Service Guard
@@ -14,10 +14,10 @@
 - Unit tests with [Jest](http://facebook.github.io/jest/).
 - Lint with [ESLint](http://eslint.org/).
 - Launch file for debugging in [VSCode](https://code.visualstudio.com/).
-- User auth with JWT authentication sample
+<!-- - User auth with JWT authentication sample -->
 - Typescript decorators for moleculer [https://github.com/d0whc3r/moleculer-decorators](https://github.com/d0whc3r/moleculer-decorators)
 - Configuration for development/production/testing using environment variables
-- Swagger embedded with demo api and jsdoc http://localhost:3000/openapi
+- Optional Swagger embedded with demo api and jsdoc http://localhost:3000/openapi
 
 
 ## Install
