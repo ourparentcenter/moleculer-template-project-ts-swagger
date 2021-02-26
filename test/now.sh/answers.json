@@ -1,0 +1,12 @@
+{
+	"apiGW": true,
+	"needTransporter": false,
+	"watcher": "ts-node-dev",
+	"needCacher": false,
+	"dbService": true,
+	"metrics": false,
+	"tracing": false,
+	"docker": true,
+	"lint": true,
+	"swagger": true
+}
