@@ -126,6 +126,12 @@ module.exports = function(values) {
         ],
         when(answers) { return answers.chooseWatcher; },
         default: "TSNODE"
+	  },
+	  {
+        type: "confirm",
+        name: "frontend",
+        message: "Add demo frontend?",
+        default: true
       },
 	  {
         type: "confirm",
@@ -143,13 +149,15 @@ module.exports = function(values) {
       }
     },
 
-    skipInterpolation: [
+	skipInterpolation: [
+		"frontend/**/*"
       //"public/index.html"
     ],
 
     filters: {
       "services/api.service.ts": "apiGW",
-      "public/**/*": "apiGW",
+	  "public/**/*": "apiGW",
+	  "frontend/**/*": "frontend",
 
       "services/products.service.ts": "dbService",
 	  "mixins/dbmixins/db.mixin.ts": "dbService",

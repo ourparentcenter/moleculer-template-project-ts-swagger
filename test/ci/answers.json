@@ -13,5 +13,6 @@
     "exporter": "Console",
     "docker": true,
     "lint": true,
+	"frontend": true,
 	"swagger": true
 }

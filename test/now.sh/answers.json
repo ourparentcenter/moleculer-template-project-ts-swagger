@@ -8,5 +8,6 @@
 	"tracing": false,
 	"docker": true,
 	"lint": true,
+	"frontend": true,
 	"swagger": true
 }

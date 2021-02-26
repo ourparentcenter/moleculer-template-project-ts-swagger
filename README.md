@@ -6,7 +6,7 @@
 - Common mono-repo project with a demo `greeter` service.
 - Sample database `products` service (with file-based NeDB in development & MongoDB in production).
 - Optional API Gateway service with detailed service settings.
-- Simplistic static welcome page made with Quasar to test generated services & watch nodes and services. http://localhost:3000
+- Simplistic static welcome page made with Quasar v2 to test generated services & watch nodes / services. http://localhost:3000
 - Optional Transporter & Cacher.
 - Metrics & Tracing.
 - Service Guard
