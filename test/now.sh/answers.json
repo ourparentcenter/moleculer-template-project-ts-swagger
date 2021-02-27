@@ -1,12 +1,14 @@
 {
 	"apiGW": true,
 	"needTransporter": false,
-	"watcher": "ts-node-dev",
+	"chooseWatcher": true,
+	"watcher": "TSNODE",
 	"needCacher": false,
 	"dbService": true,
 	"metrics": false,
 	"tracing": false,
 	"docker": true,
 	"lint": true,
+	"frontend": true,
 	"swagger": true
 }

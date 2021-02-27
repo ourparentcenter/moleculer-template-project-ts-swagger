@@ -21,6 +21,12 @@ import { openAPIMixin } from '../../mixins/openapi/openapi.mixin';
 		routes: [
 			{
 				path: '/api',
+				cors: {
+					origin: ['*'],
+					methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'DELETE'],
+					credentials: false,
+					maxAge: 3600,
+				},
 				whitelist: [
 					// Access to any actions in all services under "/api" URL
 					'**',
