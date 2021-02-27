@@ -7,8 +7,8 @@
   "private": true,
   "scripts": {
     "dev": "quasar dev",
-    "Build": "quasar build && npm run copy && npm run Clean",
-    "Clean": "quasar clean",
+    "build": "quasar build && npm run copy && npm run clean",
+    "clean": "quasar clean",
     "copy": "cp -r dist/spa/** ../public",
     "lint": "eslint --ext .js,.ts,.vue ./",
     "test": "echo \"No test specified\" && exit 0"
