@@ -1,4 +1,4 @@
-import { Options } from 'moleculer-decorators-extended';
+import { Options } from '@ourparentcenter/moleculer-decorators-extended';
 import { DbContextParameters, DbServiceSettings } from 'moleculer-db';
 import { IUser } from '../entities';
 import { ApiGatewayMeta } from './interfaces';

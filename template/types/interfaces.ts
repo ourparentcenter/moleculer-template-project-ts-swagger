@@ -1,6 +1,6 @@
 import { IncomingMessage } from 'http';
 import { ActionSchema, ActionParamSchema } from 'moleculer';
-import { ActionOptions } from 'moleculer-decorators-extended';
+import { ActionOptions } from '@ourparentcenter/moleculer-decorators-extended';
 import { Schema, SchemaType, SchemaTypeOpts, Types } from 'mongoose';
 import { UserRole } from './user';
 

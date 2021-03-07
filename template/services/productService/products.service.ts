@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 'use strict';
 import { Context } from 'moleculer';
-import { Put, Method, Service } from 'moleculer-decorators-extended';
+import { Put, Method, Service } from '@ourparentcenter/moleculer-decorators-extended';
 import { dbProductMixin, eventsProductMixin } from '../../mixins/dbMixins';
 import { Config } from '../../common';
 import {

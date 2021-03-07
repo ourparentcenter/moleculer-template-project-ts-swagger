@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 'use strict';
 import moleculer, { Context } from 'moleculer';
-import { Get, Post, Service } from 'moleculer-decorators-extended';
+import { Get, Post, Service } from '@ourparentcenter/moleculer-decorators-extended';
 import { Config } from '../../common';
 import { GreeterWelcomeParams } from '../../types';
 import EncryptionUtil from '../../helpers/encryption.helper';

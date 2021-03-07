@@ -1,4 +1,4 @@
-import { Options } from 'moleculer-decorators-extended';
+import { Options } from '@ourparentcenter/moleculer-decorators-extended';
 import { DbServiceSettings } from 'moleculer-db';
 import { IProduct } from '../entities';
 

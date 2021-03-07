@@ -7,7 +7,7 @@ import moleculer, { Context, Errors } from 'moleculer';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import ApiGateway from 'moleculer-web';
-import { Service, Method } from 'moleculer-decorators-extended';
+import { Service, Method } from '@ourparentcenter/moleculer-decorators-extended';
 import pick from 'lodash/pick';
 {{#swagger}}import { openAPIMixin } from '../../mixins/openapi/openapi.mixin';{{/swagger}}
 import { Config } from '../../common';

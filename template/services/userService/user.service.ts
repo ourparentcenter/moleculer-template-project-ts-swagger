@@ -5,7 +5,7 @@
 'use strict';
 import { constants } from 'http2';
 import moleculer, { ActionParams, Context } from 'moleculer';
-import { Action, Delete, Get, Method, Post, Put, Service } from 'moleculer-decorators-extended';
+import { Action, Delete, Get, Method, Post, Put, Service } from '@ourparentcenter/moleculer-decorators-extended';
 import bcrypt from 'bcryptjs';
 import jwt, { VerifyErrors } from 'jsonwebtoken';
 import { JsonConvert } from 'json2typescript';

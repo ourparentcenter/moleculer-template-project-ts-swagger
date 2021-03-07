@@ -4,7 +4,7 @@
  * Service for tenant catalog data in db
  */
 import moleculer, { Context, Errors } from 'moleculer';
-import { Action, Method, Service } from 'moleculer-decorators-extended';
+import { Action, Method, Service } from '@ourparentcenter/moleculer-decorators-extended';
 import { sign, verify } from 'jsonwebtoken';
 import errorHandler from '../../helpers/error.helper';
 
