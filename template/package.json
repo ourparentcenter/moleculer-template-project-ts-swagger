@@ -104,7 +104,7 @@
     "moleculer-db": "^0.8.12",
     "moleculer-db-adapter-mongo": "^0.4.11",
     "moleculer-db-adapter-mongoose": "^0.8.9",
-    "moleculer-decorators-extended": "ourparentcenter/moleculer-decorators-extended",
+    "moleculer-decorators-extended": "github:ourparentcenter/moleculer-decorators-extended",
     "moleculer-web": "^0.9.1",
     "mongodb": "^3.6.4",
     "mongoose": "^5.11.19",
