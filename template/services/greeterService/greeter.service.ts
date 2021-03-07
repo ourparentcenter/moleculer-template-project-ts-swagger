@@ -2,7 +2,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 'use strict';
 import moleculer, { Context } from 'moleculer';
-import { Action, Service } from 'moleculer-decorators';
+import { Get, Post, Service } from 'moleculer-decorators-extended';
+import { Config } from '../../common';
+import { GreeterWelcomeParams } from '../../types';
+import EncryptionUtil from '../../helpers/encryption.helper';
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  */
@@ -12,7 +15,7 @@ import { Action, Service } from 'moleculer-decorators';
 	/**
 	 * Service guard token
 	 */
-	authToken: process.env.GREETER_AUTH_TOKEN,
+	authToken: Config.GREETER_AUTH_TOKEN,
 })
 export default class GreeterService extends moleculer.Service {
 	/**
@@ -34,15 +37,22 @@ export default class GreeterService extends moleculer.Service {
 	 *        403:
 	 *          description: Server error
 	 */
-	@Action({
+	@Get('/hello', {
 		name: 'hello',
 		/**
 		 * Service guard services allowed to connect
 		 */
-		required: ['api'],
-		rest: 'GET /hello',
+		restricted: ['api'],
 	})
 	async hello() {
+		const test = EncryptionUtil.encrypt('hello there!');
+		console.log(test);
+		const test2 = EncryptionUtil.decrypt(test);
+		console.log(test2);
+		const test3 = EncryptionUtil.bcrypt('hello there!');
+		console.log(test3);
+		const test4 = EncryptionUtil.compare('hello there!', test3);
+		console.log(test4);
 		return 'Hello Moleculer';
 	}
 	/**
@@ -76,18 +86,17 @@ export default class GreeterService extends moleculer.Service {
 	 *        422:
 	 *          description: Missing parameters
 	 */
-	@Action({
+	@Post('/welcome', {
 		name: 'welcome',
 		/**
 		 * Service guard services allowed to connect
 		 */
-		required: ['api'],
-		rest: 'POST /welcome',
+		restricted: ['api'],
 		params: {
 			name: 'string',
 		},
 	})
-	async welcome(ctx: Context) {
+	async welcome(ctx: Context<GreeterWelcomeParams, Record<string, unknown>>) {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		return `Welcome, ${ctx.params.name}`;

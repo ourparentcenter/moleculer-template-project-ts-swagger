@@ -69,18 +69,6 @@ module.exports = {
 				accessibility: 'explicit',
 			},
 		],
-		'@typescript-eslint/indent': [
-			'warn',
-			'tab',
-			{
-				FunctionDeclaration: {
-					parameters: 'first',
-				},
-				FunctionExpression: {
-					parameters: 'first',
-				},
-			},
-		],
 		'@typescript-eslint/member-delimiter-style': [
 			'error',
 			{
@@ -115,7 +103,7 @@ module.exports = {
 		'@typescript-eslint/type-annotation-spacing': 'error',
 		'@typescript-eslint/unified-signatures': 'error',
 		'arrow-body-style': 'error',
-		'arrow-parens': ['error', 'as-needed'],
+		// 'arrow-parens': ['error', 'as-needed'],
 		// eslint-disable-next-line quote-props
 		camelcase: 'error',
 		'capitalized-comments': 'error',

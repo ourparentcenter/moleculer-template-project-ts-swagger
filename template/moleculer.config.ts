@@ -2,8 +2,10 @@
 import { inspect } from 'util';
 import { BrokerOptions, Errors, MetricRegistry } from 'moleculer';
 import 'reflect-metadata';
+import pick from 'lodash/pick';
 import ServiceGuard = require('./middlewares/ServiceGuard');
 import hotreload = require('./middlewares/HotReloadCHokidar');
+import { Config } from './common';
 import MoleculerRetryableError = Errors.MoleculerRetryableError;
 
 /**
@@ -31,113 +33,114 @@ import MoleculerRetryableError = Errors.MoleculerRetryableError;
  *    }
  *  }
  */
+
 const brokerConfig: BrokerOptions = {
 	// Namespace of nodes to segment your nodes on the same network.
-	namespace: '',
+	namespace: Config.NAMESPACE,
 	// Unique node identifier. Must be unique in a namespace.
-	nodeID: undefined,
+	nodeID: Config.NODEID,
 	// Custom metadata store. Store here what you want. Accessing: `this.broker.metadata`
 	metadata: {},
 
 	// Enable/disable logging or use custom logger. More info: https://moleculer.services/docs/0.14/logging.html
 	// Available logger types: "Console", "File", "Pino", "Winston", "Bunyan", "debug", "Log4js", "Datadog"
 	logger: {
-		type: 'Console',
+		type: Config.LOGGERTYPE /* || 'Console' */,
 		options: {
 			// Using colors on the output
-			colors: true,
+			colors: JSON.parse(Config.LOGGERCOLORS) || true,
 			// Print module names with different colors (like docker-compose for containers)
-			moduleColors: false,
+			moduleColors: JSON.parse(Config.LOGGERMODULECOLORS) || false,
 			// Line formatter. It can be "json", "short", "simple", "full", a `Function` or a template string like "{timestamp} {level} {nodeID}/{mod}: {msg}"
-			formatter: 'full',
+			formatter: Config.LOGGERFORMATTER || 'full',
 			// Custom object printer. If not defined, it uses the `util.inspect` method.
 			objectPrinter: (o: never) => inspect(o, { depth: 4, colors: true, breakLength: 100 }),
 			// Auto-padding the module name in order to messages begin at the same column.
-			autoPadding: false,
+			autoPadding: JSON.parse(Config.LOGGERAUTOPADDING) || false,
 		},
 	},
 	// Default log level for built-in console logger. It can be overwritten in logger options above.
 	// Available values: trace, debug, info, warn, error, fatal
-	logLevel: 'info',
+	logLevel: Config.LOGLEVEL,
 
 	// Define transporter.
 	// More info: https://moleculer.services/docs/0.14/networking.html
 	// Note: During the development, you don't need to define it because all services will be loaded locally.
 	// In production you can set it via `TRANSPORTER=nats://localhost:4222` environment variable.
-	transporter: undefined,{{#if needTransporter}} // "{{transporter}}"{{/if}}
+	transporter: Config.TRANSPORTER || undefined, // "NATS"
 
 	// Define a cacher.
 	// More info: https://moleculer.services/docs/0.14/caching.html
-	{{#if needCacher}}cacher: '{{cacher}}'{{/if}}{{#unless needCacher}}cacher: undefined{{/unless}},
+	cacher: Config.CACHER || undefined,
 
 	// Define a serializer.
 	// Available values: "JSON", "Avro", "ProtoBuf", "MsgPack", "Notepack", "Thrift".
 	// More info: https://moleculer.services/docs/0.14/networking.html#Serialization
-	serializer: 'JSON',
+	serializer: Config.SERIALIZER,
 
 	// Number of milliseconds to wait before reject a request with a RequestTimeout error. Disabled: 0
-	requestTimeout: 10 * 1000,
+	requestTimeout: Config.REQUEST_TIMEOUT, // Config.REQUEST_TIMEOUT
 
 	// Retry policy settings. More info: https://moleculer.services/docs/0.14/fault-tolerance.html#Retry
 	retryPolicy: {
 		// Enable feature
-		enabled: false,
+		enabled: Config.RETRYPOLICY,
 		// Count of retries
-		retries: 5,
+		retries: Config.RETRIES,
 		// First delay in milliseconds.
-		delay: 100,
+		delay: Config.RETRYDELAY,
 		// Maximum delay in milliseconds.
-		maxDelay: 1000,
+		maxDelay: Config.RETRYMAXDELAY,
 		// Backoff factor for delay. 2 means exponential backoff.
-		factor: 2,
+		factor: Config.RETRYFACTOR,
 		// A function to check failed requests.
 		check: (err: Error): boolean =>
 			err && err instanceof MoleculerRetryableError && !!err.retryable,
 	},
 
 	// Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
-	maxCallLevel: 100,
+	maxCallLevel: Config.MAXCALLLEVEL,
 
 	// Number of seconds to send heartbeat packet to other nodes.
-	heartbeatInterval: 10,
+	heartbeatInterval: Config.HEARTBEATINTERVAL,
 	// Number of seconds to wait before setting node to unavailable status.
-	heartbeatTimeout: 30,
+	heartbeatTimeout: Config.HEARTBEATTIMEOUT,
 
 	// Cloning the params of context if enabled. High performance impact, use it with caution!
-	contextParamsCloning: false,
+	contextParamsCloning: JSON.parse(Config.CTXPARAMSCLONING) || false,
 
 	// Tracking requests and waiting for running requests before shuting down. More info: https://moleculer.services/docs/0.14/context.html#Context-tracking
 	tracking: {
 		// Enable feature
-		enabled: false,
+		enabled: JSON.parse(Config.TRACKING_ENABLED) || false,
 		// Number of milliseconds to wait before shuting down the process.
-		shutdownTimeout: 5000,
+		shutdownTimeout: Config.TRACKINGSHUTDOWNTIME,
 	},
 
 	// Disable built-in request & emit balancer. (Transporter must support it, as well.). More info: https://moleculer.services/docs/0.14/networking.html#Disabled-balancer
-	disableBalancer: false,
+	disableBalancer: JSON.parse(Config.BALANCER_ENABLED) || false,
 
 	// Settings of Service Registry. More info: https://moleculer.services/docs/0.14/registry.html
 	registry: {
 		// Define balancing strategy. More info: https://moleculer.services/docs/0.14/balancing.html
 		// Available values: "RoundRobin", "Random", "CpuUsage", "Latency", "Shard"
-		strategy: 'RoundRobin',
+		strategy: Config.STRATEGY || 'RoundRobin',
 		// Enable local action call preferring. Always call the local action instance if available.
-		preferLocal: true,
+		preferLocal: JSON.parse(Config.PREFERLOCAL) || true,
 	},
 
 	// Settings of Circuit Breaker. More info: https://moleculer.services/docs/0.14/fault-tolerance.html#Circuit-Breaker
 	circuitBreaker: {
 		// Enable feature
-		enabled: false,
+		enabled: JSON.parse(Config.BREAKER_ENABLED) || false,
 		// Threshold value. 0.5 means that 50% should be failed for tripping.
-		threshold: 0.5,
+		threshold: Config.BREAKERTHRESHOLD || 0.5,
 		// Minimum request count. Below it, CB does not trip.
-		minRequestCount: 20,
+		minRequestCount: Config.BREAKERMINREQCOUNT || 20,
 		// Number of seconds for time window.
-		windowTime: 60,
+		windowTime: Config.WINDOWTIME || 60,
 		// Number of milliseconds to switch from open to half-open state
-		halfOpenTime: 10 * 1000,
+		halfOpenTime: Config.HALFOPENTIME || 10 * 1000,
 		// A function to check failed requests.
 		check: (err: Error): boolean =>
 			err && err instanceof MoleculerRetryableError && err.code >= 500,
@@ -146,30 +149,63 @@ const brokerConfig: BrokerOptions = {
 	// Settings of bulkhead feature. More info: https://moleculer.services/docs/0.14/fault-tolerance.html#Bulkhead
 	bulkhead: {
 		// Enable feature.
-		enabled: false,
+		enabled: JSON.parse(Config.BULKHEAD_ENABLED) || false,
 		// Maximum concurrent executions.
-		concurrency: 10,
+		concurrency: Config.CONCURRENCY || 10,
 		// Maximum size of queue
-		maxQueueSize: 100,
+		maxQueueSize: Config.MAXQUEUESIZE || 100,
 	},
 
 	// Enable action & event parameter validation. More info: https://moleculer.services/docs/0.14/validating.html
-	validator: true,
+	validator: JSON.parse(Config.VALIDATOR_ENABLED) || true,
 
-	errorHandler: undefined,
+	// eslint-disable-next-line capitalized-comments
+	/* errorHandler: (err: any, info: any) => {
+		const context = pick(
+			info.ctx,
+			'nodeID',
+			'id',
+			'event',
+			'eventName',
+			'eventType',
+			'eventGroups',
+			'parentID',
+			'requestID',
+			'caller',
+			'params',
+			'meta',
+			'locals',
+		);
+		const action = pick(info.action, 'rawName', 'name', 'params', 'rest');
+		const msg = err.message;
+		info.service.logger.error(
+			'errorHandler:',
+			msg,
+			'\n\n--- CONTEXT ---\n',
+			context,
+			'\n\n--- ACTION ---\n',
+			action,
+			'\n\n --- END ---\n',
+			err,
+		);
+		// BROADCAST ERROR or EVENT emit
+		// Info.service.broker.broadcast()
+		// eslint-disable-next-line capitalized-comments
+		// throw err; // Throw further
+	}, */
 
 	// Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
 	metrics: {
-		enabled: {{#if metrics}}true{{/if}}{{#unless metrics}}false{{/unless}},
+		enabled: Config.METRICS_ENABLED,
 		// Available built-in reporters: "Console", "CSV", "Event", "Prometheus", "Datadog", "StatsD"
 		reporter: {
-			type: '{{reporter}}',
+			type: Config.METRICS_TYPE,
 			{{#if_eq reporter "Console"}}
 			options: {
 				// HTTP port
-				port: 3030,
+				port: Config.METRICS_PORT || 3030,
 				// HTTP URL path
-				path: '/metrics',
+				path: Config.METRICS_PATH || '/metrics',
 				// Default labels which are appended to all metrics labels
 				defaultLabels: (registry: MetricRegistry) => ({
 					namespace: registry.broker.namespace,
@@ -216,15 +252,15 @@ const brokerConfig: BrokerOptions = {
 			{{#if_eq reporter "Datadog"}}
 			options: {
 				// Hostname
-				host: 'my-host',
+				host: Config.DATADOG_HOST,
 				// Base URL
-				baseUrl: 'https://api.datadoghq.eu/api/', // Default is https://api.datadoghq.com/api/
+				baseUrl: Config.DATADOG_BASE_URL, //'https://api.datadoghq.eu/api/', // Default is https://api.datadoghq.com/api/
 				// API version
 				apiVersion: 'v1',
 				// Server URL path
-				path: '/series',
+				path: Config.METRICS_PATH || '/series',
 				// Datadog API Key
-				apiKey: process.env.DATADOG_API_KEY,
+				apiKey: Config.DATADOG_API_KEY,
 				// Default labels which are appended to all metrics labels
 				defaultLabels: (registry: MetricRegistry) => ({
 					namespace: registry.broker.namespace,
@@ -237,9 +273,9 @@ const brokerConfig: BrokerOptions = {
 			{{#if_eq reporter "Prometheus"}}
 			options: {
 				// HTTP port
-				port: 3030,
+				port: Config.METRICS_PORT || 3030,
 				// HTTP URL path
-				path: '/metrics',
+				path: Config.METRICS_PATH || '/metrics',
 				// Default labels which are appended to all metrics labels
 				defaultLabels: (registry: MetricRegistry) => ({
 					namespace: registry.broker.namespace,
@@ -252,7 +288,7 @@ const brokerConfig: BrokerOptions = {
 				// Server host
 				host: 'localhost',
 				// Server port
-				port: 8125,
+				port: Config.METRICS_PORT || 8125,
 				// Maximum payload size.
 				maxPayloadSize: 1300
 			},
@@ -262,28 +298,28 @@ const brokerConfig: BrokerOptions = {
 
 	// Enable built-in tracing function. More info: https://moleculer.services/docs/0.14/tracing.html
 	tracing: {
-		enabled: {{#if tracing}}true{{/if}}{{#unless tracing}}false{{/unless}},
+		enabled: Config.TRACING_ENABLED,
 		// Available built-in exporters: "Console", "Datadog", "Event", "EventLegacy", "Jaeger", "Zipkin"
 		exporter: {
-			type: '{{exporter}}', // Console exporter is only for development!
+			type: Config.TRACING_TYPE, // Console exporter is only for development!
 			{{#if_eq exporter "Console"}}
 			options: {
 				// Custom logger
 				logger: null,
 				// Using colors
-				colors: true,
+				colors: JSON.parse(Config.TRACING_COLORS) || true,
 				// Width of row
-				width: 100,
+				width: Config.TRACING_WIDTH || 100,
 				// Gauge width in the row
-				gaugeWidth: 40,
+				gaugeWidth: Config.TRACING_GUAGEWIDTH || 40,
 			},
 			{{/if_eq}}
 			{{#if_eq exporter "Datadog"}}
 			options: {
 				// Datadog Agent URL
-				agentUrl: process.env.DD_AGENT_URL || 'http://localhost:8126',
+				agentUrl: Config.DD_AGENT_URL || 'http://localhost:8126',
 				// Environment variable
-				env: process.env.DD_ENVIRONMENT || null,
+				env: Config.DD_ENVIRONMENT || null,
 				// Sampling priority. More info: https://docs.datadoghq.com/tracing/guide/trace_sampling_and_storage/?tab=java#sampling-rules
 				samplingPriority: 'AUTO_KEEP',
 				// Default tags. They will be added into all span tags.
@@ -336,7 +372,7 @@ const brokerConfig: BrokerOptions = {
 			{{#if_eq exporter "Zipkin"}}
 			options: {
 				// Base URL for Zipkin server.
-				baseURL: 'http://localhost:9411',
+				baseURL: Config.TRACING_BASE_URL || undefined,
 				// Sending time interval in seconds.
 				interval: 5,
 				// Additional payload options.
@@ -353,7 +389,7 @@ const brokerConfig: BrokerOptions = {
 			{{#if_eq exporter "NewRelic"}}
 			options: {
 				// Base URL for NewRelic server
-				baseURL: 'https://trace-api.newrelic.com',
+				baseURL: Config.TRACING_BASE_URL, //'https://trace-api.newrelic.com',
 				// NewRelic Insert Key
 				insertKey: 'my-secret-key',
 				// Sending time interval in seconds.
