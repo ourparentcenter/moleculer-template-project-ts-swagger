@@ -1,4 +1,5 @@
 {
+	"projectdescription": "Test app",
     "apiGW": true,
     "needTransporter": true,
     "transporter": "NATS",
