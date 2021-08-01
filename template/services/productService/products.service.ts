@@ -1,45 +1,51 @@
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 'use strict';
-import moleculer, { Context } from 'moleculer';
-import { Action, Method, Service } from 'moleculer-decorators';
-import DbConnection from '../../mixins/dbMixins/db.mixin';
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const DbMixin = new DbConnection('products').start();
+import { Context } from 'moleculer';
+import { Put, Method, Service } from '@ourparentcenter/moleculer-decorators-extended';
+import { dbProductMixin, eventsProductMixin } from '../../mixins/dbMixins';
+import { Config } from '../../common';
+import {
+	IProduct,
+	MoleculerDBService,
+	ProductServiceSettingsOptions,
+	ProductsManipulateValueParams,
+	ProductsServiceOptions,
+} from '../../types';
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  */
-@Service({
+@Service<ProductsServiceOptions>({
 	name: 'products',
 	version: 1,
 	/**
 	 * Service guard token
 	 */
-	authToken: process.env.PRODUCTS_AUTH_TOKEN,
+	authToken: Config.PRODUCTS_AUTH_TOKEN,
 	/**
 	 * Mixins
 	 */
-	mixins: [DbMixin],
-})
-export default class ProductService extends moleculer.Service {
+	// Mixins: [DbMixin],
+	mixins: [dbProductMixin, eventsProductMixin],
 	/**
 	 * Settings
 	 */
-	settings = {
+	settings: {
+		idField: '_id',
 		// Available fields in the responses
 		fields: ['_id', 'name', 'quantity', 'price'],
-
+		rest: '/v1/products',
 		// Validator for the `create` & `insert` actions.
 		entityValidator: {
 			name: 'string|min:3',
 			price: 'number|positive',
 		},
-	};
+	},
 	/**
 	 * Action Hooks
 	 */
-	hooks = {
+	hooks: {
 		before: {
 			/**
 			 * Register a before hook for the `create` action.
@@ -53,7 +59,12 @@ export default class ProductService extends moleculer.Service {
 				ctx.params.quantity = 0;
 			},
 		},
-	};
+	},
+})
+export default class ProductService extends MoleculerDBService<
+	ProductServiceSettingsOptions,
+	IProduct
+> {
 	/**
 	 *  @swagger
 	 *
@@ -90,20 +101,19 @@ export default class ProductService extends moleculer.Service {
 	 *        422:
 	 *          description: Missing parameters
 	 */
-	@Action({
+	@Put('/:id/quantity/increase', {
 		name: 'increaseQuantity',
 		/**
 		 * Service guard services allowed to connect
 		 */
-		required: ['api'],
-		rest: 'PUT /:id/quantity/increase',
+		restricted: ['api'],
 		params: {
 			// Id: 'string',
 			id: 'string',
 			value: ['number|integer|positive'],
 		},
 	})
-	async increaseQuantity(ctx: Context<Record<string, number>>) {
+	async increaseQuantity(ctx: Context<ProductsManipulateValueParams, Record<string, unknown>>) {
 		const doc = await this.adapter.updateById(ctx.params.id, {
 			$inc: { quantity: ctx.params.value },
 		});
@@ -147,25 +157,23 @@ export default class ProductService extends moleculer.Service {
 	 *        422:
 	 *          description: Missing parameters
 	 */
-	@Action({
+	@Put('/:id/quantity/decrease', {
 		name: 'decreaseQuantity',
 		/**
 		 * Service guard services allowed to connect
 		 */
-		required: ['api'],
-		rest: 'PUT /:id/quantity/decrease',
+		restricted: ['api'],
 		params: {
 			id: 'string',
 			value: ['number|integer|positive'],
 		},
 	})
-	async decreaseQuantity(ctx: Context<Record<string, number>>) {
+	async decreaseQuantity(ctx: Context<ProductsManipulateValueParams, Record<string, unknown>>) {
 		const doc = await this.adapter.updateById(ctx.params.id, {
 			$inc: { quantity: -ctx.params.value },
 		});
 		const json = await this.transformDocuments(ctx, ctx.params, doc);
 		await this.entityChanged('updated', json, ctx);
-
 		return json;
 	}
 	/**
@@ -173,14 +181,14 @@ export default class ProductService extends moleculer.Service {
 	 * It is called in the DB.mixin after the database
 	 * connection establishing & the collection is empty.
 	 */
-	@Method
+	/* @Method
 	async seedDB() {
 		await this.adapter.insertMany([
 			{ name: 'Samsung Galaxy S10 Plus', quantity: 10, price: 704 },
 			{ name: 'iPhone 11 Pro', quantity: 25, price: 999 },
 			{ name: 'Huawei P30 Pro', quantity: 15, price: 679 },
 		]);
-	}
+	} */
 
 	/**
 	 * Fired after database connection establishing.

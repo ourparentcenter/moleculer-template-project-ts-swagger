@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 'use strict';
 /**
- * Mixin for all dbs to seed data
+ * Mixin for swagger
  */
 import { writeFileSync, readFileSync } from 'fs';
 import { Errors } from 'moleculer';
@@ -11,6 +11,7 @@ import SwaggerUI from 'swagger-ui-dist';
 import _ from 'lodash';
 import swaggerJSDoc from 'swagger-jsdoc';
 import * as pkg from '../../package.json';
+import { Config } from '../../common';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MoleculerServerError = Errors.MoleculerServerError;
 
@@ -59,8 +60,8 @@ export const openAPIMixin = (mixinOptions?: any) => {
 								// eslint-disable-next-line max-len
 								'Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects..', // Short description of the app
 						},
-						host: `${process.env.SWAGGER_HOST}:${process.env.SWAGGER_PORT}`, // The host or url of the app
-						basePath: `${process.env.SWAGGER_BASEPATH}`, // The basepath of your endpoint
+						host: `${Config.SWAGGER_HOST}:${Config.SWAGGER_PORT}`, // The host or url of the app
+						basePath: `${Config.SWAGGER_BASEPATH}`, // The basepath of your endpoint
 					};
 					// Options for the swagger docs
 					const options = {
@@ -72,7 +73,7 @@ export const openAPIMixin = (mixinOptions?: any) => {
 						// Path to the API docs
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore
-						apis: JSON.parse(process.env.SWAGGER_APIS),
+						apis: JSON.parse(Config.SWAGGER_APIS),
 					};
 					// Initialize swagger-jsdoc
 					const swaggerSpec = swaggerJSDoc(options);
@@ -95,8 +96,8 @@ export const openAPIMixin = (mixinOptions?: any) => {
 				.toString()
 				.replace(
 					// eslint-disable-next-line max-len
-					/(?:(?:https?):\/\/|www\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/gim,
-					`${process.env.BASE_URL}:${process.env.BASE_PORT}/openapi/swagger.json`,
+					/(?:(?:https?|undefined):(\/\/|undefined?)|www\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/gim,
+					`${Config.BASE_URL}:${Config.BASE_PORT}/openapi/swagger.json`,
 				)
 				.replace('layout: "StandaloneLayout"', '');
 			writeFileSync(`${pathToSwaggerUi}/index.html`, indexContent);
@@ -124,7 +125,7 @@ export const openAPIMixin = (mixinOptions?: any) => {
 								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 								// @ts-ignore
 								this.logger.debug(schema);
-								if (process.env.NODE_ENV !== 'production') {
+								if (Config.NODE_ENV !== 'production') {
 									writeFileSync(
 										'./swagger.json',
 										JSON.stringify(schema, null, 4),
