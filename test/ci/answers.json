@@ -14,5 +14,6 @@
     "docker": true,
     "lint": true,
 	"frontend": true,
-	"swagger": true
+	"swagger": true,
+	"swaggerstats":true
 }

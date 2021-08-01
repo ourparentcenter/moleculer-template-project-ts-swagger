@@ -1,5 +1,8 @@
 {
 	"apiGW": true,
+	"frontend": true,
+	"swagger": true,
+	"swaggerstats":true,
 	"needTransporter": false,
 	"chooseWatcher": true,
 	"watcher": "TSNODE",
@@ -8,7 +11,5 @@
 	"metrics": false,
 	"tracing": false,
 	"docker": true,
-	"lint": true,
-	"frontend": true,
-	"swagger": true
+	"lint": true
 }

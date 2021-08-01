@@ -18,6 +18,7 @@
 - Typescript decorators for moleculer [https://github.com/d0whc3r/moleculer-decorators](https://github.com/d0whc3r/moleculer-decorators)
 - Configuration for development/production/testing using environment variables
 - Optional Swagger embedded with demo api and jsdoc http://localhost:3000/openapi
+- Optionall Swagger-Stats with dashboaed at http://localhost:3000/api
 
 
 ## Install
@@ -33,7 +34,11 @@ $ moleculer init ourparentcenter/moleculer-template-project-ts moleculer-demo
 
 Template repo: ourparentcenter/moleculer-template-project-ts-swagger
 Downloading template...
+? Give a description of your app:
 ? Add API Gateway (moleculer-web) service? Yes
+? Add demo frontend project (Quasar)? Yes
+? Use Swagger? Yes
+? Use Swagger-Stats? Yes
 ? Would you like to communicate with other nodes? Yes
 ? Select a transporter NATS (recommended)
 ? Would you like to use cache? No
@@ -46,7 +51,7 @@ Downloading template...
 ? Use ESLint to lint your code? Yes
 ? Would you like to choose a file watcher? Yes
 ? Select a file watcher ts-node (recommended)
-? Use Swagger? Yes
+
 Create 'moleculertemplatetest' folder...
 ? Would you like to run 'npm install'? Yes
 ```
@@ -69,6 +74,6 @@ Create 'moleculertemplatetest' folder...
 moleculer-template-project-ts-swagger is available under the [MIT license](https://tldrlegal.com/license/mit-license).
 
 ## Contact
-Copyright (c) 2021 MoleculerJS
+Copyright (c) 2021 Our Parent Center
 
 [![@moleculerjs](https://img.shields.io/badge/github-moleculerjs-green.svg)](https://github.com/moleculerjs) [![@MoleculerJS](https://img.shields.io/badge/twitter-MoleculerJS-blue.svg)](https://twitter.com/MoleculerJS)

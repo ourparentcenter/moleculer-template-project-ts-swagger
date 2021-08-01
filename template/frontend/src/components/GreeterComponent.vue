@@ -10,7 +10,7 @@
 				<div class="request">
 					<h4>Request:</h4>
 					<code>
-						GET
+						{{ item.method || 'GET' }}
 						<a target="_blank" :href="item.rest">{{ item.rest }}</a>
 					</code>
 					<q-btn
@@ -60,6 +60,7 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { defineComponent, reactive } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 import { axios } from 'boot/axios';
@@ -77,6 +78,7 @@ let requests = reactive([
 		id: 'welcome',
 		action: 'v1.greeter.welcome',
 		rest: '/api/v1/greeter/welcome',
+		method: 'POST',
 		fields: [
 			{
 				field: 'name',
@@ -112,19 +114,23 @@ function getFieldValue(field: Record<string, unknown>) {
 	return fields[field.model];
 }
 
-async function req(url: string) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function req(url: string, method: string, body?: any) {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
-	return await axios.get(url);
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+	return await axios({
+		method: method,
+		url: url,
+		data: body,
+	});
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function callAction(item: any) {
 	const startTime = Date.now();
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	let url = item.rest;
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	const method = item.method || 'GET';
 	let body = null;
 	let params = null;
@@ -133,13 +139,10 @@ function callAction(item: any) {
 		params = {};
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
 		item.fields.forEach((field: any) => {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			const value = getFieldValue(field);
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			if (field.paramType == 'body') body[field.field] = value;
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			else if (field.paramType == 'param') params[field.field] = value;
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions
 			else if (field.paramType == 'url') url = url.replace(`:${field.field}`, value);
 		});
 
@@ -151,17 +154,15 @@ function callAction(item: any) {
 		}
 	}
 
-	return req(url)
+	return req(url, method, body)
 		.then((res) => {
 			item.status = res.status;
 			item.duration = Date.now() - startTime;
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			return (item.response = res.data);
 		})
 		.catch((err) => {
 			item.status = 'ERR';
 			item.duration = Date.now() - startTime;
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			item.response = err.message;
 			console.log(err);
 		});
@@ -185,6 +186,7 @@ export default defineComponent({
 					id: 'welcome',
 					action: 'v1.greeter.welcome',
 					rest: '/api/v1/greeter/welcome',
+					method: 'POST',
 					fields: [
 						{
 							field: 'name',

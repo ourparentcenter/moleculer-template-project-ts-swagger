@@ -19,6 +19,15 @@ import {
 	UserTokenParams,
 	UserAuthMeta,
 } from '../../types';
+{{#swaggerstats}}import swStats from 'swagger-stats';
+import swaggerSpec = require('../../swagger.json');
+const tlBucket = 60000;
+const swMiddleware = swStats.getMiddleware({
+	name: 'swagger-stats',
+	timelineBucketDuration: tlBucket,
+	uriPath: '/dashboard',
+	swaggerSpec: swaggerSpec,
+});{{/swaggerstats}}
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -93,7 +102,7 @@ import {
 					'**',
 				],
 				// Route-level Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
-				use: [],
+				use: [{{#swaggerstats}}swMiddleware{{/swaggerstats}}],
 				// Enable/disable parameter merging method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Disable-merging
 				mergeParams: true,
 
@@ -107,7 +116,22 @@ import {
 				// The gateway will dynamically build the full routes from service schema.
 				autoAliases: true,
 
-				aliases: {},
+				aliases: {
+					{{#swaggerstats}}'GET /'(req: any, res: any) {
+						// console.log(swStats.getPromClient());
+						res.statusCode = 302;
+						res.setHeader('Location', '/api/dashboard/');
+						return res.end();
+					},
+					'GET /stats'(req: any, res: any) {
+						res.setHeader('Content-Type', 'application/json');
+						return res.end(JSON.stringify(swStats.getCoreStats()));
+					},
+					'GET /metrics'(req: any, res: any) {
+						res.setHeader('Content-Type', 'application/json');
+						return res.end(JSON.stringify(swStats.getPromStats()));
+					},{{/swaggerstats}}
+				},
 				/**
 			 * Before call hook. You can check the request.
 			 * @param {Context} ctx

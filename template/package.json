@@ -1,7 +1,7 @@
 {
   "name": "{{projectName}}",
   "version": "1.0.0",
-  "description": "My Moleculer-based microservices project",
+  "description": "{{projectdescription}}",
   "scripts": {
     "build": "tsc --build tsconfig.json"{{#if_eq watcher "TSNODE"}},
     "dev": "cross-env NODE_ENV=development dotenv-flow -p ./env -- ts-node -r tsconfig-paths/register ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --config moleculer.config.ts"{{/if_eq}}{{#if_eq watcher "TSNODEDEV"}},
@@ -28,12 +28,19 @@
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
     "@types/bcryptjs": "^2.4.2",
+    {{#apiGW}}
     "@types/cookie-parser": "^1.4.2",
+    {{/apiGW}}
     "@types/dotenv-flow": "^3.1.0",
+    {{#apiGW}}
     "@types/helmet": "^4.0.0",
+    {{/apiGW}}
     "@types/jsonwebtoken": "^8.5.0",
     "@types/lodash": "^4.14.168",
     "@types/mongoose": "^5.10.3",
+    {{#swaggerstats}}
+    "@types/swagger-stats": "^0.95.4",
+    {{/swaggerstats}}
     "bcrypt": "^5.0.1",
     "chokidar": "^3.5.1",
     {{#lint}}
@@ -89,23 +96,33 @@
     "swagger-jsdoc": "^6.0.6",
 		"swagger-ui-dist": "^3.43.0",
     {{/swagger}}
+    {{#swaggerstats}}
+    "openapi-types": "^9.1.0",
+    "swagger-stats": "^0.99.2",
+    {{/swaggerstats}}
     "bcryptjs": "^2.4.3",
+    {{#apiGW}}
     "cookie-parser": "^1.4.5",
+    {{/apiGW}}
     "cross-env": "^7.0.3",
     "csv-parse": "^4.15.3",
     "dotenv": "^8.2.0",
     "dotenv-flow": "^3.2.0",
     "dotenv-flow-cli": "^1.0.0",
+    {{#apiGW}}
     "helmet": "^4.4.1",
+    {{/apiGW}}
     "json2typescript": "^1.4.1",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
-    "moleculer": "^0.14.12",
+    "moleculer": "^0.14.15",
     "moleculer-db": "^0.8.12",
     "moleculer-db-adapter-mongo": "^0.4.11",
     "moleculer-db-adapter-mongoose": "^0.8.9",
     "@ourparentcenter/moleculer-decorators-extended": "^1.1.0",
+    {{#apiGW}}
     "moleculer-web": "^0.9.1",
+    {{/apiGW}}
     "mongodb": "^3.6.4",
     "mongoose": "^5.11.19",
     "reflect-metadata": "^0.1.13",

@@ -1,0 +1,364 @@
+{
+    "info": {
+        "title": "cameo-server API Documentation",
+        "version": "1.0.0",
+        "description": "Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects.."
+    },
+    "host": "localhost:3000",
+    "basePath": "/api",
+    "swagger": "2.0",
+    "paths": {
+        "/v1/greeter/hello": {
+            "get": {
+                "tags": [
+                    "Greeter"
+                ],
+                "summary": "Say a 'Hello' action",
+                "description": "Say a 'Hello' action",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hello result"
+                    },
+                    "403": {
+                        "description": "Server error"
+                    }
+                }
+            }
+        },
+        "/v1/greeter/welcome": {
+            "post": {
+                "tags": [
+                    "Greeter"
+                ],
+                "summary": "Welcome a username",
+                "description": "Welcome a username",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "params",
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "name"
+                            ],
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "default": "John",
+                                    "description": "Name to be used"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "welcome result"
+                    },
+                    "422": {
+                        "description": "Missing parameters"
+                    }
+                }
+            }
+        },
+        "/v1/products/{id}/quantity/increase": {
+            "put": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Increase the quantity of the product item",
+                "description": "Increase the quantity of the product item.",
+                "operationId": "increaseQuantity",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json; charset=utf-8"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Id of product",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "params",
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "value"
+                            ],
+                            "properties": {
+                                "value": {
+                                    "type": "number",
+                                    "description": "Quantity to increase"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Increased quantity result"
+                    },
+                    "422": {
+                        "description": "Missing parameters"
+                    }
+                }
+            }
+        },
+        "/v1/products/{id}/quantity/decrease": {
+            "put": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Decrease the quantity of the product item",
+                "description": "Decrease the quantity of the product item.",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Id of product",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "params",
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "value"
+                            ],
+                            "properties": {
+                                "value": {
+                                    "type": "number",
+                                    "description": "Quantity to decrease"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Decreased quantity result"
+                    },
+                    "422": {
+                        "description": "Missing parameters"
+                    }
+                }
+            }
+        },
+        "/v1/products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get all products (auto generated)",
+                "description": "Get all products",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Products result"
+                    },
+                    "403": {
+                        "description": "Server error"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Create a product (auto generated)",
+                "description": "Create a product",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "params",
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "name",
+                                "price"
+                            ],
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "default": "product name",
+                                    "description": "Name to be used"
+                                },
+                                "price": {
+                                    "type": "number",
+                                    "default": 99,
+                                    "description": "Price of product"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "welcome result"
+                    },
+                    "422": {
+                        "description": "Missing parameters"
+                    }
+                }
+            }
+        },
+        "/v1/products/{id}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get product by id (auto generated)",
+                "description": "Get product by id",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Id of product",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Products result"
+                    },
+                    "403": {
+                        "description": "Server error"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Update a product (auto generated)",
+                "description": "Update product.",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Id of product",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "params",
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "name",
+                                "Price"
+                            ],
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "Name of product"
+                                },
+                                "price": {
+                                    "type": "number",
+                                    "description": "Price of product"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product update result"
+                    },
+                    "403": {
+                        "description": "Server error"
+                    },
+                    "422": {
+                        "description": "Missing parameters"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Delete a product (auto generated)",
+                "description": "Delete product by id",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Id of product",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Delete result"
+                    },
+                    "403": {
+                        "description": "Server error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {},
+    "responses": {},
+    "parameters": {},
+    "securityDefinitions": {},
+    "tags": []
+}
