@@ -45,14 +45,6 @@ export default class GreeterService extends moleculer.Service {
 		restricted: ['api'],
 	})
 	async hello() {
-		const test = EncryptionUtil.encrypt('hello there!');
-		console.log(test);
-		const test2 = EncryptionUtil.decrypt(test);
-		console.log(test2);
-		const test3 = EncryptionUtil.bcrypt('hello there!');
-		console.log(test3);
-		const test4 = EncryptionUtil.compare('hello there!', test3);
-		console.log(test4);
 		return 'Hello Moleculer';
 	}
 	/**
