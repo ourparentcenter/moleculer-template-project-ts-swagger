@@ -10,7 +10,6 @@
 	"watcher": "TSNODE",
     "needCacher": true,
     "cacher": "Redis",
-    // "dbService": true,
     "metrics": true,
     "reporter": "Prometheus",
     "tracing": true,

@@ -6,7 +6,6 @@
 	"chooseWatcher": true,
 	"watcher": "TSNODE",
     "needCacher": false,
-    "dbService": true,
     "metrics": true,
     "tracing": true,
     "docker": true,
