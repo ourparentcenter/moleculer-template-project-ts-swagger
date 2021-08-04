@@ -1,10 +1,10 @@
-# Moleculer Quasar (moleculerspa)
+# Quasar App (moleculerspa)
 
 A Quasar Framework app
 
 ## Install the dependencies
 ```bash
-npm install
+yarn
 ```
 
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
@@ -14,7 +14,7 @@ quasar dev
 
 ### Lint the files
 ```bash
-npm run lint
+yarn run lint
 ```
 
 ### Build the app for production
@@ -23,7 +23,7 @@ quasar build
 ```
 
 ### Customize the configuration
-See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
+See [Configuring quasar.conf.js](https://v2.quasar.dev/quasar-cli/quasar-conf-js).
 
 ## NPM scripts
 
