@@ -412,7 +412,7 @@ const brokerConfig: BrokerOptions = {
 	},
 
 	// Register custom middlewares
-	middlewares: [hotreload, ServiceGuard{{#apiGW}}, OpenInBrowserMiddleware{{/apiGW}}],
+	middlewares: [HotReloadMiddleware, ServiceGuard{{#apiGW}}, OpenInBrowserMiddleware{{/apiGW}}],
 
 	// Register custom REPL commands.
 	replCommands: undefined,
