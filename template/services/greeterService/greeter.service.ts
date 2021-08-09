@@ -4,7 +4,7 @@
 import moleculer, { Context } from 'moleculer';
 import { Get, Post, Service } from '@ourparentcenter/moleculer-decorators-extended';
 import { Config } from '../../common';
-import { GreeterWelcomeParams } from '../../types';
+import { GreeterWelcomeParams, RestOptions } from '../../types';
 import EncryptionUtil from '../../helpers/encryption.helper';
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -37,7 +37,7 @@ export default class GreeterService extends moleculer.Service {
 	 *        403:
 	 *          description: Server error
 	 */
-	@Get('/hello', {
+	@Get<RestOptions>('/hello', {
 		name: 'hello',
 		/**
 		 * Service guard services allowed to connect
@@ -78,7 +78,7 @@ export default class GreeterService extends moleculer.Service {
 	 *        422:
 	 *          description: Missing parameters
 	 */
-	@Post('/welcome', {
+	@Post<RestOptions>('/welcome', {
 		name: 'welcome',
 		/**
 		 * Service guard services allowed to connect
