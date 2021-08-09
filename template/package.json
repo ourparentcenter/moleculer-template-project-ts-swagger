@@ -55,6 +55,9 @@
     "jest": "^26.6.3",
     "jest-cli": "^26.6.3",
     "moleculer-repl": "^0.6.4",
+    {{#apiGW}}
+    "open": "^8.2.1",
+    {{/apiGW}}
     "prettier": "^2.2.1",
     "tsconfig-paths": "^3.9.0",
     "ts-jest": "^26.5.1",
