@@ -125,7 +125,7 @@
     "moleculer-db-adapter-mongo": "^0.4.12",
     "moleculer-db-adapter-mongoose": "^0.8.10",
     {{/dbService}}
-    "@ourparentcenter/moleculer-decorators-extended": "^1.1.0",
+    "@ourparentcenter/moleculer-decorators-extended": "^1.1.1",
     {{#apiGW}}
     "moleculer-web": "^0.10.0",
     {{/apiGW}}
