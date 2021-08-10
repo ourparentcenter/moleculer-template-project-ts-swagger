@@ -73,16 +73,16 @@
   },
   "dependencies": {
     {{#if_eq transporter "NATS"}}
-    "nats": "^1.4.12",
+    "nats": "^2.1.0",
     {{/if_eq}}
     {{#if_eq transporter "MQTT"}}
-    "mqtt": "^4.2.6",
+    "mqtt": "^4.2.8",
     {{/if_eq}}
     {{#if_eq transporter "AMQP"}}
-    "amqplib": "^0.6.0",
+    "amqplib": "^0.8.0",
     {{/if_eq}}
     {{#if_eq transporter "AMQP10"}}
-    "rhea-promise": "^1.1.0",
+    "rhea-promise": "^2.1.0",
     {{/if_eq}}
     {{#if_eq transporter "STAN"}}
     "node-nats-streaming": "^0.3.2",
@@ -91,7 +91,7 @@
     "kafka-node": "^5.0.0",
     {{/if_eq}}
     {{#redis}}
-    "ioredis": "^4.22.0",
+    "ioredis": "^4.27.7",
     {{/redis}}
     {{#swagger}}
     "swagger-jsdoc": "^6.1.0",
