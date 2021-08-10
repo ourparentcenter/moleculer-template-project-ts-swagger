@@ -71,6 +71,8 @@ jobs:
 
             - run: curl --silent --show-error --fail http://localhost:3000/api/v1/greeter/hello
             - run: curl --silent --show-error --fail http://localhost:3000/api/v1/products
+            - run: curl --silent --show-error --fail http://localhost:3000/api/ #swagger-stats dashboard
+            - run: curl --silent --show-error --fail http://localhost:3000/openapi/ #swagger-UI
 
             - name: Stop containers
               run: npm run dc:down

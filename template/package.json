@@ -120,8 +120,10 @@
     "lodash": "^4.17.21",
     "moleculer": "^0.14.16",
     "moleculer-db": "^0.8.14",
+    {{#dbservice}}
     "moleculer-db-adapter-mongo": "^0.4.12",
     "moleculer-db-adapter-mongoose": "^0.8.10",
+    {{/dbservice}}
     "@ourparentcenter/moleculer-decorators-extended": "^1.1.0",
     {{#apiGW}}
     "moleculer-web": "^0.10.0",

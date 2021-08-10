@@ -92,12 +92,12 @@ module.exports = function(values) {
 				when(answers) { return answers.needCacher; },
 				default: "Memory"
 			},
-			/* {
+			{
 			type: "confirm",
 				name: "dbService",
 				message: "Add DB sample service?",
 				default: true
-			}, */
+			},
 			{
 				type: "confirm",
 				name: "metrics",

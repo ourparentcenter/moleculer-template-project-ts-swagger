@@ -4,6 +4,7 @@
 	"frontend": true,
 	"swagger": true,
 	"swaggerstats":true,
+	"#dbservice": true,
     "needTransporter": true,
     "transporter": "NATS",
 	"chooseWatcher": true,
@@ -16,5 +17,4 @@
     "exporter": "Console",
     "docker": true,
     "lint": true
-
 }
