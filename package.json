@@ -1,6 +1,6 @@
 {
   "name": "moleculer-template-project-ts-swagger",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Project template for Moleculer-based projects with typescript & swagger",
   "main": "meta.js",
   "scripts": {
