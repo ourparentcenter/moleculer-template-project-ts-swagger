@@ -54,6 +54,12 @@ module.exports = function(values) {
 			},
 			{
 				type: "confirm",
+				name: "dbService",
+				message: "Add DB sample service?",
+				default: true
+			},
+			{
+				type: "confirm",
 				name: "needTransporter",
 				message: "Would you like to communicate with other nodes?",
 				default: true
@@ -91,12 +97,6 @@ module.exports = function(values) {
 				],
 				when(answers) { return answers.needCacher; },
 				default: "Memory"
-			},
-			{
-			type: "confirm",
-				name: "dbService",
-				message: "Add DB sample service?",
-				default: true
 			},
 			{
 				type: "confirm",
@@ -190,12 +190,12 @@ module.exports = function(values) {
 			"public/**/*": "apiGW",
 			"frontend/**/*": "frontend",
 
-			//   "services/products.service.ts": "dbService",
-			//   "mixins/dbmixins/db.mixin.ts": "dbService",
+			"services/products.service.ts": "dbService",
+			"mixins/dbmixins/db.mixin.ts": "dbService",
 			"mixins/openapi/openapi.mixin.ts": "swagger",
 			"test/mixins/db.mixin.spec.ts": "dbService",
-			//   "test/integration/products.service.spec.ts": "dbService",
-			//   "test/unit/services/products.spec.ts": "dbService",
+			"test/integration/products.service.spec.ts": "dbService",
+			"test/unit/services/products.spec.ts": "dbService",
 
 			".eslintrc.js": "lint",
 
