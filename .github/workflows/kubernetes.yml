@@ -92,8 +92,14 @@ jobs:
             - name: Check pods
               run: kubectl get all
 
-            - run: curl --silent --show-error --fail http://ci-test.127.0.0.1.nip.io/api/v1/greeter/hello
-            - run: curl --silent --show-error --fail http://ci-test.127.0.0.1.nip.io/api/v1/products
+            - name: Check Greeter Service
+              run: curl --silent --show-error --fail http://ci-test.127.0.0.1.nip.io/api/v1/greeter/hello
+            - name: Check Products Service
+              run: curl --silent --show-error --fail http://ci-test.127.0.0.1.nip.io/api/v1/products
+            - name: Check Swagger-Stats dashboard
+              run: curl --silent --show-error --fail http://ci-test.127.0.0.1.nip.io/api/ #swagger-stats dashboard
+            - name: Check Swagger-Ui
+              run: curl --silent --show-error --fail http://ci-test.127.0.0.1.nip.io/openapi/ #swagger-UI
 
             - name: Check logs
               run: kubectl logs deployment/products

@@ -1,16 +1,19 @@
 {
-	"projectdescription": "Test app",
+	"projectdescription": "Demo app",
     "apiGW": true,
+	"frontend": true,
+	"swagger": true,
+	"swaggerstats":true,
+	"dbService": true,
     "needTransporter": true,
     "transporter": "NATS",
 	"chooseWatcher": true,
 	"watcher": "TSNODE",
     "needCacher": false,
     "metrics": true,
+	"reporter": "Prometheus",
     "tracing": true,
+	"exporter": "Console",
     "docker": true,
-    "lint": true,
-	"frontend": true,
-	"swagger": true,
-	"swaggerstats":true
+    "lint": true
 }

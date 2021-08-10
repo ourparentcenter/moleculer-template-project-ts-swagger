@@ -4,7 +4,10 @@ import { BrokerOptions, Errors, MetricRegistry } from 'moleculer';
 import 'reflect-metadata';
 import pick from 'lodash/pick';
 import ServiceGuard = require('./middlewares/ServiceGuard');
-import hotreload = require('./middlewares/HotReloadCHokidar');
+import HotReloadMiddleware from './middlewares/HotReloadCHokidar';
+{{#apiGW}}
+import OpenInBrowserMiddleware from './middlewares/OpenInBrowser';
+{{/apiGW}}
 import { Config } from './common';
 import MoleculerRetryableError = Errors.MoleculerRetryableError;
 
@@ -409,7 +412,7 @@ const brokerConfig: BrokerOptions = {
 	},
 
 	// Register custom middlewares
-	middlewares: [hotreload, ServiceGuard],
+	middlewares: [HotReloadMiddleware, ServiceGuard{{#apiGW}}, OpenInBrowserMiddleware{{/apiGW}}],
 
 	// Register custom REPL commands.
 	replCommands: undefined,

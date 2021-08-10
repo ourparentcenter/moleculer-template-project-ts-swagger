@@ -11,6 +11,7 @@ import {
 	ProductServiceSettingsOptions,
 	ProductsManipulateValueParams,
 	ProductsServiceOptions,
+	RestOptions,
 } from '../../types';
 
 /**
@@ -26,7 +27,6 @@ import {
 	/**
 	 * Mixins
 	 */
-	// Mixins: [DbMixin],
 	mixins: [dbProductMixin, eventsProductMixin],
 	/**
 	 * Settings
@@ -101,7 +101,7 @@ export default class ProductService extends MoleculerDBService<
 	 *        422:
 	 *          description: Missing parameters
 	 */
-	@Put('/:id/quantity/increase', {
+	@Put<RestOptions>('/:id/quantity/increase', {
 		name: 'increaseQuantity',
 		/**
 		 * Service guard services allowed to connect
@@ -157,7 +157,7 @@ export default class ProductService extends MoleculerDBService<
 	 *        422:
 	 *          description: Missing parameters
 	 */
-	@Put('/:id/quantity/decrease', {
+	@Put<RestOptions>('/:id/quantity/decrease', {
 		name: 'decreaseQuantity',
 		/**
 		 * Service guard services allowed to connect

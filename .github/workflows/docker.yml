@@ -8,7 +8,7 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [10.x, 12.x, 14.x]
+                node-version: [10.x, 12.x, 14.x, 16.x]
                 # transporter: [NATS, Redis, MQTT, AMQP, AMQP10, STAN, Kafka, TCP]
                 transporter: [NATS, Redis, MQTT, AMQP, STAN, Kafka, TCP]
             fail-fast: false
@@ -69,8 +69,14 @@ jobs:
               run: docker-compose logs
               working-directory: ./ci-test
 
-            - run: curl --silent --show-error --fail http://localhost:3000/api/v1/greeter/hello
-            - run: curl --silent --show-error --fail http://localhost:3000/api/v1/products
+            - name: Check Greeter service
+              run: curl --silent --show-error --fail http://localhost:3000/api/v1/greeter/hello
+            - name: Chesk Products Service
+              run: curl --silent --show-error --fail http://localhost:3000/api/v1/products
+            - name: Check Swagger-Stats dashboard
+              run: curl --silent --show-error --fail http://localhost:3000/api/ #swagger-stats dashboard
+            - name: Check Swagger-Ui
+              run: curl --silent --show-error --fail http://localhost:3000/openapi/ #swagger-UI
 
             - name: Stop containers
               run: npm run dc:down

@@ -412,4 +412,4 @@ const HotReloadMiddleware = (broker: any) => {
 		},
 	};
 };
-module.exports = HotReloadMiddleware;
+export default HotReloadMiddleware;

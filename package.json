@@ -1,6 +1,6 @@
 {
   "name": "moleculer-template-project-ts-swagger",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Project template for Moleculer-based projects with typescript & swagger",
   "main": "meta.js",
   "scripts": {
@@ -22,7 +22,7 @@
   "homepage": "https://github.com/ourparentcenter/moleculer-template-project-ts-swagger#readme",
   "devDependencies": {
     "moleculer-cli": "^0.7.1",
-    "prettier": "^2.2.1",
+    "prettier": "^2.3.2",
     "rimraf": "^3.0.2"
   }
 }

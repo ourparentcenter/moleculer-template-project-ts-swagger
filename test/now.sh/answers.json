@@ -1,15 +1,16 @@
 {
 	"projectdescription": "Test app",
-	"apiGW": true,
+    "apiGW": true,
 	"frontend": true,
 	"swagger": true,
 	"swaggerstats":true,
-	"needTransporter": false,
+	"dbService": true,
+    "needTransporter": false,
 	"chooseWatcher": true,
 	"watcher": "TSNODE",
-	"needCacher": false,
-	"metrics": false,
-	"tracing": false,
-	"docker": true,
-	"lint": true
+    "needCacher": false,
+    "metrics": false,
+    "tracing": false,
+    "docker": true,
+    "lint": true
 }
