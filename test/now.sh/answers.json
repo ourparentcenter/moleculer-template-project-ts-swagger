@@ -4,7 +4,7 @@
 	"frontend": true,
 	"swagger": true,
 	"swaggerstats":true,
-	"#dbservice": true,
+	"dbService": true,
     "needTransporter": false,
 	"chooseWatcher": true,
 	"watcher": "TSNODE",
