@@ -92,6 +92,7 @@
     {{/if_eq}}
     {{#redis}}
     "ioredis": "^4.27.7",
+    "redlock": "^4.2.0",
     {{/redis}}
     {{#swagger}}
     "swagger-jsdoc": "^6.1.0",
