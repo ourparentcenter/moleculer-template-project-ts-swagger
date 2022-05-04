@@ -27,8 +27,10 @@ const swMiddleware = swStats.getMiddleware({
 	timelineBucketDuration: tlBucket,
 	uriPath: '/dashboard',
 	swaggerSpec: swaggerSpec,
-});{{/swaggerstats}}
-
+}); {{/swaggerstats}}
+{{#if_eq httptransport "SOCKET"}}
+import { Server, Socket } from 'socket.io';
+{{/if_eq}}
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  * @typedef {import('http').IncomingMessage} IncomingRequest Incoming HTTP Request
@@ -194,6 +196,19 @@ const swMiddleware = swStats.getMiddleware({
 			options: {},
 		},
 	},
+	{{#if_eq httptransport "SOCKET"}}
+	events: {
+		'**'(payload, sender, event) {
+			if (this.io) {
+				this.io.emit('event', {
+					sender,
+					event,
+					payload,
+				});
+			}
+		},
+	},
+	{{/if_eq}}
 })
 export default class ApiService extends moleculer.Service {
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -347,4 +362,106 @@ export default class ApiService extends moleculer.Service {
 		}
 		return Promise.resolve(ctx);
 	}
+	{{#if_eq httptransport "SOCKET"}}
+	started() {
+		this.logger.info('Starting socket.io server....');
+		this.io = new Server(this.server, {
+			cors: {
+				origin: '*',
+				methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+			},
+		});
+		const brokerNamespace: Socket = this.io.of('/brokercomponent');
+		const nodesNamespace: Socket = this.io.of('/nodescomponent');
+		const servicesNamespace: Socket = this.io.of('/servicescomponent');
+		this.io.on('connection', (socket: Socket) => {
+			this.logger.info(`Client connected to default via websocket ${socket.id}`);
+			// @ts-ignore
+			socket.on('call', ({ action, params, opts }, done: any) => {
+				this.logger.info(
+					`Received request from client to default namespace! Action: ${action}, Params: `,
+					params,
+				);
+				this.broker
+					.call(action, params, opts)
+					.then((res) => {
+						if (done) done(res);
+					})
+					.catch((err) => this.logger.error(err));
+			});
+			socket.on('disconnect', () => {
+				this.logger.info('Client disconnected from default namespace');
+			});
+		});
+
+		brokerNamespace.on('connection', (socket: Socket) => {
+			this.logger.info(`Client connected to broker via websocket ${socket.id}`);
+			brokerNamespace.emit(
+				'connected',
+				`Socket connected to broker namespace, ID is ${socket.id}`,
+			);
+			socket.on('call', ({ action, params, opts }, done: any) => {
+				this.logger.info(
+					`Received request from client to broker namespace! Action: ${action}, Params: `,
+					params,
+				);
+				this.broker
+					.call(action, params, opts)
+					.then((res) => {
+						if (done) done(res);
+					})
+					.catch((err) => this.logger.error(err));
+			});
+			socket.on('disconnect', () => {
+				this.logger.info('Client disconnected from broker namespace');
+			});
+		});
+
+		nodesNamespace.on('connection', (socket: Socket) => {
+			this.logger.info(`Client connected to nodes via websocket ${socket.id}`);
+			nodesNamespace.emit(
+				'connected',
+				`Socket connected to nodes namespace, ID is ${socket.id}`,
+			);
+			socket.on('call', ({ action, params, opts }, done: any) => {
+				this.logger.info(
+					`Received request from client to nodes namespace! Action: ${action}, Params: `,
+					params,
+				);
+				this.broker
+					.call(action, params, opts)
+					.then((res) => {
+						if (done) done(res);
+					})
+					.catch((err) => this.logger.error(err));
+			});
+			socket.on('disconnect', () => {
+				this.logger.info('Client disconnected from nodes namespace');
+			});
+		});
+
+		servicesNamespace.on('connection', (socket: Socket) => {
+			this.logger.info(`Client connected to services via websocket ${socket.id}`);
+			servicesNamespace.emit(
+				'connected',
+				`Socket connected to services namespace, ID is ${socket.id}`,
+			);
+			socket.on('call', ({ action, params, opts }, done: any) => {
+				this.logger.info(
+					`Received request from client to services namespace! Action: ${action}, Params: `,
+					params,
+				);
+				this.broker
+					.call(action, params, opts)
+					.then((res) => {
+						if (done) done(res);
+					})
+					.catch((err) => this.logger.error(err));
+			});
+			socket.on('disconnect', () => {
+				this.logger.info('Client disconnected from services namespace');
+			});
+		});
+	}
+	{{/if_eq}}
 }

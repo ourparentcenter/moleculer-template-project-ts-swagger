@@ -15,6 +15,7 @@ const MoleculerClientError = Errors.MoleculerClientError;
  */
 @Service({
 	name: 'guard',
+	version: 1,
 })
 class GuardService extends moleculer.Service {
 	/**

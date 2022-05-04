@@ -3,15 +3,15 @@
 		<fieldset v-for="item in requests" :key="item.id">
 			<legend class="shadow-11">
 				Action '
-				<code>{{ item.action }}</code
+				<code>{{{{raw-helper}}}}{{ item.action }}{{{{/raw-helper}}}}</code
 				>'
 			</legend>
 			<div class="content">
 				<div class="request">
 					<h4>Request:</h4>
 					<code>
-						{{ item.method || 'GET' }}
-						<a target="_blank" :href="item.rest">{{ item.rest }}</a>
+						{{{{raw-helper}}}}{{ item.method || 'GET' }}{{{{/raw-helper}}}}
+						<a target="_blank" :href="item.rest">{{{{raw-helper}}}}{{ item.rest }}{{{{/raw-helper}}}}</a>
 					</code>
 					<q-btn
 						color="secondary"
@@ -54,15 +54,15 @@
 				<div class="response" v-if="item.status">
 					<h4>
 						Response:
-						<q-badge :color="item.status < 400 ? 'green' : 'red'">{{
+						<q-badge :color="item.status < 400 ? 'green' : 'red'">{{{{raw-helper}}}}{{
 							item.status
-						}}</q-badge>
+						}}{{{{/raw-helper}}}}</q-badge>
 
-						<q-badge color="black" class="q-ml-sm">{{
+						<q-badge color="black" class="q-ml-sm">{{{{raw-helper}}}}{{
 							humanize(item.duration)
-						}}</q-badge>
+						}}{{{{/raw-helper}}}}</q-badge>
 					</h4>
-					<pre><code>{{ item.response }}</code></pre>
+					<pre><code>{{{{raw-helper}}}}{{ item.response }}{{{{/raw-helper}}}}</code></pre>
 				</div>
 			</div>
 		</fieldset>
@@ -75,7 +75,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { defineComponent, reactive } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
-import { axios } from 'boot/axios';
+{{#if_eq httptransport "AXIOS"}}
+import { axios } from '../boot/axios';
+{{/if_eq}}
+{{#if_eq httptransport "SOCKET"}}
+import { socketIO } from '../boot/socketIO';
+const socket = socketIO('http://localhost:3000/servicescomponent');
+let socketDisconnected = false;
+{{/if_eq}}
 
 let requests = reactive([
 	{

@@ -27,7 +27,7 @@ module.exports = {
 
 				// Verify token & restricted services
 				// Tip: For better performance, you can cache the response because it won't change in runtime.
-				await ctx.call('guard.check', { token, services: action.restricted });
+				await ctx.call('v1.guard.check', { token, services: action.restricted });
 
 				// Call the original handler
 				return await next(ctx);
