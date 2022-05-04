@@ -76,7 +76,40 @@ services:
 {{/if_eq}}
     networks:
       - internal
-{{#dbService}}
+
+  guard:
+      build:
+        context: .
+      image: {{projectName}}
+      env_file: docker-compose.env
+      environment:
+        SERVICES: guard
+  {{#hasDepends}}
+      depends_on:
+  {{/hasDepends}}
+  {{#if_eq transporter "NATS"}}
+        - nats
+  {{/if_eq}}
+  {{#redis}}
+        - redis
+  {{/redis}}
+  {{#if_eq transporter "MQTT"}}
+        - mqtt
+  {{/if_eq}}
+  {{#if_eq transporter "AMQP"}}
+        - rabbitmq
+  {{/if_eq}}
+  {{#if_eq transporter "AMQP10"}}
+        - activemq
+  {{/if_eq}}
+  {{#if_eq transporter "STAN"}}
+        - stan
+  {{/if_eq}}
+  {{#if_eq transporter "Kafka"}}
+        - zookeeper
+  {{/if_eq}}
+      networks:
+        - internal
 
   products:
     build:
@@ -111,6 +144,41 @@ services:
     networks:
       - internal
 
+  user:
+      build:
+        context: .
+      image: {{projectName}}
+      env_file: docker-compose.env
+      environment:
+        SERVICES: userService/user
+  {{#hasDepends}}
+      depends_on:
+  {{/hasDepends}}
+  {{#if_eq transporter "NATS"}}
+        - nats
+  {{/if_eq}}
+  {{#redis}}
+        - redis
+  {{/redis}}
+  {{#if_eq transporter "MQTT"}}
+        - mqtt
+  {{/if_eq}}
+  {{#if_eq transporter "AMQP"}}
+        - rabbitmq
+  {{/if_eq}}
+  {{#if_eq transporter "AMQP10"}}
+        - activemq
+  {{/if_eq}}
+  {{#if_eq transporter "STAN"}}
+        - stan
+  {{/if_eq}}
+  {{#if_eq transporter "Kafka"}}
+        - zookeeper
+  {{/if_eq}}
+      networks:
+        - internal
+
+{{#dbService}}
   mongo:
     image: mongo:4
     volumes:

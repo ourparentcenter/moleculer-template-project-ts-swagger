@@ -3,15 +3,15 @@ div.q-pa-md
 	q-table(title="Node Status" :rows="nodes" :columns="columns" row-key="name")
 		template(#header="props")
 			q-tr(:props="props")
-				q-th(v-for="col in props.cols" :key="col.name" :props="props") {{ col.label }}
+				q-th(v-for="col in props.cols" :key="col.name" :props="props") {{{{raw-helper}}}}{{ col.label }}{{{{/raw-helper}}}}
 		template(#body="props")
 			q-tr(:props="props")
-				q-td(key="id" :props="props") {{ props.row.id }}
-				q-td(key="type" :props="props") {{ props.row.client.type }}
+				q-td(key="id" :props="props") {{{{raw-helper}}}}{{ props.row.id }}{{{{/raw-helper}}}}
+				q-td(key="type" :props="props") {{{{raw-helper}}}}{{ props.row.client.type }}{{{{/raw-helper}}}}
 				q-td(key="version" :props="props")
-					q-badge(v-if="props.row.client.version" transparent color="black") {{ 'v' + props.row.client.version }}
-				q-td(key="ip" :props="props") {{ props.row.ipList[0] }}
-				q-td(key="hostname" :props="props") {{ props.row.hostname }}
+					q-badge(v-if="props.row.client.version" transparent color="black") {{{{raw-helper}}}}{{ 'v' + props.row.client.version }}{{{{/raw-helper}}}}
+				q-td(key="ip" :props="props") {{{{raw-helper}}}}{{ props.row.ipList[0] }}{{{{/raw-helper}}}}
+				q-td(key="hostname" :props="props") {{{{raw-helper}}}}{{ props.row.hostname }}{{{{/raw-helper}}}}
 				q-td(key="status" :props="props")
 					q-chip(
 						class="glossy"
@@ -19,8 +19,8 @@ div.q-pa-md
 						:color="props.row.available ? 'teal' : 'red'"
 						text-color="white"
 						:icon="props.row.available ? 'done' : 'priority_high'"
-					) {{ props.row.available ? 'Online' : 'Offline' }}
-				q-td(key="cpu" :props="props") {{ props.row.cpu != null ? Number(props.row.cpu).toFixed(0) + '%' : '-' }}
+					) {{{{raw-helper}}}}{{ props.row.available ? 'Online' : 'Offline' }}{{{{/raw-helper}}}}
+				q-td(key="cpu" :props="props") {{{{raw-helper}}}}{{ props.row.cpu != null ? Number(props.row.cpu).toFixed(0) + '%' : '-' }}{{{{/raw-helper}}}}
 					div.bar(
 						:style="{ width: props.row.cpu != null ? props.row.cpu + '%' : '0', backgroundColor: props.row.cpu >= '60' ? 'rgba(207,0,15,0.6)' : 'rgba(0,0,0,0.3)' }"
 					)
@@ -31,8 +31,14 @@ div.q-pa-md
 import { defineComponent, ref, onMounted } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 import { useQuasar } from 'quasar';
-import { axios } from 'boot/axios';
-
+{{#if_eq httptransport "AXIOS"}}
+import { axios } from '../boot/axios';
+{{/if_eq}}
+{{#if_eq httptransport "SOCKET"}}
+import { socketIO } from '../boot/socketIO';
+const socket = socketIO('http://localhost:3000/nodescomponent');
+let socketDisconnected = false;
+{{/if_eq}}
 const columns = [
 	{
 		name: 'id',
@@ -89,8 +95,9 @@ const columns = [
 ];
 
 export default defineComponent({
-	name: 'CompositionComponent',
+	name: 'NodesComponent',
 
+	{{#if_eq httptransport "AXIOS"}}
 	setup() {
 		const $q = useQuasar();
 		const nodes = ref([]);
@@ -144,6 +151,77 @@ export default defineComponent({
 
 		return { nodes, columns };
 	},
+	{{/if_eq}}
+	{{#if_eq httptransport "SOCKET"}}
+	setup() {
+		const $q = useQuasar();
+		const nodes = ref([]);
+		let interval: unknown = undefined;
+		socket.on('connected', (res: string) => {
+			$q.notify({
+				color: 'positive',
+				position: 'top',
+				message: res,
+			})
+		});
+		socket.on('connect_error',
+			() => {
+				$q.notify({
+					color: 'negative',
+					position: 'top',
+					message: 'Loading failed',
+					icon: 'report_problem',
+				})
+			}
+		);
+
+		socket.emit(
+			'call',
+			{ action: '$node.list' },
+			(res: []) => {
+				res.sort((a: Record<string, string>, b: Record<string, string>) =>
+					a.id.localeCompare(b.id),
+				);
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				nodes.value = res;
+			}
+		);
+
+		function updateNodeList() {
+			socket.emit('call', {
+				action: '$node.list'
+			}, (res: []) => {
+				res.sort((a: Record<string, string>, b: Record<string, string>) =>
+					a.id.localeCompare(b.id),
+				);
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				nodes.value = res;
+			});
+		}
+
+		onMounted(() => {
+			if (socketDisconnected) {
+				socket.connect();
+				socketDisconnected = false;
+			}
+			interval = <never>setInterval(() => {
+				updateNodeList();
+			}, 2000);
+		});
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		onBeforeRouteLeave((to: any, from: any, next: any) => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			clearInterval(interval);
+			socket.disconnect();
+			socketDisconnected = true;
+			next();
+		});
+
+		return { nodes, columns };
+	},
+	{{/if_eq}}
 });
 </script>
 

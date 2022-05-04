@@ -24,6 +24,11 @@
 ## Install
 To install use the [moleculer-cli](https://github.com/moleculerjs/moleculer-cli) tool.
 
+*** Before moleculer-cli can be used with this template it will need to be patched, at least until it is updated [bug #63](https://github.com/moleculerjs/moleculer-cli/issues/63)
+
+To patch navigate to the global moleculer-cli node modules folder => src => init => index.js
+add `Handlebars.registerHelper("raw-helper", (options) => options.fn());` to the Register handlebars helpers section and save. 
+
 ```bash
 $ moleculer init ourparentcenter/moleculer-template-project-ts-swagger#main my-project
 ```
@@ -70,10 +75,16 @@ Create 'moleculertemplatetest' folder...
 - `npm run dc:logs`: Watch & follow the container logs
 - `npm run dc:down`: Stop the stack with Docker Compose
 
+## REPL in Docker
+Docker images now have moleculer-repl added to them. To use, open docker cli of a container, like api container, and run the following command `moleculer --ns {enter your namespace here}`, e.g. `moleculer --ns test-template2-docker`. This will start a new broker serviece node and add it to your existing nodes so that you can use the repl commands in docker.
+
+## Current issues
+If using swagger-stats, running npm install will fail due to swagger-stats dependency of prom-client, which is `"prom-client": ">= 10 <= 13",` and we are using 14.0.1. Until this is changed in swagger-stats either use yarn or remove prom-client from package.json, npm install, then add it back and do npm install.
+
 ## License
 moleculer-template-project-ts-swagger is available under the [MIT license](https://tldrlegal.com/license/mit-license).
 
 ## Contact
-Copyright (c) 2021 Our Parent Center
+Copyright (c) 2022 Our Parent Center
 
 [![@moleculerjs](https://img.shields.io/badge/github-moleculerjs-green.svg)](https://github.com/moleculerjs) [![@MoleculerJS](https://img.shields.io/badge/twitter-MoleculerJS-blue.svg)](https://twitter.com/MoleculerJS)

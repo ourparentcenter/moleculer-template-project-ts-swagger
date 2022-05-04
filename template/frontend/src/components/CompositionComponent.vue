@@ -1,14 +1,14 @@
 <template>
   <div>
-    <p>{{ title }}</p>
+    <p>{{{{raw-helper}}}}{{ title }}{{{{/raw-helper}}}}</p>
     <ul>
       <li v-for="todo in todos" :key="todo.id" @click="increment">
-        {{ todo.id }} - {{ todo.content }}
+        {{{{raw-helper}}}}{{ todo.id }}{{{{/raw-helper}}}} - {{{{raw-helper}}}}{{ todo.content }}{{{{/raw-helper}}}}
       </li>
     </ul>
-    <p>Count: {{ todoCount }} / {{ meta.totalCount }}</p>
-    <p>Active: {{ active ? 'yes' : 'no' }}</p>
-    <p>Clicks on todos: {{ clickCount }}</p>
+    <p>Count: {{{{raw-helper}}}}{{ todoCount }}{{{{/raw-helper}}}} / {{{{raw-helper}}}}{{ meta.totalCount }}{{{{/raw-helper}}}}</p>
+    <p>Active: {{{{raw-helper}}}}{{ active ? 'yes' : 'no' }}{{{{/raw-helper}}}}</p>
+    <p>Clicks on todos: {{{{raw-helper}}}}{{ clickCount }}{{{{/raw-helper}}}}</p>
   </div>
 </template>
 
