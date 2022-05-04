@@ -81,6 +81,9 @@ Docker images now have moleculer-repl added to them. To use, open docker cli of 
 ## Current issues
 If using swagger-stats, running npm install will fail due to swagger-stats dependency of prom-client, which is `"prom-client": ">= 10 <= 13",` and we are using 14.0.1. Until this is changed in swagger-stats either use yarn or remove prom-client from package.json, npm install, then add it back and do npm install.
 
+If you found this project useful, please buy me a beer!
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?business=NNWZXRYD4FMNL&no_recurring=0&item_name=If+you+found+this+project+useful%2C+please+by+me+a+beer+to+show+your+gratitude.+%5E_%5E&currency_code=USD)
+
 ## License
 moleculer-template-project-ts-swagger is available under the [MIT license](https://tldrlegal.com/license/mit-license).
 
