@@ -28,6 +28,13 @@ To install use the [moleculer-cli](https://github.com/moleculerjs/moleculer-cli)
 ```bash
 $ moleculer init ourparentcenter/moleculer-template-project-ts-swagger#main my-project
 ```
+Then be sure to update the .env file with the correct address to your transporter system if using one.
+```
+e.g.
+TRANSPORTER=stan://stan:4222
+to
+TRANSPORTER=stan://localhost:4222
+```
 
 ## Prompts
 ```
