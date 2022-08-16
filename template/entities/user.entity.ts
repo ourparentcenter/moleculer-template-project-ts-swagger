@@ -19,7 +19,7 @@ export interface IUser extends IUserBase {
 @JsonObject('User')
 export class UserEntity implements IUser {
 	@JsonProperty('_id', String, true)
-	public _id = Config.DB_USER.dialect === 'local' ? Types.ObjectId() : null;
+	public _id = Config.DB_USER.dialect === 'local' ? new Types.ObjectId() : null;
 
 	@JsonProperty('login', String)
 	public login = '';

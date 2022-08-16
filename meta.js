@@ -234,6 +234,7 @@ module.exports = function (values) {
 			'services/products.service.ts': 'dbService',
 			'mixins/dbmixins/db.mixin.ts': 'dbService',
 			'mixins/openapi/openapi.mixin.ts': 'swagger',
+			'mixins/swstats/index.ts': 'swaggerstats',
 			'test/mixins/db.mixin.spec.ts': 'dbService',
 			'test/integration/products.service.spec.ts': 'dbService',
 			'test/unit/services/products.spec.ts': 'dbService',

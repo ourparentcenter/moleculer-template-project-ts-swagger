@@ -28,9 +28,9 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
 		"@types/bcryptjs": "^2.4.2",
-		"@types/jest": "^27.4.1",
+		"@types/jest": "^28.1.7",
 		"@types/mkdirp": "^1.0.2",
-		"@types/node": "^17.0.31",
+		"@types/node": "^18.7.6",
     {{#apiGW}}
     "@types/cookie-parser": "^1.4.3",
     {{/apiGW}}
@@ -42,30 +42,30 @@
 		"@types/swagger-ui-dist": "^3.30.1",
     {{/swagger}}
     {{#swaggerstats}}
-    "@types/swagger-stats": "^0.95.4",
+    "@types/swagger-stats": "^0.95.5",
     {{/swaggerstats}}
     "bcrypt": "^5.0.1",
     "chokidar": "^3.5.3",
     {{#lint}}
-    "eslint": "^8.14.0",
+    "eslint": "^8.22.0",
+    "eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-import": "^2.26.0",
-		"eslint-config-prettier": "^8.5.0",
-		"eslint-plugin-prettier": "^4.0.0",
-		"@typescript-eslint/eslint-plugin": "^5.22.0",
-		"@typescript-eslint/parser": "^5.22.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"@typescript-eslint/eslint-plugin": "^5.33.1",
+		"@typescript-eslint/parser": "^5.33.1",
 		"eslint-plugin-prefer-arrow": "^1.2.3",
     {{/lint}}
-    "jest": "^27.0.6",
-    "jest-cli": "^27.0.6",
-    "moleculer-repl": "^0.7.0",
+    "jest": "^28.1.3",
+    "jest-cli": "^28.1.3",
+    "moleculer-repl": "^0.7.2",
     {{#apiGW}}
     "open": "^8.4.0",
     {{/apiGW}}
-    "prettier": "^2.6.2",
-		"tsconfig-paths": "^4.0.0",
-		"ts-jest": "^27.1.4",
+    "prettier": "^2.7.1",
+		"tsconfig-paths": "^4.1.0",
+		"ts-jest": "^28.0.8",
     {{#if_eq watcher "TSNODE"}}
-    "ts-node": "^10.7.0"
+    "ts-node": "^10.9.1"
     {{/if_eq}}
     {{#if_eq watcher "TSNODEDEV"}}
     "ts-node-dev": "^1.1.8"
@@ -73,7 +73,7 @@
   },
   "dependencies": {
     {{#if_eq transporter "NATS"}}
-    "nats": "^2.6.1",
+    "nats": "^2.7.1",
     {{/if_eq}}
     {{#if_eq transporter "MQTT"}}
     "mqtt": "^4.2.8",
@@ -95,11 +95,12 @@
     "redlock": "^4.2.0",
     {{/redis}}
     {{#swagger}}
-    "swagger-jsdoc": "^6.2.1",
-		"swagger-ui-dist": "^4.10.3",
+    "swagger-jsdoc": "^6.2.5",
+		"swagger-ui-dist": "^4.13.2",
+    "replace-in-file": "^6.3.5",
     {{/swagger}}
     {{#swaggerstats}}
-    "openapi-types": "^11.0.0",
+    "openapi-types": "^12.0.0",
 		"swagger-stats": "^0.99.2",
 		"prom-client": "^14.0.1",
     {{/swaggerstats}}
@@ -107,36 +108,36 @@
     {{#apiGW}}
     "cookie-parser": "^1.4.6",
     {{/apiGW}}
-    "core-js": "^3.22.4",
+    "core-js": "^3.24.1",
 		"cross-env": "^7.0.3",
 		"csv-parse": "^4.16.0",
-		"dotenv": "^16.0.0",
+		"dotenv": "^16.0.1",
 		"dotenv-flow": "^3.2.0",
 		"dotenv-flow-cli": "^1.0.0",
     {{#apiGW}}
-    "helmet": "^5.0.2",
+    "helmet": "^5.1.1",
     {{/apiGW}}
-    "json2typescript": "^1.4.1",
+    "json2typescript": "^1.5.1",
 		"jsonwebtoken": "^8.5.1",
 		"lodash": "^4.17.21",
-		"moleculer": "^0.14.21",
-		"moleculer-db": "^0.8.17",
+		"moleculer": "^0.14.23",
+		"moleculer-db": "^0.8.19",
     {{#dbService}}
-    "moleculer-db-adapter-mongo": "^0.4.14",
-		"moleculer-db-adapter-mongoose": "^0.8.12",
+    "moleculer-db-adapter-mongo": "^0.4.15",
+		"moleculer-db-adapter-mongoose": "^0.8.14",
     {{/dbService}}
     "@ourparentcenter/moleculer-decorators-extended": "^1.1.1",
     {{#apiGW}}
     "moleculer-web": "^0.10.4",
     {{/apiGW}}
-    "mongodb": "^4.5.0",
-		"mongoose": "^5.13.6",
+    "mongodb": "^4.8.1",
+		"mongoose": "^6.5.2",
 		"reflect-metadata": "^0.1.13",
     {{#if_eq httptransport "SOCKET"}}
     "socket.io": "^4.1.3",
     {{/if_eq}}
     "ts-results": "^3.3.0",
-    "typescript": "^4.6.4"
+    "typescript": "^4.7.4"
 },
   "engines": {
     "node": ">= 16.x.x"

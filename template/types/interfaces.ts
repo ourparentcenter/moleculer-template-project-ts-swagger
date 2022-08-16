@@ -1,13 +1,13 @@
 import { IncomingMessage } from 'http';
 import { ActionSchema, ActionParamSchema } from 'moleculer';
 import { ActionOptions } from '@ourparentcenter/moleculer-decorators-extended';
-import { Schema, SchemaType, SchemaTypeOpts, Types } from 'mongoose';
+import { Schema, SchemaType, SchemaTypeOptions, Types } from 'mongoose';
 import { UserRole } from './user';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export type definitionType<T> = (
 	collection?: string,
-) => Record<keyof Required<T>, SchemaTypeOpts<any> | Schema | SchemaType>;
+) => Record<keyof Required<T>, SchemaTypeOptions<any> | Schema | SchemaType>;
 
 export type ObjectId = Types.ObjectId | string;
 export type ObjectIdNull = ObjectId | null;
