@@ -19,18 +19,11 @@ import {
 	UserTokenParams,
 	UserAuthMeta,
 } from '../../types';
-{{#swaggerstats}}import swStats from 'swagger-stats';
-import swaggerSpec = require('../../swagger.json');
-const tlBucket = 60000;
-const swMiddleware = swStats.getMiddleware({
-	name: 'swagger-stats',
-	timelineBucketDuration: tlBucket,
-	uriPath: '/dashboard',
-	swaggerSpec: swaggerSpec,
-}); {{/swaggerstats}}
+{{#swaggerstats}} import { swMiddleware, swStats } from '@Mixins/swstats'; {{/swaggerstats}}
 {{#if_eq httptransport "SOCKET"}}
 import { Server, Socket } from 'socket.io';
 {{/if_eq}}
+
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  * @typedef {import('http').IncomingMessage} IncomingRequest Incoming HTTP Request
@@ -42,6 +35,25 @@ import { Server, Socket } from 'socket.io';
 	mixins: [ApiGateway{{#swagger}}, openAPIMixin(){{/swagger}}],
 	// More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
 	settings: {
+		// rate limiter default for all routes
+		rateLimit: {
+			// How long to keep record of requests in memory (in milliseconds).
+			// Defaults to 60000 (1 min)
+			window: 60 * 1000,
+
+			// Max number of requests during window. Defaults to 30
+			limit: 30,
+
+			// Set rate limit headers to response. Defaults to false
+			headers: true,
+
+			// Function used to generate keys. Defaults to:
+			key: (req: RequestMessage) => {
+				return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+			},
+			//StoreFactory: CustomStore
+		},
+
 		port: Config.PORT || 3000,
 
 		use: [
@@ -62,10 +74,11 @@ import { Server, Socket } from 'socket.io';
 						'upgrade-insecure-requests': [],
 					},
 				},
-			})
+			}),
 		],
 		routes: [
 			{
+				// auth endpoint
 				path: '/auth',
 				authorization: false,
 				authentication: false,
@@ -73,8 +86,27 @@ import { Server, Socket } from 'socket.io';
 				aliases: {
 					'POST /login': 'v1.user.login',
 				},
+				// rate limit override for route
+				rateLimit: {
+					// How long to keep record of requests in memory (in milliseconds).
+					// Defaults to 60000 (1 min)
+					window: 60 * 1000,
+
+					// Max number of requests during window. Defaults to 30
+					limit: 30,
+
+					// Set rate limit headers to response. Defaults to false
+					headers: true,
+
+					// Function used to generate keys. Defaults to:
+					key: (req: RequestMessage) => {
+						return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+					},
+					//StoreFactory: CustomStore
+				},
 			},
 			{
+				// for internal services communication only
 				path: '/admin',
 				whitelist: ['$node.*', 'api.listAliases'],
 				authorization: true,
@@ -92,6 +124,7 @@ import { Server, Socket } from 'socket.io';
 				},
 			},
 			{
+				// api dashboard thorugh swagger stats
 				path: '/api',
 				cors: {
 					origin: ['*'],
@@ -104,6 +137,7 @@ import { Server, Socket } from 'socket.io';
 					'**',
 				],
 				// Route-level Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
+				// usign swagger stats dachboard
 				use: [{{#swaggerstats}}swMiddleware{{/swaggerstats}}],
 				// Enable/disable parameter merging method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Disable-merging
 				mergeParams: true,
@@ -119,8 +153,9 @@ import { Server, Socket } from 'socket.io';
 				autoAliases: true,
 
 				aliases: {
-					{{#swaggerstats}}'GET /'(req: any, res: any) {
-						// console.log(swStats.getPromClient());
+					{{#swaggerstats}}
+					// swagger stats dashboard route at root
+					'GET /'(req: any, res: any) {
 						res.statusCode = 302;
 						res.setHeader('Location', '/api/dashboard/');
 						return res.end();
@@ -132,34 +167,35 @@ import { Server, Socket } from 'socket.io';
 					'GET /metrics'(req: any, res: any) {
 						res.setHeader('Content-Type', 'application/json');
 						return res.end(JSON.stringify(swStats.getPromStats()));
-					},{{/swaggerstats}}
+					},
+					{{/swaggerstats}}
 				},
 				/**
-			 * Before call hook. You can check the request.
-			 * @param {Context} ctx
-			 * @param {Object} route
-			 * @param {IncomingMessage} req
-			 * @param {ServerResponse} res
-			 * @param {Object} data
-			onBeforeCall(ctx: Context<any,{userAgent: string}>,
-				route: object, req: IncomingMessage, res: ServerResponse) {
-				Set request headers to context meta
-				ctx.meta.userAgent = req.headers["user-agent"];
-			},
+				 * Before call hook. You can check the request.
+				 * @param {Context} ctx
+				 * @param {Object} route
+				 * @param {IncomingMessage} req
+				 * @param {ServerResponse} res
+				 * @param {Object} data
+				onBeforeCall(ctx: Context<any,{userAgent: string}>,
+					route: object, req: IncomingMessage, res: ServerResponse) {
+					Set request headers to context meta
+					ctx.meta.userAgent = req.headers["user-agent"];
+				},
 				*/
 
 				/**
-			 * After call hook. You can modify the data.
-			 * @param {Context} ctx
-			 * @param {Object} route
-			 * @param {IncomingMessage} req
-			 * @param {ServerResponse} res
-			 * @param {Object} data
-			 *
-			 onAfterCall(ctx: Context, route: object, req: IncomingMessage, res: ServerResponse, data: object) {
-			// Async function which return with Promise
-			return doSomething(ctx, res, data);
-		},
+				 * After call hook. You can modify the data.
+				 * @param {Context} ctx
+				 * @param {Object} route
+				 * @param {IncomingMessage} req
+				 * @param {ServerResponse} res
+				 * @param {Object} data
+				 *
+				 onAfterCall(ctx: Context, route: object, req: IncomingMessage, res: ServerResponse, data: object) {
+					// Async function which return with Promise
+					return doSomething(ctx, res, data);
+				},
 				*/
 
 				// Calling options. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Calling-options

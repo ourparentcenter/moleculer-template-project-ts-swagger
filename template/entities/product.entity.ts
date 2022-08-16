@@ -12,7 +12,7 @@ export interface IProduct {
 @JsonObject('Product')
 export class ProductEntity implements IProduct {
 	@JsonProperty('_id', String, true)
-	public _id = Config.DB_PRODUCT.dialect === 'local' ? Types.ObjectId() : null;
+	public _id = Config.DB_PRODUCT.dialect === 'local' ? new Types.ObjectId() : null;
 
 	@JsonProperty('name', String)
 	public name = '';

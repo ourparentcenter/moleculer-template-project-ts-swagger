@@ -12,6 +12,10 @@ import _ from 'lodash';
 import swaggerJSDoc from 'swagger-jsdoc';
 import * as pkg from '../../package.json';
 import { Config } from '../../common';
+import { RequestMessage } from 'types';
+import { replaceInFile } from 'replace-in-file';
+// import swJSON from '../../swagger.json';
+import { isEqual } from 'lodash';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MoleculerServerError = Errors.MoleculerServerError;
 
@@ -28,7 +32,6 @@ export const openAPIMixin = (mixinOptions?: any) => {
 	});
 
 	let shouldUpdateSchema = true;
-	let schema: any = null;
 
 	return {
 		events: {
@@ -91,63 +94,119 @@ export const openAPIMixin = (mixinOptions?: any) => {
 		},
 
 		async created() {
-			const pathToSwaggerUi = SwaggerUI.absolutePath();
-			const indexContent = readFileSync(`${pathToSwaggerUi}/index.html`)
-				.toString()
-				.replace(
-					// eslint-disable-next-line max-len
+			const pathToSwaggerUi = `${SwaggerUI.absolutePath()}/swagger-initializer.js`;
+			const options = {
+				encoding: 'utf8',
+				files: pathToSwaggerUi,
+				from: [
 					/(?:(?:https?|undefined):(\/\/|undefined?)|www\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/gim,
-					`${Config.BASE_URL}:${Config.BASE_PORT}/openapi/swagger.json`,
-				)
-				.replace('layout: "StandaloneLayout"', '');
-			writeFileSync(`${pathToSwaggerUi}/index.html`, indexContent);
+					/StandaloneLayout/g,
+				],
+				to: [`${Config.BASE_URL}:${Config.BASE_PORT}/openapi/swagger.json`, 'BaseLayout'],
+			};
+			try {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				this.logger.info(
+					`♻ Testing for matches to modify in swagger initalize at ${pathToSwaggerUi}/swagger-initializer.js`,
+				);
+				const dryRun = replaceInFile({ dry: true, countMatches: true, ...options });
+				dryRun
+					.then((results) => {
+						if (results[0]['hasChanged'] == true) {
+							// @ts-ignore
+							this.logger.info(
+								`♻ Found matches in swagger initalize, updating file...`,
+							);
+							replaceInFile(options)
+								.then(
+									// @ts-ignore
+									this.logger.info(
+										`♻ Updated swagger initalize at ${pathToSwaggerUi}/swagger-initializer.js`,
+									),
+								)
+								.catch((err) =>
+									// @ts-ignore
+									this.logger.error(
+										`♻ Error updating swagger initalize at ${pathToSwaggerUi}/swagger-initializer.js: ${err}`,
+									),
+								);
+						} else {
+							// @ts-ignore
+							this.logger.info(
+								'♻ No changes needed, swagger initialize has the correct values',
+							);
+						}
+					})
+					.catch((err) =>
+						// @ts-ignore
+						this.logger.error(`♻ Error testing for matches: ${err}`),
+					);
+			} catch (err) {
+				// @ts-ignore
+				this.logger.error(err);
+			}
+
 			const route = _.defaultsDeep(mixinOptions.routeOptions, {
 				use: [ApiGateway.serveStatic(SwaggerUI.absolutePath())],
+				// rate lime for swagger api doc route
+				rateLimit: {
+					// How long to keep record of requests in memory (in milliseconds).
+					// Defaults to 60000 (1 min)
+					window: 60 * 1000,
+
+					// Max number of requests during window. Defaults to 30
+					limit: 5,
+
+					// Set rate limit headers to response. Defaults to false
+					headers: true,
+
+					// Function used to generate keys. Defaults to:
+					key: (req: RequestMessage) => {
+						return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+					},
+					//StoreFactory: CustomStore
+				},
 
 				aliases: {
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore
-					'GET /swagger.json'(req, res) {
-						// Send back the generated schema
-						if (shouldUpdateSchema || !schema) {
-							// Create new server & regenerate GraphQL schema
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					'GET /swagger.json'(req: any, res: any) {
+						try {
+							const swJSON = require('../../swagger.json');
+							const ctx = req.$ctx;
+							ctx.meta.responseType = 'application/json';
 							// @ts-ignore
-							this.logger.info('♻ Regenerate OpenAPI/Swagger schema...');
-
-							try {
+							const generatedScheme = this.generateOpenAPISchema();
+							// @ts-ignore
+							this.logger.info('♻ Checking if Swagger JSON schema needs updating...');
+							if (isEqual(swJSON, generatedScheme)) {
+								// @ts-ignore
+								this.logger.info(
+									'♻ No changes needed, swagger json schema has the correct values',
+								);
 								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 								// @ts-ignore
-								schema = this.generateOpenAPISchema();
-
-								shouldUpdateSchema = false;
-
-								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								return this.sendResponse(req, res, generatedScheme);
+							} else {
 								// @ts-ignore
-								this.logger.debug(schema);
-								if (Config.NODE_ENV !== 'production') {
-									writeFileSync(
-										'./swagger.json',
-										JSON.stringify(schema, null, 4),
-										'utf8',
-									);
-								}
-							} catch (err) {
-								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								this.logger.info(
+									'♻ Swagger JSON schema needs updating, updating file...',
+								);
+								writeFileSync(
+									'./swagger.json',
+									JSON.stringify(generatedScheme, null, 4),
+									'utf8',
+								);
 								// @ts-ignore
-								this.logger.warn(err);
-								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								this.logger.info(`♻ Updated swagger JSON`);
 								// @ts-ignore
-								this.sendError(req, res, err);
+								return this.sendResponse(req, res, generatedScheme);
 							}
+						} catch (err) {
+							// @ts-ignore
+							this.logger.error(`♻ Error updating swagger JSOn schema: ${err}`);
 						}
-
-						const ctx = req.$ctx;
-						ctx.meta.responseType = 'application/json';
-
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore
-						return this.sendResponse(req, res, schema);
 					},
 				},
 
@@ -164,7 +223,7 @@ export const openAPIMixin = (mixinOptions?: any) => {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			this.logger.info(
-				`♻ OpenAPI Docs server is available at ${mixinOptions.routeOptions.path}`,
+				`♻ OpenAPI swagger Docs server is available at ${mixinOptions.routeOptions.path}`,
 			);
 		},
 	};
