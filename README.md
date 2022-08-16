@@ -19,15 +19,11 @@
 - Configuration for development/production/testing using environment variables
 - Optional Swagger embedded with demo api and jsdoc http://localhost:3000/openapi
 - Optionall Swagger-Stats with dashboaed at http://localhost:3000/api
+- Auto generation and regeneration of swagger.json spec, needed for swager-stats
 
 
 ## Install
 To install use the [moleculer-cli](https://github.com/moleculerjs/moleculer-cli) tool.
-
-*** Before moleculer-cli can be used with this template it will need to be patched, at least until it is updated [bug #63](https://github.com/moleculerjs/moleculer-cli/issues/63)
-
-To patch navigate to the global moleculer-cli node modules folder => src => init => index.js
-add `Handlebars.registerHelper("raw-helper", (options) => options.fn());` to the Register handlebars helpers section and save. 
 
 ```bash
 $ moleculer init ourparentcenter/moleculer-template-project-ts-swagger#main my-project
@@ -60,6 +56,9 @@ Downloading template...
 Create 'moleculertemplatetest' folder...
 ? Would you like to run 'npm install'? Yes
 ```
+
+## swagger
+Swagger has been updated to use the swagger initialize file in swagger-dist. This is a change from previous versions of swagger-dist where the html file was updated and held the js code for swagger initialize.
 
 ## NPM scripts
 - `npm run dev`: Start development mode (load all services locally without transporter with hot-reload & REPL)
