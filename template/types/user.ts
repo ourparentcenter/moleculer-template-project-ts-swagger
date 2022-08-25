@@ -4,7 +4,8 @@ import { IUser } from '../entities';
 import { ApiGatewayMeta } from './interfaces';
 
 export interface UserServiceSettingsOptions extends DbServiceSettings {
-	rest: '/v1/user';
+	rest?: string;
+	// rest?: '/v1/user';
 	JWT_SECRET: string;
 	fields: (keyof Required<IUser>)[];
 	populates?: any;

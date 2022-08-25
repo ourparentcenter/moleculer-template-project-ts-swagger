@@ -48,7 +48,7 @@ const brokerConfig: BrokerOptions = {
 	// Enable/disable logging or use custom logger. More info: https://moleculer.services/docs/0.14/logging.html
 	// Available logger types: "Console", "File", "Pino", "Winston", "Bunyan", "debug", "Log4js", "Datadog"
 	logger: {
-		type: Config.LOGGERTYPE /* || 'Console' */,
+		type: Config.LOGGERTYPE || 'Console',
 		options: {
 			// Using colors on the output
 			colors: JSON.parse(Config.LOGGERCOLORS) || true,
@@ -64,7 +64,7 @@ const brokerConfig: BrokerOptions = {
 	},
 	// Default log level for built-in console logger. It can be overwritten in logger options above.
 	// Available values: trace, debug, info, warn, error, fatal
-	logLevel: Config.LOGLEVEL,
+	logLevel: Config.LOGLEVEL || 'info',
 
 	// Define transporter.
 	// More info: https://moleculer.services/docs/0.14/networking.html
@@ -79,35 +79,35 @@ const brokerConfig: BrokerOptions = {
 	// Define a serializer.
 	// Available values: "JSON", "Avro", "ProtoBuf", "MsgPack", "Notepack", "Thrift".
 	// More info: https://moleculer.services/docs/0.14/networking.html#Serialization
-	serializer: Config.SERIALIZER,
+	serializer: Config.SERIALIZER || 'JSONSerializer',
 
 	// Number of milliseconds to wait before reject a request with a RequestTimeout error. Disabled: 0
-	requestTimeout: Config.REQUEST_TIMEOUT, // Config.REQUEST_TIMEOUT
+	requestTimeout: JSON.parse(Config.REQUEST_TIMEOUT) || 0, // Config.REQUEST_TIMEOUT
 
 	// Retry policy settings. More info: https://moleculer.services/docs/0.14/fault-tolerance.html#Retry
 	retryPolicy: {
 		// Enable feature
-		enabled: Config.RETRYPOLICY,
+		enabled: JSON.parse(Config.RETRYPOLICY) || false,
 		// Count of retries
-		retries: Config.RETRIES,
+		retries: JSON.parse(Config.RETRIES) || 5,
 		// First delay in milliseconds.
-		delay: Config.RETRYDELAY,
+		delay: JSON.parse(Config.RETRYDELAY) || 100,
 		// Maximum delay in milliseconds.
-		maxDelay: Config.RETRYMAXDELAY,
+		maxDelay: JSON.parse(Config.RETRYMAXDELAY) || 2000,
 		// Backoff factor for delay. 2 means exponential backoff.
-		factor: Config.RETRYFACTOR,
+		factor: JSON.parse(Config.RETRYFACTOR) || 2,
 		// A function to check failed requests.
 		check: (err: Error): boolean =>
 			err && err instanceof MoleculerRetryableError && !!err.retryable,
 	},
 
 	// Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
-	maxCallLevel: Config.MAXCALLLEVEL,
+	maxCallLevel: JSON.parse(Config.MAXCALLLEVEL) || 0,
 
 	// Number of seconds to send heartbeat packet to other nodes.
-	heartbeatInterval: Config.HEARTBEATINTERVAL,
+	heartbeatInterval: JSON.parse(Config.HEARTBEATINTERVAL) || 5,
 	// Number of seconds to wait before setting node to unavailable status.
-	heartbeatTimeout: Config.HEARTBEATTIMEOUT,
+	heartbeatTimeout: JSON.parse(Config.HEARTBEATTIMEOUT) || 15,
 
 	// Cloning the params of context if enabled. High performance impact, use it with caution!
 	contextParamsCloning: JSON.parse(Config.CTXPARAMSCLONING) || false,
@@ -117,7 +117,7 @@ const brokerConfig: BrokerOptions = {
 		// Enable feature
 		enabled: JSON.parse(Config.TRACKING_ENABLED) || false,
 		// Number of milliseconds to wait before shuting down the process.
-		shutdownTimeout: Config.TRACKINGSHUTDOWNTIME,
+		shutdownTimeout: JSON.parse(Config.TRACKINGSHUTDOWNTIME) * 1000,
 	},
 
 	// Disable built-in request & emit balancer. (Transporter must support it, as well.). More info: https://moleculer.services/docs/0.14/networking.html#Disabled-balancer
@@ -137,13 +137,13 @@ const brokerConfig: BrokerOptions = {
 		// Enable feature
 		enabled: JSON.parse(Config.BREAKER_ENABLED) || false,
 		// Threshold value. 0.5 means that 50% should be failed for tripping.
-		threshold: Config.BREAKERTHRESHOLD || 0.5,
+		threshold: JSON.parse(Config.BREAKERTHRESHOLD) || 0.5,
 		// Minimum request count. Below it, CB does not trip.
-		minRequestCount: Config.BREAKERMINREQCOUNT || 20,
+		minRequestCount: JSON.parse(Config.BREAKERMINREQCOUNT) || 20,
 		// Number of seconds for time window.
-		windowTime: Config.WINDOWTIME || 60,
+		windowTime: JSON.parse(Config.WINDOWTIME) || 60,
 		// Number of milliseconds to switch from open to half-open state
-		halfOpenTime: Config.HALFOPENTIME || 10 * 1000,
+		halfOpenTime: JSON.parse(Config.HALFOPENTIME) * 1000,
 		// A function to check failed requests.
 		check: (err: Error): boolean =>
 			err && err instanceof MoleculerRetryableError && err.code >= 500,
@@ -154,9 +154,9 @@ const brokerConfig: BrokerOptions = {
 		// Enable feature.
 		enabled: JSON.parse(Config.BULKHEAD_ENABLED) || false,
 		// Maximum concurrent executions.
-		concurrency: Config.CONCURRENCY || 10,
+		concurrency: JSON.parse(Config.CONCURRENCY) || 10,
 		// Maximum size of queue
-		maxQueueSize: Config.MAXQUEUESIZE || 100,
+		maxQueueSize: JSON.parse(Config.MAXQUEUESIZE) || 100,
 	},
 
 	// Enable action & event parameter validation. More info: https://moleculer.services/docs/0.14/validating.html
@@ -199,14 +199,14 @@ const brokerConfig: BrokerOptions = {
 
 	// Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
 	metrics: {
-		enabled: Config.METRICS_ENABLED,
+		enabled: JSON.parse(Config.METRICS_ENABLED) || false,
 		// Available built-in reporters: "Console", "CSV", "Event", "Prometheus", "Datadog", "StatsD"
 		reporter: {
-			type: Config.METRICS_TYPE,
+			type: Config.METRICS_TYPE || undefined,
 			{{#if_eq reporter "Console"}}
 			options: {
 				// HTTP port
-				port: Config.METRICS_PORT || 3030,
+				port: JSON.parse(Config.METRICS_PORT) || 3030,
 				// HTTP URL path
 				path: Config.METRICS_PATH || '/metrics',
 				// Default labels which are appended to all metrics labels
@@ -276,7 +276,7 @@ const brokerConfig: BrokerOptions = {
 			{{#if_eq reporter "Prometheus"}}
 			options: {
 				// HTTP port
-				port: Config.METRICS_PORT || 3030,
+				port: JSON.parse(Config.METRICS_PORT) || 3030,
 				// HTTP URL path
 				path: Config.METRICS_PATH || '/metrics',
 				// Default labels which are appended to all metrics labels
@@ -291,7 +291,7 @@ const brokerConfig: BrokerOptions = {
 				// Server host
 				host: 'localhost',
 				// Server port
-				port: Config.METRICS_PORT || 8125,
+				port: JSON.parse(Config.METRICS_PORT) || 8125,
 				// Maximum payload size.
 				maxPayloadSize: 1300
 			},
@@ -301,7 +301,7 @@ const brokerConfig: BrokerOptions = {
 
 	// Enable built-in tracing function. More info: https://moleculer.services/docs/0.14/tracing.html
 	tracing: {
-		enabled: Config.TRACING_ENABLED,
+		enabled: JSON.parse(Config.TRACING_ENABLED) || false,
 		// Available built-in exporters: "Console", "Datadog", "Event", "EventLegacy", "Jaeger", "Zipkin"
 		exporter: {
 			type: Config.TRACING_TYPE, // Console exporter is only for development!
@@ -312,9 +312,9 @@ const brokerConfig: BrokerOptions = {
 				// Using colors
 				colors: JSON.parse(Config.TRACING_COLORS) || true,
 				// Width of row
-				width: Config.TRACING_WIDTH || 100,
+				width: JSON.parse(Config.TRACING_WIDTH) || 100,
 				// Gauge width in the row
-				gaugeWidth: Config.TRACING_GUAGEWIDTH || 40,
+				gaugeWidth: JSON.parse(Config.TRACING_GUAGEWIDTH) || 40,
 			},
 			{{/if_eq}}
 			{{#if_eq exporter "Datadog"}}
@@ -412,7 +412,7 @@ const brokerConfig: BrokerOptions = {
 	},
 
 	// Register custom middlewares
-	middlewares: [HotReloadMiddleware, ServiceGuard{{#apiGW}}, OpenInBrowserMiddleware{{/apiGW}}],
+	middlewares: [/* HotReloadMiddleware, */ ServiceGuard{{#apiGW}}, OpenInBrowserMiddleware{{/apiGW}}],
 
 	// Register custom REPL commands.
 	// replCommands: [],

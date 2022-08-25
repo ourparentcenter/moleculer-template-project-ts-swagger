@@ -35,7 +35,9 @@ import {
 		idField: '_id',
 		// Available fields in the responses
 		fields: ['_id', 'name', 'quantity', 'price'],
-		rest: '/v1/products',
+		// rest endpoint
+		rest: '/',
+		// rest: '/v1/products',
 		// Validator for the `create` & `insert` actions.
 		entityValidator: {
 			name: 'string|min:3',
@@ -68,38 +70,40 @@ export default class ProductService extends MoleculerDBService<
 	/**
 	 *  @swagger
 	 *
-	 *  /v1/products/{id}/quantity/increase:
+	 *  /api/v1/products/{id}/quantity/increase:
 	 *    put:
 	 *      tags:
 	 *      - "Products"
 	 *      summary: Increase the quantity of the product item
 	 *      description: Increase the quantity of the product item.
 	 *      operationId: increaseQuantity
-	 *      produces:
-	 *        - application/json
-	 *      consumes:
-	 *        - application/json; charset=utf-8
 	 *      parameters:
-	 *        - in: path
-	 *          name: id
-	 *          description: Id of product
-	 *          required: true
+	 *      - name: id
+	 *        in: path
+	 *        description: Id of product
+	 *        required: true
+	 *        schema:
 	 *          type: string
-	 *        - in: body
-	 *          name: params
-	 *          schema:
-	 *            type: object
-	 *            required:
+	 *      requestBody:
+	 *        content:
+	 *          application/json; charset=utf-8:
+	 *            schema:
+	 *              required:
 	 *              - value
-	 *            properties:
-	 *              value:
-	 *                type: number
-	 *                description: Quantity to increase
+	 *              type: object
+	 *              properties:
+	 *                value:
+	 *                  type: number
+	 *                  description: Quantity to increase
+	 *        required: false
 	 *      responses:
 	 *        200:
 	 *          description: Increased quantity result
+	 *          content: {}
 	 *        422:
 	 *          description: Missing parameters
+	 *          content: {}
+	 *      x-codegen-request-body-name: params
 	 */
 	@Put<RestOptions>('/:id/quantity/increase', {
 		name: 'increaseQuantity',
@@ -125,37 +129,40 @@ export default class ProductService extends MoleculerDBService<
 	/**
 	 *  @swagger
 	 *
-	 *  /v1/products/{id}/quantity/decrease:
+	 *  /api/v1/products/{id}/quantity/decrease:
 	 *    put:
 	 *      tags:
 	 *      - "Products"
 	 *      summary: Decrease the quantity of the product item
 	 *      description: Decrease the quantity of the product item.
-	 *      produces:
-	 *        - application/json
-	 *      consumes:
-	 *        - application/json
+	 *      operationId: decreaseQuantity
 	 *      parameters:
-	 *        - in: path
-	 *          name: id
-	 *          description: Id of product
-	 *          required: true
+	 *      - name: id
+	 *        in: path
+	 *        description: Id of product
+	 *        required: true
+	 *        schema:
 	 *          type: string
-	 *        - in: body
-	 *          name: params
-	 *          schema:
-	 *            type: object
-	 *            required:
+	 *      requestBody:
+	 *        content:
+	 *          application/json:
+	 *            schema:
+	 *              required:
 	 *              - value
-	 *            properties:
-	 *              value:
-	 *                type: number
-	 *                description: Quantity to decrease
+	 *              type: object
+	 *              properties:
+	 *                value:
+	 *                  type: number
+	 *                  description: Quantity to increase
+	 *        required: false
 	 *      responses:
 	 *        200:
 	 *          description: Decreased quantity result
+	 *          content: {}
 	 *        422:
 	 *          description: Missing parameters
+	 *          content: {}
+	 *      x-codegen-request-body-name: params
 	 */
 	@Put<RestOptions>('/:id/quantity/decrease', {
 		name: 'decreaseQuantity',
@@ -208,150 +215,155 @@ export default class ProductService extends MoleculerDBService<
 	 *  - update
 	 *  - remove
 	 */
+
 	/**
 	 *  @swagger
 	 *
-	 *  /v1/products:
+	 *  /api/v1/products:
 	 *    get:
 	 *      tags:
 	 *      - "Products"
 	 *      summary: Get all products (auto generated)
 	 *      description: Get all products
-	 *      produces:
-	 *        - application/json
-	 *      consumes:
-	 *        - application/json
 	 *      responses:
 	 *        200:
 	 *          description: Products result
+	 *          content: {}
 	 *        403:
 	 *          description: Server error
+	 *          content: {}
 	 */
+
 	/**
 	 *  @swagger
 	 *
-	 *  /v1/products/{id}:
-	 *    get:
-	 *      tags:
-	 *      - "Products"
-	 *      summary: Get product by id (auto generated)
-	 *      description: Get product by id
-	 *      produces:
-	 *        - application/json
-	 *      consumes:
-	 *        - application/json
-	 *      parameters:
-	 *        - in: path
-	 *          name: id
-	 *          description: Id of product
-	 *          required: true
-	 *          type: string
-	 *      responses:
-	 *        200:
-	 *          description: Products result
-	 *        403:
-	 *          description: Server error
-	 */
-	/**
-	 *  @swagger
-	 *
-	 *  /v1/products:
+	 *  /api/v1/products:
 	 *    post:
 	 *      tags:
 	 *      - "Products"
 	 *      summary: Create a product (auto generated)
 	 *      description: Create a product
-	 *      produces:
-	 *        - application/json
-	 *      consumes:
-	 *        - application/json
-	 *      parameters:
-	 *        - in: body
-	 *          name: params
-	 *          schema:
-	 *            type: object
-	 *            required:
+	 *      requestBody:
+	 *        content:
+	 *          application/json:
+	 *            schema:
+	 *              required:
 	 *              - name
 	 *              - price
-	 *            properties:
-	 *              name:
-	 *                type: string
-	 *                default: product name
-	 *                description: Name to be used
-	 *              price:
-	 *                type: number
-	 *                default: 99
-	 *                description: Price of product
+	 *              type: object
+	 *              properties:
+	 *                name:
+	 *                  type: string
+	 *                  description: Name to be used
+	 *                  default: product name
+	 *                price:
+	 *                  type: number
+	 *                  description: Price of product
+	 *                  default: 5.00
+	 *        required: false
 	 *      responses:
 	 *        200:
-	 *          description: welcome result
+	 *          description: Create product result
+	 *          content: {}
 	 *        422:
 	 *          description: Missing parameters
+	 *          content: {}
+	 *      x-codegen-request-body-name: params
 	 */
+
 	/**
 	 *  @swagger
 	 *
-	 *  /v1/products/{id}:
+	 *  /api/v1/products/{id}:
+	 *    get:
+	 *      tags:
+	 *      - "Products"
+	 *      summary: Get product by id (auto generated)
+	 *      description: Get product by id
+	 *      parameters:
+	 *      - name: id
+	 *        in: path
+	 *        description: Id of product
+	 *        required: true
+	 *        schema:
+	 *          type: string
+	 *      responses:
+	 *        200:
+	 *          description: Products result
+	 *          content: {}
+	 *        403:
+	 *          description: Server error
+	 *          content: {}
+	 */
+
+	/**
+	 *  @swagger
+	 *
+	 *  /api/v1/products/{id}:
 	 *    put:
 	 *      tags:
 	 *      - "Products"
 	 *      summary: Update a product (auto generated)
 	 *      description: Update product.
-	 *      produces:
-	 *        - application/json
-	 *      consumes:
-	 *        - application/json
 	 *      parameters:
-	 *        - in: path
-	 *          name: id
-	 *          description: Id of product
-	 *          required: true
+	 *      - name: id
+	 *        in: path
+	 *        description: Id of product
+	 *        required: true
+	 *        schema:
 	 *          type: string
-	 *        - in: body
-	 *          name: params
-	 *          schema:
-	 *            type: object
-	 *            required:
+	 *      requestBody:
+	 *        content:
+	 *          application/json:
+	 *            schema:
+	 *              required:
 	 *              - name
-	 *              - Price
-	 *            properties:
-	 *              name:
-	 *                type: string
-	 *                description: Name of product
-	 *              price:
-	 *                type: number
-	 *                description: Price of product
+	 *              type: object
+	 *              properties:
+	 *                name:
+	 *                  type: string
+	 *                  description: Name of product
+	 *                  default: product name
+	 *                price:
+	 *                  type: number
+	 *                  description: Price of product
+	 *                  default: 5.00
+	 *        required: false
 	 *      responses:
 	 *        200:
 	 *          description: Product update result
+	 *          content: {}
 	 *        403:
 	 *          description: Server error
+	 *          content: {}
 	 *        422:
 	 *          description: Missing parameters
+	 *          content: {}
+	 *      x-codegen-request-body-name: params
 	 */
+
 	/**
 	 *  @swagger
 	 *
-	 *  /v1/products/{id}:
+	 *  /api/v1/products/{id}:
 	 *    delete:
 	 *      tags:
 	 *      - "Products"
 	 *      summary: Delete a product (auto generated)
 	 *      description: Delete product by id
-	 *      produces:
-	 *        - application/json
-	 *      consumes:
-	 *        - application/json
 	 *      parameters:
-	 *        - in: path
-	 *          name: id
-	 *          description: Id of product
-	 *          required: true
+	 *      - name: id
+	 *        in: path
+	 *        description: Id of product
+	 *        required: true
+	 *        schema:
 	 *          type: string
 	 *      responses:
 	 *        200:
 	 *          description: Delete result
+	 *          content: {}
 	 *        403:
 	 *          description: Server error
+	 *          content: {}
 	 */
 }

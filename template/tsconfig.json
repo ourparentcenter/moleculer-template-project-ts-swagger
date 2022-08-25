@@ -14,84 +14,34 @@
 		"preserveConstEnums": true,
 		"sourceMap": true,
 		"pretty": true,
-		"types": [
-			"jest",
-			"node"
-		],
+		"types": ["jest", "node"],
 		"target": "es6",
 		"outDir": "dist",
 		"allowJs": true,
 		"baseUrl": ".",
 		"paths": {
-			"@MicroServices/*": [
-				"services/*"
-			],
-			"@MicroServices": [
-				"services"
-			],
-			"@Entities/*": [
-				"Entities/*"
-			],
-			"@Entities": [
-				"Entities"
-			],
-			"@Hooks/*": [
-				"Hooks/*"
-			],
-			"@Hooks": [
-				"Hooks"
-			],
-			"@ServiceHelpers/*": [
-				"helpers/*"
-			],
-			"@ServiceHelpers": [
-				"helpers"
-			],
-			"@Middlewares/*": [
-				"middlewares/*"
-			],
-			"@Middlewares": [
-				"middlewares"
-			],
-			"@Mixins/*": [
-				"mixins/*"
-			],
-			"@Mixins": [
-				"mixins"
-			],
-			"@Test/*": [
-				"test/*"
-			],
-			"@Test": [
-				"test"
-			],
-			"@Interfaces/*": [
-				"interfaces/*"
-			],
-			"@Interfaces": [
-				"interfaces"
-			],
-			"@Repositories/*": [
-				"repositories/*"
-			],
-			"@Repositories": [
-				"repositories"
-			],
-			"@Meta/*": [
-				"meta/*"
-			],
-			"@Meta": [
-				"meta"
-			]
+			"@MicroServices/*": ["services/*"],
+			"@MicroServices": ["services"],
+			"@Entities/*": ["Entities/*"],
+			"@Entities": ["Entities"],
+			"@Hooks/*": ["Hooks/*"],
+			"@Hooks": ["Hooks"],
+			"@ServiceHelpers/*": ["helpers/*"],
+			"@ServiceHelpers": ["helpers"],
+			"@Middlewares/*": ["middlewares/*"],
+			"@Middlewares": ["middlewares"],
+			"@Mixins/*": ["mixins/*"],
+			"@Mixins": ["mixins"],
+			"@Test/*": ["test/*"],
+			"@Test": ["test"],
+			"@Interfaces/*": ["interfaces/*"],
+			"@Interfaces": ["interfaces"],
+			"@Repositories/*": ["repositories/*"],
+			"@Repositories": ["repositories"],
+			"@Meta/*": ["meta/*"],
+			"@Meta": ["meta"]
 		}
 	},
-	"include": [
-		"./**/*",
-		".eslintrc.js"
-	],
-	"exclude": [
-		"node_modules/**/*",
-		"test",
-		"frontend/**/*"
-	]
+	"include": ["./**/*", ".eslintrc.js"],
+	"exclude": ["node_modules/**/*", "test", "frontend/**/*"]
 }

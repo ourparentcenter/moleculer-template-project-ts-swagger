@@ -17,9 +17,10 @@
 <!-- - User auth with JWT authentication sample -->
 - Typescript decorators for moleculer [https://github.com/d0whc3r/moleculer-decorators](https://github.com/d0whc3r/moleculer-decorators)
 - Configuration for development/production/testing using environment variables
-- Optional Swagger embedded with demo api and jsdoc http://localhost:3000/openapi
+- (**New features**) Optional Swagger embedded with demo api and jsdoc http://localhost:3000/openapi for standard swagger ui and http://localhost:3000/editor for swagger editor. Both accept auth JWT token and auto update swagger.json & swagger.ymal. OpenAPI 3.0.1 schema.
 - Optionall Swagger-Stats with dashboaed at http://localhost:3000/api
 - Auto generation and regeneration of swagger.json spec, needed for swager-stats
+- (**New**) Added jest tests for all services
 
 
 ## Install
@@ -87,7 +88,7 @@ Docker images now have moleculer-repl added to them. To use, open docker cli of 
 ## Current issues
 If using swagger-stats, running npm install will fail due to swagger-stats dependency of prom-client, which is `"prom-client": ">= 10 <= 13",` and we are using 14.0.1. Until this is changed in swagger-stats either use yarn or remove prom-client from package.json, npm install, then add it back and do npm install.
 
-If you found this project useful, please buy me a beer!
+If you found this project useful, buy me a beer! 😁
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?business=NNWZXRYD4FMNL&no_recurring=0&item_name=If+you+found+this+project+useful%2C+please+by+me+a+beer+to+show+your+gratitude.+%5E_%5E&currency_code=USD)
 
 ## License

@@ -22,7 +22,7 @@ const getValue = (value: string, context: CastingContext): unknown => {
 		} else if (value.includes('|')) {
 			result = value.split('|').filter(Boolean);
 		} else if (context.column === 'password') {
-			result = bcrypt.hashSync(value, 10);
+			result = bcrypt.hashSync(value, JSON.parse(Config.SALT_VALUE));
 		} else if (Number(value)) {
 			result = Number(value);
 		} else if (value.startsWith('{') && value.endsWith('}')) {
@@ -33,33 +33,33 @@ const getValue = (value: string, context: CastingContext): unknown => {
 	return result;
 };
 
-const dbSeed = (dbInfo: DBInfo, classReference: new () => any) => async (
-	adapter: DbAdapter,
-): Promise<void> => {
-	const csvFile = path.resolve(
-		__dirname,
-		'../../database',
-		Config.NODE_ENV,
-		`${dbInfo.collection}.csv`,
-	);
-	if (fs.existsSync(csvFile)) {
-		const content = fs.readFileSync(csvFile, 'utf8');
-		const cast = (value: string, context: CastingContext) => getValue(value, context);
-		const options: Options = {
-			delimiter: ',',
-			trim: true,
-			cast,
-			comment: '#',
-			// eslint-disable-next-line camelcase
-			auto_parse: true,
-			// eslint-disable-next-line camelcase
-			skip_empty_lines: true,
-			columns: true,
-		};
-		for (const row of parseSync(content, options)) {
-			const item: any = new JsonConvert().deserializeObject(row, classReference);
-			await adapter.insert(item);
+const dbSeed =
+	(dbInfo: DBInfo, classReference: new () => any) =>
+	async (adapter: DbAdapter): Promise<void> => {
+		const csvFile = path.resolve(
+			__dirname,
+			'../../database',
+			Config.NODE_ENV,
+			`${dbInfo.collection}.csv`,
+		);
+		if (fs.existsSync(csvFile)) {
+			const content = fs.readFileSync(csvFile, 'utf8');
+			const cast = (value: string, context: CastingContext) => getValue(value, context);
+			const options: Options = {
+				delimiter: ',',
+				trim: true,
+				cast,
+				comment: '#',
+				// eslint-disable-next-line camelcase
+				auto_parse: true,
+				// eslint-disable-next-line camelcase
+				skip_empty_lines: true,
+				columns: true,
+			};
+			for (const row of parseSync(content, options)) {
+				const item: any = new JsonConvert().deserializeObject(row, classReference);
+				await adapter.insert(item);
+			}
 		}
-	}
-};
+	};
 export { dbSeed };

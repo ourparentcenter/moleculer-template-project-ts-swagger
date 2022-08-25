@@ -9,7 +9,8 @@ import helmet from 'helmet';
 import ApiGateway from 'moleculer-web';
 import { Service, Method } from '@ourparentcenter/moleculer-decorators-extended';
 import pick from 'lodash/pick';
-{{#swagger}}import { openAPIMixin } from '../../mixins/openapi/openapi.mixin';{{/swagger}}
+{{#swagger}}import { openAPIMixin } from '../../mixins/openapi/openapi.mixin';
+import { editorMixin } from '../../mixins/editor/editor.mixin';{{/swagger}}
 import { Config } from '../../common';
 import {
 	RequestMessage,
@@ -19,7 +20,8 @@ import {
 	UserTokenParams,
 	UserAuthMeta,
 } from '../../types';
-{{#swaggerstats}} import { swMiddleware, swStats } from '@Mixins/swstats'; {{/swaggerstats}}
+import { serviceRoutes } from '../serviceroutes';
+{{#swaggerstats}} import { swMiddleware, swStats } from '../../mixins/swstats'; {{/swaggerstats}}
 {{#if_eq httptransport "SOCKET"}}
 import { Server, Socket } from 'socket.io';
 {{/if_eq}}
@@ -32,7 +34,7 @@ import { Server, Socket } from 'socket.io';
 @Service({
 	name: 'api',
 	authToken: Config.API_AUTH_TOKEN,
-	mixins: [ApiGateway{{#swagger}}, openAPIMixin(){{/swagger}}],
+	mixins: [ApiGateway{{#swagger}}, openAPIMixin(), editorMixin(){{/swagger}}],
 	// More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
 	settings: {
 		// rate limiter default for all routes
@@ -66,63 +68,28 @@ import { Server, Socket } from 'socket.io';
 						// 'block-all-mixed-content',
 						'font-src': ["'self'"],
 						'frame-ancestors': ["'self'"],
-						'img-src': ["'self'"],
+						'img-src': ["'self'", 'data:'],
 						'object-src': ["'none'"],
-						'script-src': ["'self'", "'unsafe-inline'"],
+						'script-src': ["'self'", "'unsafe-inline'"{{#swagger}}, "'unsafe-eval'"{{/swagger}}],
 						'script-src-attr': ["'none'"],
 						'style-src': ["'self'", "'unsafe-inline'"],
 						'upgrade-insecure-requests': [],
+						{{#swagger}}'worker-src': ['blob:'],
+						'connect-src': [
+							"'self'",
+							'https://generator3.swagger.io/openapi.json',
+							'https://generator3.swagger.io/api/clients',
+							'https://generator3.swagger.io/api/servers',
+							'https://generator.swagger.io/api/swagger.json',
+							'https://generator.swagger.io/api/gen/clients',
+							'https://generator.swagger.io/api/gen/servers',
+							'https://converter.swagger.io/api/convert',
+						],{{/swagger}}
 					},
 				},
 			}),
 		],
 		routes: [
-			{
-				// auth endpoint
-				path: '/auth',
-				authorization: false,
-				authentication: false,
-				whitelist: ['v1.user.login'],
-				aliases: {
-					'POST /login': 'v1.user.login',
-				},
-				// rate limit override for route
-				rateLimit: {
-					// How long to keep record of requests in memory (in milliseconds).
-					// Defaults to 60000 (1 min)
-					window: 60 * 1000,
-
-					// Max number of requests during window. Defaults to 30
-					limit: 30,
-
-					// Set rate limit headers to response. Defaults to false
-					headers: true,
-
-					// Function used to generate keys. Defaults to:
-					key: (req: RequestMessage) => {
-						return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-					},
-					//StoreFactory: CustomStore
-				},
-			},
-			{
-				// for internal services communication only
-				path: '/admin',
-				whitelist: ['$node.*', 'api.listAliases'],
-				authorization: true,
-				authentication: true,
-				// roles: [UserRole.SUPERADMIN],
-				aliases: {
-					'GET /health': '$node.health',
-					'GET /services': '$node.services',
-					'GET /actions': '$node.actions',
-					'GET /list': '$node.list',
-					'GET /metrics': '$node.metrics',
-					'GET /events': '$node.events',
-					'GET /options': '$node.options',
-					'GET /aliases': 'api.listAliases',
-				},
-			},
 			{
 				// api dashboard thorugh swagger stats
 				path: '/api',
@@ -150,7 +117,7 @@ import { Server, Socket } from 'socket.io';
 
 				// The auto-alias feature allows you to declare your route alias directly in your services.
 				// The gateway will dynamically build the full routes from service schema.
-				autoAliases: true,
+				autoAliases: false,
 
 				aliases: {
 					{{#swaggerstats}}
@@ -161,11 +128,11 @@ import { Server, Socket } from 'socket.io';
 						return res.end();
 					},
 					'GET /stats'(req: any, res: any) {
-						res.setHeader('Content-Type', 'application/json');
+						res.setHeader('Content-Type', 'application/json; charset=utf-8');
 						return res.end(JSON.stringify(swStats.getCoreStats()));
 					},
 					'GET /metrics'(req: any, res: any) {
-						res.setHeader('Content-Type', 'application/json');
+						res.setHeader('Content-Type', 'application/json; charset=utf-8');
 						return res.end(JSON.stringify(swStats.getPromStats()));
 					},
 					{{/swaggerstats}}
@@ -218,6 +185,7 @@ import { Server, Socket } from 'socket.io';
 				// Enable/disable logging
 				logging: true,
 			},
+			...serviceRoutes,
 		],
 		// Do not log client side errors (does not log an error response when the error.code is 400<=X<500)
 		log4XXResponses: false,
@@ -500,4 +468,7 @@ export default class ApiService extends moleculer.Service {
 		});
 	}
 	{{/if_eq}}
+	async stopped() {
+		{{#swaggerstats}}swStats.stop();{{/swaggerstats}}
+	}
 }

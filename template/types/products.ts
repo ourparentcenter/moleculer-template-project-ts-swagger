@@ -3,7 +3,8 @@ import { DbServiceSettings } from 'moleculer-db';
 import { IProduct } from '../entities';
 
 export interface ProductServiceSettingsOptions extends DbServiceSettings {
-	rest: '/v1/products';
+	// rest?: '/v1/products';
+	rest?: string;
 	fields: (keyof Required<IProduct>)[];
 }
 

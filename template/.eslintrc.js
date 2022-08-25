@@ -7,7 +7,7 @@ module.exports = {
 		node: true,
 		jquery: false,
 		jest: true,
-		jasmine: true,
+		circus: true,
 	},
 	ignorePatterns: ['test/*'],
 	parser: '@typescript-eslint/parser',

@@ -16,26 +16,39 @@ import EncryptionUtil from '../../helpers/encryption.helper';
 	 * Service guard token
 	 */
 	authToken: Config.GREETER_AUTH_TOKEN,
+	/**
+	 * Settings
+	 */
+	settings: {
+		idField: '_id',
+		// Available fields in the responses
+		fields: ['_id', 'name', 'quantity', 'price'],
+		// rest endpoint
+		rest: '/',
+		// rest: '/v1/greeter',
+		// Validator for the `create` & `insert` actions.
+		entityValidator: {
+			name: 'string|min:3',
+		},
+	},
 })
 export default class GreeterService extends moleculer.Service {
 	/**
 	 *  @swagger
 	 *
-	 *  /v1/greeter/hello:
+	 *  /api/v1/greeter/hello:
 	 *    get:
 	 *      tags:
 	 *      - "Greeter"
 	 *      summary: Say a 'Hello' action
 	 *      description: Say a 'Hello' action
-	 *      produces:
-	 *        - application/json
-	 *      consumes:
-	 *        - application/json
 	 *      responses:
 	 *        200:
 	 *          description: Hello result
+	 *          content: {}
 	 *        403:
 	 *          description: Server error
+	 *          content: {}
 	 */
 	@Get<RestOptions>('/hello', {
 		name: 'hello',
@@ -50,33 +63,33 @@ export default class GreeterService extends moleculer.Service {
 	/**
 	 *  @swagger
 	 *
-	 *  /v1/greeter/welcome:
+	 *  /api/v1/greeter/welcome:
 	 *    post:
 	 *      tags:
 	 *      - "Greeter"
 	 *      summary:  Welcome a username
 	 *      description: Welcome a username
-	 *      produces:
-	 *        - application/json
-	 *      consumes:
-	 *        - application/json
-	 *      parameters:
-	 *        - in: body
-	 *          name: params
-	 *          schema:
-	 *            type: object
-	 *            required:
+	 *      requestBody:
+	 *        content:
+	 *          application/json:
+	 *            schema:
+	 *              required:
 	 *              - name
-	 *            properties:
-	 *              name:
-	 *                type: string
-	 *                default: John
-	 *                description: Name to be used
+	 *              type: object
+	 *              properties:
+	 *                name:
+	 *                  type: string
+	 *                  description: Name to be used
+	 *                  default: John
+	 *        required: false
 	 *      responses:
 	 *        200:
 	 *          description: welcome result
+	 *          content: {}
 	 *        422:
 	 *          description: Missing parameters
+	 *          content: {}
+	 *      x-codegen-request-body-name: params
 	 */
 	@Post<RestOptions>('/welcome', {
 		name: 'welcome',

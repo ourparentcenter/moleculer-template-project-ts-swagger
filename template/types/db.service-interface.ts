@@ -1,6 +1,13 @@
 /* eslint-disable no-shadow */
 import moleculer, { Context } from 'moleculer';
-import { DbAdapter, DbContextParameters } from 'moleculer-db';
+import {
+	DbAdapter,
+	QueryOptions,
+	DbContextSanitizedParams,
+	DbContextParameters,
+	FilterOptions,
+	CountOptions,
+} from 'moleculer-db';
 
 export const listActionConfig = {
 	cache: {
@@ -83,7 +90,13 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 	 * @param {any} origParams
 	 * @returns {Promise}
 	 */
-	public sanitizeParams!: (ctx: Context, params?: DbContextParameters) => Promise<any>;
+	public sanitizeParams!: (
+		ctx: Context,
+		params?: DbContextParameters & {
+			query?: QueryOptions | any;
+		},
+	) => Promise<any>;
+	// public sanitizeParams!: (ctx: Context, params?: DbContextParameters) => Promise<any>;
 
 	/**
 	 * Get entity(ies) by ID(s).
@@ -94,6 +107,7 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 	 * @returns {Object|Array<Object>} Found entity(ies).
 	 */
 	public getById!: (id: string | number | string[], decoding?: boolean) => Promise<R>;
+	// public getById!: (id: string | number | string[], decoding?: boolean) => Promise<R>;
 
 	/**
 	 * Clear the cache & call entity lifecycle events
@@ -120,7 +134,12 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 	 * @param {Object}      Params
 	 * @returns {Array|Object}
 	 */
-	public transformDocuments!: (ctx: Context, params: any, docs: any) => Promise<R | R[]>;
+	public transformDocuments!: (
+		ctx: Context,
+		params: any,
+		docs: any[] | object,
+	) => Promise<R | R[]>;
+	// public transformDocuments!: (ctx: Context, params: any, docs: any) => Promise<R | R[]>;
 
 	/**
 	 * Filter fields in the entity object
@@ -178,17 +197,17 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 	/**
 	 * Service started lifecycle event handler
 	 */
-	// Started!: () => Promise<void>;
+	started!: () => Promise<void>;
 
 	/**
 	 * Service stopped lifecycle event handler
 	 */
-	// Stopped!: () => Promise<void>;
+	stopped!: () => Promise<void>;
 
 	/**
 	 * Service created lifecycle event handler
 	 */
-	// Created!: () => Promise<void>;
+	created!: () => Promise<void>;
 
 	/**
 	 * Find entities by query.
@@ -200,7 +219,7 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 	 *
 	 * @returns {Array<Object>} List of found entities.
 	 */
-	public _find!: (ctx: Context, params: any) => Promise<R[]>;
+	public _find!: (ctx: Context, params?: FilterOptions) => Promise<R[]>;
 
 	/**
 	 * Get count of entities by query.
@@ -212,7 +231,7 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 	 *
 	 * @returns {Number} Count of found entities.
 	 */
-	public _count!: (ctx: Context, params: any) => Promise<number>;
+	public _count!: (ctx: Context, params: CountOptions) => Promise<number>;
 
 	/**
 	 * List entities by filters and pagination results.
@@ -224,7 +243,7 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 	 *
 	 * @returns {Object} List of found entities and count.
 	 */
-	public _list!: (ctx: Context, params: any) => Promise<DBPagination<R>>;
+	public _list!: (ctx: Context, params: DbContextSanitizedParams) => Promise<DBPagination<R>>;
 
 	/**
 	 * Create a new entity.
@@ -248,7 +267,7 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 	 *
 	 * @returns {Object|Array.<Object>} Saved entity(ies).
 	 */
-	public _insert!: (ctx: Context, params: any) => Promise<R | R[]>;
+	public _insert!: (ctx: Context, params: object | object[]) => Promise<R | R[]>;
 
 	/**
 	 * Get entity by ID.
@@ -262,7 +281,13 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	public _get!: (ctx: Context, params: any) => Promise<R | R[]>;
+	public _get!: (
+		ctx: Context,
+		params: { id: any | any[]; mapping?: boolean } & Partial<
+			Pick<DbContextParameters, 'populate' | 'fields'>
+		>,
+	) => Promise<R | R[]>;
+	// public _get!: (ctx: Context, params: any) => Promise<R | R[]>;
 
 	/**
 	 * Update an entity by ID.
@@ -276,7 +301,7 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	public _update!: (ctx: Context, params: any) => Promise<R>;
+	public _update!: (ctx: Context, params: object) => Promise<R>;
 
 	/**
 	 * Remove an entity by ID.
@@ -288,5 +313,5 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	public _remove!: (ctx: Context, params: any) => Promise<void>;
+	public _remove!: (ctx: Context, params: { id: any }) => Promise<R>;
 }
