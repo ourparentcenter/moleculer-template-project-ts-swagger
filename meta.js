@@ -231,13 +231,14 @@ module.exports = function (values) {
 			'frontend/**/*': 'frontend',
 
 			'boot/socketIO.ts': 'dbService',
-			'services/products.service.ts': 'dbService',
+			'services/**/*': 'dbService',
 			'mixins/dbmixins/db.mixin.ts': 'dbService',
 			'mixins/openapi/openapi.mixin.ts': 'swagger',
+			'mixins/editor/editor.mixin.ts': 'swagger',
 			'mixins/swstats/index.ts': 'swaggerstats',
 			'test/mixins/db.mixin.spec.ts': 'dbService',
-			'test/integration/products.service.spec.ts': 'dbService',
-			'test/unit/services/products.spec.ts': 'dbService',
+			'test/integration/*': 'dbService',
+			'test/unit/services/*': 'dbService',
 
 			'.eslintrc.js': 'lint',
 

@@ -5,7 +5,15 @@
 'use strict';
 import { constants } from 'http2';
 import moleculer, { ActionParams, Context } from 'moleculer';
-import { Action, Delete, Get, Method, Post, Put, Service } from '@ourparentcenter/moleculer-decorators-extended';
+import {
+	Action,
+	Delete,
+	Get,
+	Method,
+	Post,
+	Put,
+	Service,
+} from '@ourparentcenter/moleculer-decorators-extended';
 import bcrypt from 'bcryptjs';
 import jwt, { VerifyErrors } from 'jsonwebtoken';
 import { JsonConvert } from 'json2typescript';
@@ -59,18 +67,32 @@ const validateUserBaseOptional: ActionParams = {
 	langKey: { type: 'string', min: 2, max: 2, optional: true },
 };
 
-const encryptPassword = (password: string) => bcrypt.hashSync(password, 10);
+const encryptPassword = (password: string) =>
+	bcrypt.hashSync(password, JSON.parse(Config.SALT_VALUE));
 
 @Service<UsersServiceOptions>({
 	name: 'user',
 	version: 1,
+	/**
+	 * Service guard token
+	 */
 	authToken: Config.USER_AUTH_TOKEN,
+	/**
+	 * Mixins
+	 */
 	mixins: [dbUserMixin, eventsUserMixin],
+	/**
+	 * Settings
+	 */
 	settings: {
 		idField: '_id',
 		pageSize: 10,
-		rest: '/v1/user',
+		// rest endpoint
+		rest: '/',
+		// rest: '/v1/user',
+		// user jwt secret
 		JWT_SECRET: Config.JWT_SECRET,
+		// Available fields in the responses
 		fields: [
 			'_id',
 			'login',
@@ -85,14 +107,17 @@ const encryptPassword = (password: string) => bcrypt.hashSync(password, 10);
 			'lastModifiedBy',
 			'lastModifiedDate',
 		],
+		// additional fields added to responses
 		populates: {
 			createdBy: {
-				action: 'user.id',
-				fields: ['login', 'firstName', 'lastName'],
+				action: 'v1.user.id',
+				params: { fields: ['login', 'firstName', 'lastName'] },
+				// params: { fields: 'login firstName lastName' },
 			},
 			lastModifiedBy: {
-				action: 'user.id',
-				fields: ['login', 'firstName', 'lastName'],
+				action: 'v1.user.id',
+				params: { fields: ['login', 'firstName', 'lastName'] },
+				// params: { fields: 'login firstName lastName' },
 			},
 		},
 	},
@@ -135,7 +160,7 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 
 	@Action({
 		name: 'validateRole',
-		restricted: ['api'],
+		// restricted: ['api'],
 		cache: {
 			keys: ['roles', 'user'],
 		},
@@ -146,8 +171,6 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	async validateRole(ctx: Context<UserRolesParams, UserAuthMeta>) {
 		const roles = ctx.params.roles;
 		const userRoles = ctx.meta.user.roles;
-		console.log(roles);
-		console.log(ctx.meta.user);
 		return !roles || !roles.length || roles.some((r) => userRoles.includes(r));
 	}
 
@@ -158,9 +181,47 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	})
 	async getUserId(ctx: Context<UserGetParams, UserAuthMeta>) {
 		const params = this.sanitizeParams(ctx, ctx.params);
-		return this._get(ctx, params);
+		const result = await this._get(ctx, await params);
+		return result;
 	}
 
+	/**
+	 *  @swagger
+	 *
+	 *  /auth/login:
+	 *    post:
+	 *      tags:
+	 *      - "Auth"
+	 *      summary: Login a user
+	 *      description: Login a user.
+	 *      operationId: loginUser
+	 *      requestBody:
+	 *        content:
+	 *           application/json; charset=utf-8:
+	 *              schema:
+	 *                required:
+	 *                - login
+	 *                - password
+	 *                type: object
+	 *                properties:
+	 *                  login:
+	 *                    type: string
+	 *                    description: user login name
+	 *                    default: superadmin
+	 *                  password:
+	 *                    type: string
+	 *                    description: user password
+	 *                    default: 123456
+	 *        required: false
+	 *      responses:
+	 *        200:
+	 *          description: Login user result
+	 *          content: {}
+	 *        422:
+	 *          description: Missing parameters
+	 *          content: {}
+	 *      x-codegen-request-body-name: params
+	 */
 	@Action({
 		name: 'login',
 		restricted: ['api'],
@@ -201,9 +262,9 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 			);
 		}
 
+		// const user: any = (await this.transformDocuments(ctx, {}, result)) as IUser;
 		const user: any = await this.transformDocuments(ctx, {}, result);
 		const token = this.generateJWT(user);
-		console.log(user);
 		// eslint-disable-next-line require-atomic-updates
 		ctx.meta.$responseHeaders = { Authorization: `Bearer ${token}` };
 		return { token };
@@ -273,6 +334,32 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 		return this._get(ctx, { ...params, id: ctx.meta.user._id });
 	}
 
+	/**
+	 *  @swagger
+	 *
+	 *  /api/v1/user/{id}:
+	 *    get:
+	 *      tags:
+	 *      - "Users"
+	 *      summary: get user by id
+	 *      description: get user by id.
+	 *      operationId: getUser
+	 *      parameters:
+	 *        - name: id
+	 *          in: path
+	 *          description: Id of user
+	 *          required: true
+	 *          schema:
+	 *            type: string
+	 *            default: 5eb71ba74676dfca3fef434f
+	 *      responses:
+	 *        200:
+	 *          description: Get user result
+	 *          content: {}
+	 *        422:
+	 *          description: Missing parameters
+	 *          content: {}
+	 */
 	@Get<RestOptions>('/:id', {
 		name: 'get.id',
 		restricted: ['api'],
@@ -281,9 +368,78 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	})
 	async getUser(ctx: Context<UserGetParams, UserAuthMeta>) {
 		const params = this.sanitizeParams(ctx, ctx.params);
-		return this._get(ctx, { ...params, populate: ['createdBy', 'lastModifiedBy'] });
+		return this._get(ctx, await { ...params, populate: ['createdBy', 'lastModifiedBy'] });
 	}
 
+	/**
+	 *  @swagger
+	 *
+	 *  /api/v1/user/{id}:
+	 *    put:
+	 *      tags:
+	 *      - "Users"
+	 *      summary: update a user
+	 *      description: update a user.
+	 *      operationId: updateUser
+	 *      parameters:
+	 *        - name: id
+	 *          in: path
+	 *          description: Id of user
+	 *          required: true
+	 *          schema:
+	 *            type: string
+	 *            default: 5eb71ba74676dfca3fef434f
+	 *      requestBody:
+	 *        content:
+	 *         application/json:
+	 *            schema:
+	 *              required:
+	 *              - login
+	 *              - email
+	 *              - password
+	 *              - firstName
+	 *              - lastName
+	 *              - langKey
+	 *              - roles
+	 *              type: object
+	 *              properties:
+	 *                login:
+	 *                  type: string
+	 *                  description: user login name
+	 *                email:
+	 *                  type: string
+	 *                  description: user email
+	 *                  format: email
+	 *                password:
+	 *                  type: string
+	 *                  description: user password
+	 *                firstName:
+	 *                  type: string
+	 *                  description: user first name
+	 *                lastName:
+	 *                  type: string
+	 *                  description: user last name
+	 *                langKey:
+	 *                  type: string
+	 *                  description: user language key
+	 *                roles:
+	 *                  type: array
+	 *                  description: user roles
+	 *                  items:
+	 *                    type: string
+	 *                active:
+	 *                  type: boolean
+	 *                  description: user enabled
+	 *        required: false
+	 *      responses:
+	 *        200:
+	 *          description: Update user result
+	 *          content: {}
+	 *        422:
+	 *          description: Missing parameters
+	 *          content: {}
+	 *      x-codegen-request-body-name: params
+	 */
 	@Put<RestOptions>('/:id', {
 		name: 'update',
 		restricted: ['api'],
@@ -299,6 +455,7 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		delete ctx.params.id;
+		// const user = await this.getById(id);
 		const user = await this.getById(id);
 		if (!user) {
 			throw new moleculer.Errors.MoleculerClientError(
@@ -325,9 +482,41 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 			newUser.password = encryptPassword(password);
 		}
 		const result = await this._update(ctx, newUser);
-		return this.transformDocuments(ctx, { populate: ['createdBy', 'lastModifiedBy'] }, result);
+		const transform = await this.transformDocuments(
+			ctx,
+			{ populate: ['createdBy', 'lastModifiedBy'] },
+			// {},
+			result,
+		);
+		return transform;
 	}
 
+	/**
+	 *  @swagger
+	 *
+	 *  /api/v1/user/{id}:
+	 *    delete:
+	 *      tags:
+	 *      - "Users"
+	 *      summary: Delete user by id
+	 *      description: Delete user by id.
+	 *      operationId: deleteUser
+	 *      parameters:
+	 *        - name: id
+	 *          in: path
+	 *          description: Id of user
+	 *          required: true
+	 *          schema:
+	 *            type: string
+	 *            default: 5eb725a7ada22e664c83e634
+	 *      responses:
+	 *        200:
+	 *          description: Delete user result
+	 *          content: {}
+	 *        422:
+	 *          description: Missing parameters
+	 *          content: {}
+	 */
 	@Delete<RestOptions>('/:id', {
 		name: 'remove',
 		restricted: ['api'],
@@ -342,12 +531,30 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 			);
 		}
 		const params = this.sanitizeParams(ctx, ctx.params);
-		await this._remove(ctx, params);
+		await this._remove(ctx, await params);
 		await this.broker.emit(UserEvent.DELETED, { id: ctx.params.id });
 		// eslint-disable-next-line require-atomic-updates
 		ctx.meta.$statusCode = constants.HTTP_STATUS_ACCEPTED;
 	}
 
+	/**
+	 *  @swagger
+	 *
+	 *  /api/v1/user/list:
+	 *    get:
+	 *      tags:
+	 *      - "Users"
+	 *      summary: list all users
+	 *      description: list all users.
+	 *      operationId: listAllUsers
+	 *      responses:
+	 *        200:
+	 *          description: Get user result
+	 *          content: {}
+	 *        422:
+	 *          description: Missing parameters
+	 *          content: {}
+	 */
 	@Get<RestOptions>('/list', {
 		name: 'list',
 		restricted: ['api'],
@@ -356,7 +563,7 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	})
 	async listAllUsers(ctx: Context<DbContextParameters, UserAuthMeta>) {
 		const params = this.sanitizeParams(ctx, ctx.params);
-		return this._list(ctx, { ...params });
+		return this._list(ctx, await { ...params });
 	}
 
 	@Method

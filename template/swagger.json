@@ -1,79 +1,90 @@
 {
+    "openapi": "3.0.1",
     "info": {
-        "title": "cameo-server API Documentation",
-        "version": "1.0.0",
-        "description": "Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects.."
+        "title": "newtestdev API Documentation",
+        "description": "Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects..",
+        "version": "1.0.0"
     },
-    "host": "localhost:3000",
-    "basePath": "/api",
-    "swagger": "2.0",
+    "servers": [
+        {
+            "url": "//localhost:3000"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
     "paths": {
-        "/v1/greeter/hello": {
+        "/api/v1/greeter/hello": {
             "get": {
                 "tags": [
                     "Greeter"
                 ],
                 "summary": "Say a 'Hello' action",
                 "description": "Say a 'Hello' action",
-                "produces": [
-                    "application/json"
-                ],
-                "consumes": [
-                    "application/json"
-                ],
                 "responses": {
                     "200": {
-                        "description": "Hello result"
+                        "description": "Hello result",
+                        "content": {}
                     },
                     "403": {
-                        "description": "Server error"
+                        "description": "Server error",
+                        "content": {}
                     }
                 }
             }
         },
-        "/v1/greeter/welcome": {
+        "/api/v1/greeter/welcome": {
             "post": {
                 "tags": [
                     "Greeter"
                 ],
                 "summary": "Welcome a username",
                 "description": "Welcome a username",
-                "produces": [
-                    "application/json"
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "params",
-                        "schema": {
-                            "type": "object",
-                            "required": [
-                                "name"
-                            ],
-                            "properties": {
-                                "name": {
-                                    "type": "string",
-                                    "default": "John",
-                                    "description": "Name to be used"
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Name to be used",
+                                        "default": "John"
+                                    }
                                 }
                             }
                         }
-                    }
-                ],
+                    },
+                    "required": false
+                },
                 "responses": {
                     "200": {
-                        "description": "welcome result"
+                        "description": "welcome result",
+                        "content": {}
                     },
                     "422": {
-                        "description": "Missing parameters"
+                        "description": "Missing parameters",
+                        "content": {}
                     }
-                }
+                },
+                "x-codegen-request-body-name": "params"
             }
         },
-        "/v1/products/{id}/quantity/increase": {
+        "/api/v1/products/{id}/quantity/increase": {
             "put": {
                 "tags": [
                     "Products"
@@ -81,114 +92,115 @@
                 "summary": "Increase the quantity of the product item",
                 "description": "Increase the quantity of the product item.",
                 "operationId": "increaseQuantity",
-                "produces": [
-                    "application/json"
-                ],
-                "consumes": [
-                    "application/json; charset=utf-8"
-                ],
                 "parameters": [
                     {
-                        "in": "path",
                         "name": "id",
+                        "in": "path",
                         "description": "Id of product",
                         "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "body",
-                        "name": "params",
                         "schema": {
-                            "type": "object",
-                            "required": [
-                                "value"
-                            ],
-                            "properties": {
-                                "value": {
-                                    "type": "number",
-                                    "description": "Quantity to increase"
-                                }
-                            }
+                            "type": "string"
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=utf-8": {
+                            "schema": {
+                                "required": [
+                                    "value"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "value": {
+                                        "type": "number",
+                                        "description": "Quantity to increase"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": false
+                },
                 "responses": {
                     "200": {
-                        "description": "Increased quantity result"
+                        "description": "Increased quantity result",
+                        "content": {}
                     },
                     "422": {
-                        "description": "Missing parameters"
+                        "description": "Missing parameters",
+                        "content": {}
                     }
-                }
+                },
+                "x-codegen-request-body-name": "params"
             }
         },
-        "/v1/products/{id}/quantity/decrease": {
+        "/api/v1/products/{id}/quantity/decrease": {
             "put": {
                 "tags": [
                     "Products"
                 ],
                 "summary": "Decrease the quantity of the product item",
                 "description": "Decrease the quantity of the product item.",
-                "produces": [
-                    "application/json"
-                ],
-                "consumes": [
-                    "application/json"
-                ],
+                "operationId": "decreaseQuantity",
                 "parameters": [
                     {
-                        "in": "path",
                         "name": "id",
+                        "in": "path",
                         "description": "Id of product",
                         "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "body",
-                        "name": "params",
                         "schema": {
-                            "type": "object",
-                            "required": [
-                                "value"
-                            ],
-                            "properties": {
-                                "value": {
-                                    "type": "number",
-                                    "description": "Quantity to decrease"
-                                }
-                            }
+                            "type": "string"
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "value"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "value": {
+                                        "type": "number",
+                                        "description": "Quantity to increase"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": false
+                },
                 "responses": {
                     "200": {
-                        "description": "Decreased quantity result"
+                        "description": "Decreased quantity result",
+                        "content": {}
                     },
                     "422": {
-                        "description": "Missing parameters"
+                        "description": "Missing parameters",
+                        "content": {}
                     }
-                }
+                },
+                "x-codegen-request-body-name": "params"
             }
         },
-        "/v1/products": {
+        "/api/v1/products": {
             "get": {
                 "tags": [
                     "Products"
                 ],
                 "summary": "Get all products (auto generated)",
                 "description": "Get all products",
-                "produces": [
-                    "application/json"
-                ],
-                "consumes": [
-                    "application/json"
-                ],
                 "responses": {
                     "200": {
-                        "description": "Products result"
+                        "description": "Products result",
+                        "content": {}
                     },
                     "403": {
-                        "description": "Server error"
+                        "description": "Server error",
+                        "content": {}
                     }
                 }
             },
@@ -198,75 +210,71 @@
                 ],
                 "summary": "Create a product (auto generated)",
                 "description": "Create a product",
-                "produces": [
-                    "application/json"
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "params",
-                        "schema": {
-                            "type": "object",
-                            "required": [
-                                "name",
-                                "price"
-                            ],
-                            "properties": {
-                                "name": {
-                                    "type": "string",
-                                    "default": "product name",
-                                    "description": "Name to be used"
-                                },
-                                "price": {
-                                    "type": "number",
-                                    "default": 99,
-                                    "description": "Price of product"
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "price"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Name to be used",
+                                        "default": "product name"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "description": "Price of product",
+                                        "default": 5
+                                    }
                                 }
                             }
                         }
-                    }
-                ],
+                    },
+                    "required": false
+                },
                 "responses": {
                     "200": {
-                        "description": "welcome result"
+                        "description": "Create product result",
+                        "content": {}
                     },
                     "422": {
-                        "description": "Missing parameters"
+                        "description": "Missing parameters",
+                        "content": {}
                     }
-                }
+                },
+                "x-codegen-request-body-name": "params"
             }
         },
-        "/v1/products/{id}": {
+        "/api/v1/products/{id}": {
             "get": {
                 "tags": [
                     "Products"
                 ],
                 "summary": "Get product by id (auto generated)",
                 "description": "Get product by id",
-                "produces": [
-                    "application/json"
-                ],
-                "consumes": [
-                    "application/json"
-                ],
                 "parameters": [
                     {
-                        "in": "path",
                         "name": "id",
+                        "in": "path",
                         "description": "Id of product",
                         "required": true,
-                        "type": "string"
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Products result"
+                        "description": "Products result",
+                        "content": {}
                     },
                     "403": {
-                        "description": "Server error"
+                        "description": "Server error",
+                        "content": {}
                     }
                 }
             },
@@ -276,53 +284,57 @@
                 ],
                 "summary": "Update a product (auto generated)",
                 "description": "Update product.",
-                "produces": [
-                    "application/json"
-                ],
-                "consumes": [
-                    "application/json"
-                ],
                 "parameters": [
                     {
-                        "in": "path",
                         "name": "id",
+                        "in": "path",
                         "description": "Id of product",
                         "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "body",
-                        "name": "params",
                         "schema": {
-                            "type": "object",
-                            "required": [
-                                "name",
-                                "Price"
-                            ],
-                            "properties": {
-                                "name": {
-                                    "type": "string",
-                                    "description": "Name of product"
-                                },
-                                "price": {
-                                    "type": "number",
-                                    "description": "Price of product"
-                                }
-                            }
+                            "type": "string"
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Name of product",
+                                        "default": "product name"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "description": "Price of product",
+                                        "default": 5
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": false
+                },
                 "responses": {
                     "200": {
-                        "description": "Product update result"
+                        "description": "Product update result",
+                        "content": {}
                     },
                     "403": {
-                        "description": "Server error"
+                        "description": "Server error",
+                        "content": {}
                     },
                     "422": {
-                        "description": "Missing parameters"
+                        "description": "Missing parameters",
+                        "content": {}
                     }
-                }
+                },
+                "x-codegen-request-body-name": "params"
             },
             "delete": {
                 "tags": [
@@ -330,35 +342,246 @@
                 ],
                 "summary": "Delete a product (auto generated)",
                 "description": "Delete product by id",
-                "produces": [
-                    "application/json"
-                ],
-                "consumes": [
-                    "application/json"
-                ],
                 "parameters": [
                     {
-                        "in": "path",
                         "name": "id",
+                        "in": "path",
                         "description": "Id of product",
                         "required": true,
-                        "type": "string"
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Delete result"
+                        "description": "Delete result",
+                        "content": {}
                     },
                     "403": {
-                        "description": "Server error"
+                        "description": "Server error",
+                        "content": {}
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login a user",
+                "description": "Login a user.",
+                "operationId": "loginUser",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=utf-8": {
+                            "schema": {
+                                "required": [
+                                    "login",
+                                    "password"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "login": {
+                                        "type": "string",
+                                        "description": "user login name",
+                                        "default": "superadmin"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "description": "user password",
+                                        "default": 123456
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login user result",
+                        "content": {}
+                    },
+                    "422": {
+                        "description": "Missing parameters",
+                        "content": {}
+                    }
+                },
+                "x-codegen-request-body-name": "params"
+            }
+        },
+        "/api/v1/user/{id}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "get user by id",
+                "description": "get user by id.",
+                "operationId": "getUser",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of user",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "5eb71ba74676dfca3fef434f"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get user result",
+                        "content": {}
+                    },
+                    "422": {
+                        "description": "Missing parameters",
+                        "content": {}
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "update a user",
+                "description": "update a user.",
+                "operationId": "updateUser",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of user",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "5eb71ba74676dfca3fef434f"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "login",
+                                    "email",
+                                    "password",
+                                    "firstName",
+                                    "lastName",
+                                    "langKey",
+                                    "roles"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "login": {
+                                        "type": "string",
+                                        "description": "user login name"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "description": "user email",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "description": "user password"
+                                    },
+                                    "firstName": {
+                                        "type": "string",
+                                        "description": "user first name"
+                                    },
+                                    "lastName": {
+                                        "type": "string",
+                                        "description": "user last name"
+                                    },
+                                    "langKey": {
+                                        "type": "string",
+                                        "description": "user language key"
+                                    },
+                                    "roles": {
+                                        "type": "array",
+                                        "description": "user roles",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "active": {
+                                        "type": "boolean",
+                                        "description": "user enabled"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": false
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update user result",
+                        "content": {}
+                    },
+                    "422": {
+                        "description": "Missing parameters",
+                        "content": {}
+                    }
+                },
+                "x-codegen-request-body-name": "params"
+            },
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete user by id",
+                "description": "Delete user by id.",
+                "operationId": "deleteUser",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of user",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "5eb725a7ada22e664c83e634"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Delete user result",
+                        "content": {}
+                    },
+                    "422": {
+                        "description": "Missing parameters",
+                        "content": {}
+                    }
+                }
+            }
+        },
+        "/api/v1/user/list": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "list all users",
+                "description": "list all users.",
+                "operationId": "listAllUsers",
+                "responses": {
+                    "200": {
+                        "description": "Get user result",
+                        "content": {}
+                    },
+                    "422": {
+                        "description": "Missing parameters",
+                        "content": {}
                     }
                 }
             }
         }
     },
-    "definitions": {},
-    "responses": {},
-    "parameters": {},
-    "securityDefinitions": {},
     "tags": []
 }

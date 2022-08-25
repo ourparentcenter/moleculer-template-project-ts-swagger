@@ -1,0 +1,7 @@
+_id,login,password,firstName,lastName,email,langKey,roles,active,createdBy,createdDate,lastModifiedBy,lastModifiedDate
+5eb71ba74676dfca3fef434f,superadmin,123456,sadmin,sadmin,sadmin@admin.com,es,ROLE_SUPERADMIN|,true,5eb71ba74676dfca3fef434f,2020-05-09T21:11:16.887Z,,
+5eb71bb3b3a17a2fd4f83322,admin,123456,admin,admin,admin@admin.com,es,ROLE_ADMIN|,true,5eb71ba74676dfca3fef434f,2020-05-09T21:11:16.887Z,,
+5eb71c114b35f4c17db3a773,approver,123456,approver,approver,approver@admin.com,es,ROLE_APPROVER|,true,5eb71ba74676dfca3fef434f,2020-05-09T21:11:16.887Z,,
+5eb71c1e9662c4530b2e9d2a,modifier,123456,modifier,modifier,modifier@admin.com,es,ROLE_MODIFIER|,true,5eb71ba74676dfca3fef434f,2020-05-09T21:11:16.887Z,,
+5eb71bad0e58852bae1d10c3,user,123456,user,user,user@admin.com,es,ROLE_USER|,true,5eb71ba74676dfca3fef434f,2020-05-09T21:11:16.887Z,,
+5eb725a7ada22e664c83e634,disabled,123456,user,user,user1@admin.com,es,ROLE_USER|,false,5eb71ba74676dfca3fef434f,2020-05-09T21:11:16.887Z,,

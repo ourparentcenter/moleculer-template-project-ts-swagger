@@ -31,6 +31,8 @@
 		"@types/jest": "^28.1.7",
 		"@types/mkdirp": "^1.0.2",
 		"@types/node": "^18.7.6",
+    "@types/rimraf": "^3.0.2",
+		"@types/supertest": "^2.0.12",
     {{#apiGW}}
     "@types/cookie-parser": "^1.4.3",
     {{/apiGW}}
@@ -56,12 +58,17 @@
 		"eslint-plugin-prefer-arrow": "^1.2.3",
     {{/lint}}
     "jest": "^28.1.3",
+    "jest-chain": "^1.1.5",
+		"jest-circus": "^28.1.3",
     "jest-cli": "^28.1.3",
+    "jest-junit": "^14.0.0",
+    "jest-extended": "^3.0.2",
     "moleculer-repl": "^0.7.2",
     {{#apiGW}}
     "open": "^8.4.0",
     {{/apiGW}}
     "prettier": "^2.7.1",
+    "supertest": "^6.2.4",
 		"tsconfig-paths": "^4.1.0",
 		"ts-jest": "^28.0.8",
     {{#if_eq watcher "TSNODE"}}
@@ -95,9 +102,13 @@
     "redlock": "^4.2.0",
     {{/redis}}
     {{#swagger}}
+    "@types/js-yaml": "^4.0.5",
+    "js-yaml": "^4.1.0",
+    "replace-in-file": "^6.3.5",
     "swagger-jsdoc": "^6.2.5",
 		"swagger-ui-dist": "^4.13.2",
     "replace-in-file": "^6.3.5",
+    "swagger-editor-dist": "^4.4.0",
     {{/swagger}}
     {{#swaggerstats}}
     "openapi-types": "^12.0.0",
@@ -145,6 +156,18 @@
   "jest": {
     "coverageDirectory": "<rootDir>/coverage",
     "testEnvironment": "node",
+    "collectCoverage": false,
+		"reporters": [
+			"default",
+			"jest-junit"
+		],
+		"setupFiles": [
+			"./jest.setup.ts"
+		],
+		"setupFilesAfterEnv": [
+			"jest-chain",
+			"jest-extended/all"
+		],
     "moduleFileExtensions": [
       "ts",
       "tsx",
@@ -158,7 +181,8 @@
     ],
     "globals": {
       "ts-jest": {
-        "tsconfig": "tsconfig.json"
+        "tsconfig": "tsconfig.json",
+        "diagnostics": true
       }
     }
   }

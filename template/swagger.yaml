@@ -1,0 +1,402 @@
+openapi: 3.0.1
+info:
+  title: newtestdev API Documentation
+  description: Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects..
+  version: 1.0.0
+servers:
+  - url: //localhost:3000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+paths:
+  /api/v1/greeter/hello:
+    get:
+      tags:
+        - Greeter
+      summary: Say a 'Hello' action
+      description: Say a 'Hello' action
+      responses:
+        '200':
+          description: Hello result
+          content: {}
+        '403':
+          description: Server error
+          content: {}
+  /api/v1/greeter/welcome:
+    post:
+      tags:
+        - Greeter
+      summary: Welcome a username
+      description: Welcome a username
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name to be used
+                  default: John
+        required: false
+      responses:
+        '200':
+          description: welcome result
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
+  /api/v1/products/{id}/quantity/increase:
+    put:
+      tags:
+        - Products
+      summary: Increase the quantity of the product item
+      description: Increase the quantity of the product item.
+      operationId: increaseQuantity
+      parameters:
+        - name: id
+          in: path
+          description: Id of product
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              required:
+                - value
+              type: object
+              properties:
+                value:
+                  type: number
+                  description: Quantity to increase
+        required: false
+      responses:
+        '200':
+          description: Increased quantity result
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
+  /api/v1/products/{id}/quantity/decrease:
+    put:
+      tags:
+        - Products
+      summary: Decrease the quantity of the product item
+      description: Decrease the quantity of the product item.
+      operationId: decreaseQuantity
+      parameters:
+        - name: id
+          in: path
+          description: Id of product
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - value
+              type: object
+              properties:
+                value:
+                  type: number
+                  description: Quantity to increase
+        required: false
+      responses:
+        '200':
+          description: Decreased quantity result
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
+  /api/v1/products:
+    get:
+      tags:
+        - Products
+      summary: Get all products (auto generated)
+      description: Get all products
+      responses:
+        '200':
+          description: Products result
+          content: {}
+        '403':
+          description: Server error
+          content: {}
+    post:
+      tags:
+        - Products
+      summary: Create a product (auto generated)
+      description: Create a product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+                - price
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name to be used
+                  default: product name
+                price:
+                  type: number
+                  description: Price of product
+                  default: 5
+        required: false
+      responses:
+        '200':
+          description: Create product result
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
+  /api/v1/products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get product by id (auto generated)
+      description: Get product by id
+      parameters:
+        - name: id
+          in: path
+          description: Id of product
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Products result
+          content: {}
+        '403':
+          description: Server error
+          content: {}
+    put:
+      tags:
+        - Products
+      summary: Update a product (auto generated)
+      description: Update product.
+      parameters:
+        - name: id
+          in: path
+          description: Id of product
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of product
+                  default: product name
+                price:
+                  type: number
+                  description: Price of product
+                  default: 5
+        required: false
+      responses:
+        '200':
+          description: Product update result
+          content: {}
+        '403':
+          description: Server error
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
+    delete:
+      tags:
+        - Products
+      summary: Delete a product (auto generated)
+      description: Delete product by id
+      parameters:
+        - name: id
+          in: path
+          description: Id of product
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Delete result
+          content: {}
+        '403':
+          description: Server error
+          content: {}
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login a user
+      description: Login a user.
+      operationId: loginUser
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              required:
+                - login
+                - password
+              type: object
+              properties:
+                login:
+                  type: string
+                  description: user login name
+                  default: superadmin
+                password:
+                  type: string
+                  description: user password
+                  default: 123456
+        required: false
+      responses:
+        '200':
+          description: Login user result
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
+  /api/v1/user/{id}:
+    get:
+      tags:
+        - Users
+      summary: get user by id
+      description: get user by id.
+      operationId: getUser
+      parameters:
+        - name: id
+          in: path
+          description: Id of user
+          required: true
+          schema:
+            type: string
+            default: 5eb71ba74676dfca3fef434f
+      responses:
+        '200':
+          description: Get user result
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+    put:
+      tags:
+        - Users
+      summary: update a user
+      description: update a user.
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          description: Id of user
+          required: true
+          schema:
+            type: string
+            default: 5eb71ba74676dfca3fef434f
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - login
+                - email
+                - password
+                - firstName
+                - lastName
+                - langKey
+                - roles
+              type: object
+              properties:
+                login:
+                  type: string
+                  description: user login name
+                email:
+                  type: string
+                  description: user email
+                  format: email
+                password:
+                  type: string
+                  description: user password
+                firstName:
+                  type: string
+                  description: user first name
+                lastName:
+                  type: string
+                  description: user last name
+                langKey:
+                  type: string
+                  description: user language key
+                roles:
+                  type: array
+                  description: user roles
+                  items:
+                    type: string
+                active:
+                  type: boolean
+                  description: user enabled
+        required: false
+      responses:
+        '200':
+          description: Update user result
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
+    delete:
+      tags:
+        - Users
+      summary: Delete user by id
+      description: Delete user by id.
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          description: Id of user
+          required: true
+          schema:
+            type: string
+            default: 5eb725a7ada22e664c83e634
+      responses:
+        '200':
+          description: Delete user result
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+  /api/v1/user/list:
+    get:
+      tags:
+        - Users
+      summary: list all users
+      description: list all users.
+      operationId: listAllUsers
+      responses:
+        '200':
+          description: Get user result
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+tags: []
