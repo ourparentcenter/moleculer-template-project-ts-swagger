@@ -38,8 +38,7 @@ jobs:
                   TRANSPORTER: ${{ matrix.transporter }}
 
             - name: Generate project with '${{ matrix.transporter }}' transporter
-              run: yarn install --immutable
-              run: yarn test
+              run: yarn install --immutable && yarn test
 
             # - name: Run lint in the generated project
             #   run: npm run lint
