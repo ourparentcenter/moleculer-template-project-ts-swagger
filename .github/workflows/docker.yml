@@ -24,7 +24,7 @@ jobs:
             - name: Cache
               uses: actions/cache@v2
               with:
-                  path: ~/.npm
+                  path: ~/.yarn
                   key: cache-node-modules-${{ matrix.node-version }}
 
             - name: Install dependencies
