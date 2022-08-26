@@ -20,6 +20,7 @@ jobs:
               uses: actions/setup-node@v1
               with:
                   node-version: ${{ matrix.node-version }}
+                  package-manager: yarn
 
             - name: Cache
               uses: actions/cache@v2
@@ -37,8 +38,6 @@ jobs:
                   TRANSPORTER: ${{ matrix.transporter }}
 
             - name: Generate project with '${{ matrix.transporter }}' transporter
-              with:
-                  package-manager: yarn
               run: yarn test
 
             # - name: Run lint in the generated project
