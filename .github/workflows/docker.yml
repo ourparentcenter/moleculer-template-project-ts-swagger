@@ -8,7 +8,7 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [16.x, 17.x, 18.x]
+                node-version: [16.x, 18.x]
                 # transporter: [NATS, Redis, MQTT, AMQP, AMQP10, STAN, Kafka, TCP]
                 transporter: [NATS, Redis, MQTT, AMQP, STAN, Kafka, TCP]
             fail-fast: false
@@ -40,12 +40,15 @@ jobs:
             - name: Generate project with '${{ matrix.transporter }}' transporter
               run: yarn test
 
+            - name: Install test dependencies
+              run: yarn install
+              working-directory: ./ci-test
             # - name: Run lint in the generated project
             #   run: npm run lint
             #   working-directory: ./ci-test
 
             - name: Run tests in the generated project
-              run: yarn install --immutable && yarn test
+              run: yarn test
               working-directory: ./ci-test
 
             - run: cat ./ci-test/docker-compose.env
