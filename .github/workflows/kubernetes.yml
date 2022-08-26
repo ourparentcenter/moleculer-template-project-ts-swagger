@@ -37,6 +37,8 @@ jobs:
                   TRANSPORTER: ${{ matrix.transporter }}
 
             - name: Generate project with '${{ matrix.transporter }}' transporter
+              with:
+                  package-manager: yarn
               run: yarn test
 
             - name: Run tests in the generated project
