@@ -8,7 +8,7 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [10.x, 12.x, 14.x, 16.x]
+                node-version: [16.x, 17.x, 18.x]
                 # transporter: [NATS, Redis, MQTT, AMQP, AMQP10, STAN, Kafka, TCP]
                 transporter: [NATS, Redis, MQTT, AMQP, STAN, Kafka, TCP]
             fail-fast: false
@@ -28,7 +28,7 @@ jobs:
                   key: cache-node-modules-${{ matrix.node-version }}
 
             - name: Install dependencies
-              run: npm install
+              run: yarn install
 
             - name: Create answers file
               run: node update-answers.js
@@ -37,21 +37,21 @@ jobs:
                   TRANSPORTER: ${{ matrix.transporter }}
 
             - name: Generate project with '${{ matrix.transporter }}' transporter
-              run: npm test
+              run: yarn test
 
             # - name: Run lint in the generated project
             #   run: npm run lint
             #   working-directory: ./ci-test
 
             - name: Run tests in the generated project
-              run: npm test
+              run: yarn test
               working-directory: ./ci-test
 
             - run: cat ./ci-test/docker-compose.env
             - run: cat ./ci-test/docker-compose.yml
 
             - name: Start containers
-              run: npm run dc:up
+              run: yarn run dc:up
               working-directory: ./ci-test
 
             - name: Sleeping 60 secs
@@ -79,5 +79,5 @@ jobs:
               run: curl --silent --show-error --fail http://localhost:3000/openapi/ #swagger-UI
 
             - name: Stop containers
-              run: npm run dc:down
+              run: yarn run dc:down
               working-directory: ./ci-test

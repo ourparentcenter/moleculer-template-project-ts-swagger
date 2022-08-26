@@ -8,6 +8,7 @@ jobs:
 
         strategy:
             matrix:
+                node-version: [16.x, 17.x, 18.x]
                 # transporter: [NATS, Redis, MQTT, AMQP, AMQP10, STAN, Kafka]
                 transporter: [NATS, Redis, MQTT, AMQP, STAN, Kafka]
             fail-fast: false
@@ -19,15 +20,15 @@ jobs:
             - name: Use Node.js with ${{ matrix.transporter }} transporter
               uses: actions/setup-node@v1
               with:
-                  node-version: 12.x
+                  node-version: ${{ matrix.node-version }}
             - name: Cache
               uses: actions/cache@v2
               with:
                   path: ~/.npm
-                  key: cache-node-modules-12.x
+                  key: cache-node-modules-${{ matrix.node-version }}
 
             - name: Install dependencies
-              run: npm i
+              run: yarn install
 
             - name: Create answers file
               run: node update-answers.js
@@ -36,10 +37,10 @@ jobs:
                   TRANSPORTER: ${{ matrix.transporter }}
 
             - name: Generate project with '${{ matrix.transporter }}' transporter
-              run: npm test
+              run: yarn test
 
             - name: Run tests in the generated project
-              run: npm test
+              run: yarn test
               working-directory: ./ci-test
 
             - name: Start a local Docker Registry
