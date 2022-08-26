@@ -38,10 +38,10 @@ jobs:
                   TRANSPORTER: ${{ matrix.transporter }}
 
             - name: Generate project with '${{ matrix.transporter }}' transporter
-              run: yarn install --immutable && yarn test
+              run: yarn test
 
             - name: Run tests in the generated project
-              run: yarn test
+              run: yarn install --immutable && yarn test
               working-directory: ./ci-test
 
             - name: Start a local Docker Registry
