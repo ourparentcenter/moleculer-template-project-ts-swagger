@@ -9,8 +9,8 @@ import helmet from 'helmet';
 import ApiGateway from 'moleculer-web';
 import { Service, Method } from '@ourparentcenter/moleculer-decorators-extended';
 import pick from 'lodash/pick';
-{{#swagger}}import { openAPIMixin } from '../../mixins/openapi/openapi.mixin';
-import { editorMixin } from '../../mixins/editor/editor.mixin';{{/swagger}}
+{{#swagger}}import { openAPIMixin } from '../../mixins/openapi/openapi.mixin';{{/swagger}}
+{{#swaggereditor}}import { editorMixin } from '../../mixins/editor/editor.mixin';{{/swaggereditor}}
 import { Config } from '../../common';
 import {
 	RequestMessage,
@@ -34,7 +34,7 @@ import { Server, Socket } from 'socket.io';
 @Service({
 	name: 'api',
 	authToken: Config.API_AUTH_TOKEN,
-	mixins: [ApiGateway{{#swagger}}, openAPIMixin(), editorMixin(){{/swagger}}],
+	mixins: [ApiGateway{{#swagger}}, openAPIMixin(){{/swagger}}{{#swaggereditor}}, editorMixin(){{/swaggereditor}}],
 	// More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
 	settings: {
 		// rate limiter default for all routes
@@ -70,11 +70,11 @@ import { Server, Socket } from 'socket.io';
 						'frame-ancestors': ["'self'"],
 						'img-src': ["'self'", 'data:'],
 						'object-src': ["'none'"],
-						'script-src': ["'self'", "'unsafe-inline'"{{#swagger}}, "'unsafe-eval'"{{/swagger}}],
+						'script-src': ["'self'", "'unsafe-inline'"{{#swaggereditor}}, "'unsafe-eval'"{{/swaggereditor}}],
 						'script-src-attr': ["'none'"],
 						'style-src': ["'self'", "'unsafe-inline'"],
 						'upgrade-insecure-requests': [],
-						{{#swagger}}'worker-src': ['blob:'],
+						{{#swaggereditor}}'worker-src': ['blob:'],
 						'connect-src': [
 							"'self'",
 							'https://generator3.swagger.io/openapi.json',
@@ -84,7 +84,7 @@ import { Server, Socket } from 'socket.io';
 							'https://generator.swagger.io/api/gen/clients',
 							'https://generator.swagger.io/api/gen/servers',
 							'https://converter.swagger.io/api/convert',
-						],{{/swagger}}
+						],{{/swaggereditor}}
 					},
 				},
 			}),

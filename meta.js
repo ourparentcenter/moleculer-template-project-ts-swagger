@@ -20,7 +20,7 @@ module.exports = function (values) {
 				name: 'frontend',
 				message: 'Add demo frontend project (Quasar)?',
 				when: (answers) => {
-					if (!answers.apiGW) {
+					if (!answers.apiGW || answers.apiGW == false) {
 						answers.apiGW = false;
 						answers.frontend = false;
 					}
@@ -33,7 +33,7 @@ module.exports = function (values) {
 				name: 'swagger',
 				message: 'Use Swagger?',
 				when: (answers) => {
-					if (!answers.apiGW) {
+					if (!answers.apiGW || answers.apiGW == false) {
 						answers.swagger = answers.apiGW;
 					}
 					return answers.apiGW;
@@ -45,8 +45,20 @@ module.exports = function (values) {
 				name: 'swaggerstats',
 				message: 'Use Swagger-Stats?',
 				when: (answers) => {
-					if (!answers.apiGW) {
+					if (!answers.apiGW || answers.apiGW == false) {
 						answers.swaggerstats = answers.apiGW;
+					}
+					return answers.apiGW;
+				},
+				default: true,
+			},
+			{
+				type: 'confirm',
+				name: 'swaggereditor',
+				message: 'Use Swagger-Editor?',
+				when: (answers) => {
+					if (!answers.apiGW || answers.apiGW == false) {
+						answers.swaggereditor = answers.apiGW;
 					}
 					return answers.apiGW;
 				},
@@ -234,7 +246,7 @@ module.exports = function (values) {
 			'services/**/*': 'dbService',
 			'mixins/dbmixins/db.mixin.ts': 'dbService',
 			'mixins/openapi/openapi.mixin.ts': 'swagger',
-			'mixins/editor/editor.mixin.ts': 'swagger',
+			'mixins/editor/editor.mixin.ts': 'swaggereditor',
 			'mixins/swstats/index.ts': 'swaggerstats',
 			'test/mixins/db.mixin.spec.ts': 'dbService',
 			'test/integration/*': 'dbService',

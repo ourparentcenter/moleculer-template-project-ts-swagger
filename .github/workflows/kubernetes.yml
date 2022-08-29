@@ -8,26 +8,28 @@ jobs:
 
         strategy:
             matrix:
+                node-version: [16.x, 18.x]
                 # transporter: [NATS, Redis, MQTT, AMQP, AMQP10, STAN, Kafka]
                 transporter: [NATS, Redis, MQTT, AMQP, STAN, Kafka]
             fail-fast: false
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             - name: Use Node.js with ${{ matrix.transporter }} transporter
-              uses: actions/setup-node@v1
+              uses: actions/setup-node@v3
               with:
-                  node-version: 12.x
+                  node-version: ${{ matrix.node-version }}
+                  cache: 'yarn'
             - name: Cache
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
-                  path: ~/.npm
-                  key: cache-node-modules-12.x
+                  path: ~/.yarn
+                  key: cache-node-modules-${{ matrix.node-version }}
 
             - name: Install dependencies
-              run: npm i
+              run: yarn install --immutable
 
             - name: Create answers file
               run: node update-answers.js
@@ -36,10 +38,14 @@ jobs:
                   TRANSPORTER: ${{ matrix.transporter }}
 
             - name: Generate project with '${{ matrix.transporter }}' transporter
-              run: npm test
+              run: yarn test
+
+            - name: Install test dependencies
+              run: yarn install
+              working-directory: ./ci-test
 
             - name: Run tests in the generated project
-              run: npm test
+              run: yarn test
               working-directory: ./ci-test
 
             - name: Start a local Docker Registry
