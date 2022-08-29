@@ -24,6 +24,7 @@
 
 
 ## Install
+This project needs yarn due to an issue with npm resolving dependencies for prom client if using swagger stats.
 To install use the [moleculer-cli](https://github.com/moleculerjs/moleculer-cli) tool.
 
 ```bash
@@ -48,6 +49,7 @@ Downloading template...
 ? Add demo frontend project (Quasar)? Yes
 ? Use Swagger? Yes
 ? Use Swagger-Stats? Yes
+? Use Swagger-Editor? Yes
 ? Would you like to communicate with other nodes? Yes
 ? Select a transporter NATS (recommended)
 ? Would you like to use cache? No
@@ -62,11 +64,8 @@ Downloading template...
 ? Select a file watcher ts-node (recommended)
 
 Create 'moleculertemplatetest' folder...
-? Would you like to run 'npm install'? Yes
+? Would you like to run 'npm install'? Yes **-- no if using swagger stats**
 ```
-
-## swagger
-Swagger has been updated to use the swagger initialize file in swagger-dist. This is a change from previous versions of swagger-dist where the html file was updated and held the js code for swagger initialize.
 
 ## NPM scripts
 - `npm run dev`: Start development mode (load all services locally without transporter with hot-reload & REPL)
@@ -81,6 +80,12 @@ Swagger has been updated to use the swagger initialize file in swagger-dist. Thi
 - `npm run dc:up`: Start the stack with Docker Compose
 - `npm run dc:logs`: Watch & follow the container logs
 - `npm run dc:down`: Stop the stack with Docker Compose
+
+## swagger
+Swagger has been updated to use the swagger initialize file in swagger-dist and openAPI 3.0.1 schema. This is a change from previous versions of swagger-dist where the html file was updated and held the js code for swagger initialize. Swagger editor has also been added for those who like swagger editor. You can use one or the other or both at the same time is supported.
+
+## frontend
+The frontend is built with Quasar v2 and compiled into the public folder of api gateway. The frontend project directory is provided when selecting yes to adding frontend project. Quasar is an awesome vue framework that not only provide you with a frontend site, but can also compile to mobile app, SSR, PWA, BEX, Electron app, all from the same code base. [See Quasar for more details](https://quasar.dev/introduction-to-quasar)
 
 ## REPL in Docker
 Docker images now have moleculer-repl added to them. To use, open docker cli of a container, like api container, and run the following command `moleculer --ns {enter your namespace here}`, e.g. `moleculer --ns test-template2-docker`. This will start a new broker serviece node and add it to your existing nodes so that you can use the repl commands in docker.
