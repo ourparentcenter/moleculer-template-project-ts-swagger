@@ -107,7 +107,6 @@
     "replace-in-file": "^6.3.5",
     "swagger-jsdoc": "^6.2.5",
 		"swagger-ui-dist": "^4.13.2",
-    "replace-in-file": "^6.3.5",
     "swagger-editor-dist": "^4.4.0",
     {{/swagger}}
     {{#swaggerstats}}

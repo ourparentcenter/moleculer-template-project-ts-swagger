@@ -4,25 +4,17 @@ FROM node:lts-alpine
 WORKDIR /app
 
 # Install dependencies npm
-COPY package.json package-lock.json ./
+# COPY package.json package-lock.json ./
 
 # Install dependencies yarn
-# COPY package.json yarn.lock ./
+COPY package.json yarn.lock ./
 
 # Add moleculer
-RUN npm install -g moleculer-cli
-# RUN yarn global add moleculer-cli
+# RUN npm install -g moleculer-cli
+RUN yarn global add moleculer-cli
 
 # Add all supported transporters except kafka
-RUN npm install -g amqp \
-	nats \
-	node-nats-streaming \
-	ioredis \
-	mqtt \
-	amqplib \
-	rhea-promise
-
-# RUN yarn global add install amqp \
+# RUN npm install -g amqp \
 # 	nats \
 # 	node-nats-streaming \
 # 	ioredis \
@@ -30,22 +22,30 @@ RUN npm install -g amqp \
 # 	amqplib \
 # 	rhea-promise
 
-# Add all supported serializers
-RUN npm install -g avsc \
-	msgpack5 \
-	notepack.io \
-	protobufjs \
-	thrift
+RUN yarn global add install \
+	{{#if_eq transporter "AMQP"}}amqp amqplib{{/if_eq}}
+	{{#if_eq transporter "NATS"}}nats{{/if_eq}}
+	{{#if_eq transporter "STAN"}}node-nats-streaming{{/if_eq}}
+	{{#if_eq transporter "Redis"}}ioredis{{/if_eq}}
+	{{#if_eq transporter "MQTT"}}mqtt{{/if_eq}}
+	{{#if_eq transporter "AMQP10"}}rhea-promise{{/if_eq}}
 
-# RUN yarn global add avsc \
+# Add all supported serializers
+# RUN npm install -g avsc \
 # 	msgpack5 \
 # 	notepack.io \
 # 	protobufjs \
 # 	thrift
 
+RUN yarn global add avsc \
+	msgpack5 \
+	notepack.io \
+	protobufjs \
+	thrift
+
 # install project dependencies
-RUN npm ci --silent
-# RUN yarn install --frozen-lockfile
+# RUN npm ci --silent
+RUN yarn install --frozen-lockfile
 
 # Copy source
 COPY . .
@@ -54,11 +54,11 @@ COPY . .
 ENV NODE_ENV=production
 
 # build
-RUN npm run build \
-	&& npm prune
+# RUN npm run build \
+# 	&& npm prune
 
-# RUN yarn run build
+RUN yarn run build
 
 # Start server
-CMD ["npm", "run", "start"]
-# CMD ["yarn", "run", "start"]
+# CMD ["npm", "run", "start"]
+CMD ["yarn", "run", "start"]
