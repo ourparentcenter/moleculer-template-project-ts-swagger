@@ -35,7 +35,7 @@ import {
 		idField: '_id',
 		// Available fields in the responses
 		fields: ['_id', 'name', 'quantity', 'price'],
-		// rest endpoint
+		// Base path
 		rest: '/',
 		// rest: '/v1/products',
 		// Validator for the `create` & `insert` actions.
@@ -84,7 +84,9 @@ export default class ProductService extends MoleculerDBService<
 	 *        required: true
 	 *        schema:
 	 *          type: string
+	 *          example: '5ec51b33ead6ef2b423e4089'
 	 *      requestBody:
+	 *        required: true
 	 *        content:
 	 *          application/json; charset=utf-8:
 	 *            schema:
@@ -95,11 +97,18 @@ export default class ProductService extends MoleculerDBService<
 	 *                value:
 	 *                  type: number
 	 *                  description: Quantity to increase
-	 *        required: false
 	 *      responses:
 	 *        200:
 	 *          description: Increased quantity result
-	 *          content: {}
+	 *          content:
+	 *            application/json:
+	 *              schema:
+	 *                allOf:
+	 *                - type: object
+	 *                  properties:
+	 *                    _id:
+	 *                      type: string
+	 *                - $ref: '#/components/schemas/Product'
 	 *        422:
 	 *          description: Missing parameters
 	 *          content: {}
@@ -144,6 +153,7 @@ export default class ProductService extends MoleculerDBService<
 	 *        schema:
 	 *          type: string
 	 *      requestBody:
+	 *        required: true
 	 *        content:
 	 *          application/json:
 	 *            schema:
@@ -154,11 +164,18 @@ export default class ProductService extends MoleculerDBService<
 	 *                value:
 	 *                  type: number
 	 *                  description: Quantity to increase
-	 *        required: false
 	 *      responses:
 	 *        200:
 	 *          description: Decreased quantity result
-	 *          content: {}
+	 *          content:
+	 *            application/json:
+	 *              schema:
+	 *                allOf:
+	 *                - type: object
+	 *                  properties:
+	 *                    _id:
+	 *                      type: string
+	 *                - $ref: '#/components/schemas/Product'
 	 *        422:
 	 *          description: Missing parameters
 	 *          content: {}
@@ -228,7 +245,32 @@ export default class ProductService extends MoleculerDBService<
 	 *      responses:
 	 *        200:
 	 *          description: Products result
-	 *          content: {}
+	 *          content:
+	 *            application/json:
+	 *              schema:
+	 *                type: object
+	 *                properties:
+	 *                  rows:
+	 *                    type: array
+	 *                    items:
+	 *                      allOf:
+	 *                      - type: object
+	 *                        properties:
+	 *                          _id:
+	 *                            type: string
+	 *                      - $ref: '#/components/schemas/Product'
+	 *                  total:
+	 *                    type: number
+	 *                    description: Products result count
+	 *                  page:
+	 *                    type: number
+	 *                    description: Products result page
+	 *                  pageSize:
+	 *                    type: number
+	 *                    description: Products result page size max
+	 *                  totalPages:
+	 *                    type: number
+	 *                    description: Products result total pages
 	 *        403:
 	 *          description: Server error
 	 *          content: {}
@@ -244,6 +286,7 @@ export default class ProductService extends MoleculerDBService<
 	 *      summary: Create a product (auto generated)
 	 *      description: Create a product
 	 *      requestBody:
+	 *        required: true
 	 *        content:
 	 *          application/json:
 	 *            schema:
@@ -255,16 +298,23 @@ export default class ProductService extends MoleculerDBService<
 	 *                name:
 	 *                  type: string
 	 *                  description: Name to be used
-	 *                  default: product name
+	 *                  example: product name
 	 *                price:
 	 *                  type: number
 	 *                  description: Price of product
-	 *                  default: 5.00
-	 *        required: false
+	 *                  example: 5.00
 	 *      responses:
 	 *        200:
 	 *          description: Create product result
-	 *          content: {}
+	 *          content:
+	 *            application/json:
+	 *              schema:
+	 *                allOf:
+	 *                - type: object
+	 *                  properties:
+	 *                    _id:
+	 *                      type: string
+	 *                - $ref: '#/components/schemas/Product'
 	 *        422:
 	 *          description: Missing parameters
 	 *          content: {}
@@ -287,10 +337,19 @@ export default class ProductService extends MoleculerDBService<
 	 *        required: true
 	 *        schema:
 	 *          type: string
+	 *          example: '5ec51b33ead6ef2b423e4089'
 	 *      responses:
 	 *        200:
 	 *          description: Products result
-	 *          content: {}
+	 *          content:
+	 *            application/json:
+	 *              schema:
+	 *                allOf:
+	 *                - type: object
+	 *                  properties:
+	 *                    _id:
+	 *                      type: string
+	 *                - $ref: '#/components/schemas/Product'
 	 *        403:
 	 *          description: Server error
 	 *          content: {}
@@ -312,27 +371,26 @@ export default class ProductService extends MoleculerDBService<
 	 *        required: true
 	 *        schema:
 	 *          type: string
+	 *          example: '5ec51b33ead6ef2b423e4089'
 	 *      requestBody:
+	 *        required: true
 	 *        content:
 	 *          application/json:
 	 *            schema:
-	 *              required:
-	 *              - name
-	 *              type: object
-	 *              properties:
-	 *                name:
-	 *                  type: string
-	 *                  description: Name of product
-	 *                  default: product name
-	 *                price:
-	 *                  type: number
-	 *                  description: Price of product
-	 *                  default: 5.00
-	 *        required: false
+	 *              anyOf:
+	 *              - $ref: '#/components/schemas/Product'
 	 *      responses:
 	 *        200:
 	 *          description: Product update result
-	 *          content: {}
+	 *          content:
+	 *            application/json:
+	 *              schema:
+	 *                allOf:
+	 *                - type: object
+	 *                  properties:
+	 *                    _id:
+	 *                      type: string
+	 *                - $ref: '#/components/schemas/Product'
 	 *        403:
 	 *          description: Server error
 	 *          content: {}
@@ -358,6 +416,7 @@ export default class ProductService extends MoleculerDBService<
 	 *        required: true
 	 *        schema:
 	 *          type: string
+	 *          example: '5ec51b33ead6ef2b423e4089'
 	 *      responses:
 	 *        200:
 	 *          description: Delete result

@@ -33,12 +33,12 @@ export enum UserLang {
 }
 
 export interface IUserBase {
-	login: string;
-	firstName: string;
+	login?: string;
+	firstName?: string;
 	lastName?: string;
-	email: string;
+	email?: string;
 	langKey?: UserLang;
-	roles: UserRole[];
+	roles?: UserRole[];
 	active?: boolean;
 }
 
@@ -49,6 +49,7 @@ export interface UserJWT extends IUserBase {
 // PARAMS
 export interface UserCreateParams extends IUserBase {
 	password: string;
+	requireRegToken?: boolean;
 }
 
 export interface UserLoginParams {
@@ -73,8 +74,16 @@ export interface UserGetParams extends DbContextParameters {
 	id: string;
 }
 
+export interface UserActivateParams extends DbContextParameters {
+	verificationToken: string;
+}
+
 export interface UserDeleteParams extends DbContextParameters {
 	id: string;
+}
+
+export interface UsersDeleteParams extends DbContextParameters {
+	userIDs: string[];
 }
 
 // META

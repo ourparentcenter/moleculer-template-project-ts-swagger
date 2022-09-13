@@ -1,7 +1,7 @@
 'use strict';
 
 import { Errors, ServiceBroker } from 'moleculer';
-import TestService from '../../../services/greeterService/greeter.service';
+import TestService from '../../../services/greeterService';
 import 'jest-extended';
 import 'jest-chain';
 const JEST_TIMEOUT = 35 * 1000;

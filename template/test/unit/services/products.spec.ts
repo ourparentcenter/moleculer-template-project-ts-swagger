@@ -5,7 +5,7 @@
 import { clearDB } from '../../helpers/helper';
 import { Config } from '../../../common';
 import { Context, Errors, ServiceBroker } from 'moleculer';
-import TestService from '../../../services/productService/products.service';
+import TestService from '../../../services/productService';
 import 'jest-extended';
 import 'jest-chain';
 const JEST_TIMEOUT = 35 * 1000;

@@ -1,5 +1,6 @@
 import moleculer, { Context, Endpoint, ServiceBroker } from 'moleculer';
-import TestingService from '../../../services/userService/user.service';
+import TestingService from '../../../services/userService';
+import AuthService from '../../../services/authService';
 import {
 	IUser,
 	IUserBase,
@@ -35,11 +36,9 @@ describe('Unit tests for User service', () => {
 	let broker: ServiceBroker;
 	let endpoint: Endpoint;
 	let service: TestingService;
+	let authService: AuthService;
 	const spyBroadcast = jest.spyOn(Context.prototype, 'broadcast');
-	// let version: string;
-	// const spyCall = jest.spyOn(Context.prototype, 'call');
-	// Context.prototype.call = jest.fn();
-	// beforeAll(async () => await clearDB(Config.DB_USER));
+
 	beforeEach(async () => {
 		broker = new ServiceBroker(testConfig);
 		// broker = new ServiceBroker();
@@ -50,11 +49,15 @@ describe('Unit tests for User service', () => {
 			node: {},
 			state: true,
 		};
+		authService = broker.createService(AuthService) as AuthService;
 		service = broker.createService(TestingService) as TestingService;
 		// version = `vv${service.version}`;
 		await clearDB(Config.DB_USER);
 		await broker.start();
-		await broker.waitForServices(`v${service.version}.${service.name}`);
+		await broker.waitForServices([
+			`v${service.version}.${service.name}`,
+			`v${authService.version}.${authService.name}`,
+		]);
 	});
 	afterEach(() => {
 		jest.clearAllMocks();
@@ -68,7 +71,7 @@ describe('Unit tests for User service', () => {
 	beforeEach(() => expect.hasAssertions());
 
 	function getJWT(user: UserJWT) {
-		return service.generateJWT(user as IUser);
+		return authService.generateJWT(user as IUser);
 	}
 
 	describe('actions', () => {
@@ -77,36 +80,34 @@ describe('Unit tests for User service', () => {
 			context = new Context<UserTokenParams, Record<string, unknown>>(broker, endpoint);
 		});
 		it('resolve token', async () => {
-			context.params = { token: getJWT(simpleUser) };
-			try {
-				const response = await service.resolveToken(context);
-				expect(response)
-					.toBeDefined()
-					.toBeObject()
-					.toContainEntries([
-						['_id', simpleUser._id],
-						['login', simpleUser.login],
-					]);
-			} catch (err: any) {
-				throw new Error(err);
-			}
+			context.params = { token: await getJWT(simpleUser) };
+			const response = await authService.resolveToken(context);
+			expect(response)
+				.toBeDefined()
+				.toBeObject()
+				.toContainEntries([
+					['_id', simpleUser._id],
+					['login', simpleUser.login],
+				]);
 		});
 		it('resolve wrong token', async () => {
-			context.params = { token: getJWT(simpleUser) + 'asdf' };
-			try {
-				const response = await service.resolveToken(context);
-				expect(response).toBeUndefined();
-			} catch (err: any) {
-				throw new Error(err);
-			}
+			context.params = { token: (await getJWT(simpleUser)) + 'asdf' };
+			const response = await authService.resolveToken(context);
+			expect(response)
+				.toBeDefined()
+				.toBeObject()
+				.toContainEntries([['code', 'ERR_JWE_DECRYPTION_FAILED']]);
 		});
 		it('resolve not found user', async () => {
-			context.params = { token: getJWT({ ...simpleUser, _id: '1234' }) };
-			try {
-				await service.resolveToken(context);
-			} catch (err: any) {
-				expect(err).toBeInstanceOf(moleculer.Errors.MoleculerClientError);
-			}
+			context.params = { token: await getJWT({ ...simpleUser, _id: '1234' }) };
+			const test = await authService.resolveToken(context);
+			expect(test)
+				.toBeDefined()
+				.toBeObject()
+				.toContainEntries([
+					['code', 404],
+					['data', { id: '1234' }],
+				]);
 		});
 	});
 
@@ -119,7 +120,7 @@ describe('Unit tests for User service', () => {
 			context.params = {} as UserRolesParams;
 			context.meta.user = simpleUser;
 			try {
-				const response = await service.validateRole(context);
+				const response = await authService.validateRole(context);
 				expect(response).toBe(true);
 			} catch (err: any) {
 				throw new Error(err);
@@ -129,7 +130,7 @@ describe('Unit tests for User service', () => {
 			context.params = { roles: [] };
 			context.meta.user = simpleUser;
 			try {
-				const response = await service.validateRole(context);
+				const response = await authService.validateRole(context);
 				expect(response).toBe(true);
 			} catch (err: any) {
 				throw new Error(err);
@@ -139,7 +140,7 @@ describe('Unit tests for User service', () => {
 			context.params = { roles: [UserRole.USER] };
 			context.meta.user = simpleUser;
 			try {
-				const response = await service.validateRole(context);
+				const response = await authService.validateRole(context);
 				expect(response).toBe(true);
 			} catch (err: any) {
 				throw new Error(err);
@@ -149,7 +150,7 @@ describe('Unit tests for User service', () => {
 			context.params = { roles: [UserRole.SUPERADMIN] };
 			context.meta.user = simpleUser;
 			try {
-				const response = await service.validateRole(context);
+				const response = await authService.validateRole(context);
 				expect(response).toBe(false);
 			} catch (err: any) {
 				throw new Error(err);
@@ -242,43 +243,59 @@ describe('Unit tests for User service', () => {
 		});
 		it('login wrong user', async () => {
 			context.params = { login: 'not-valid-user', password: 'test' };
-			try {
-				await service.loginUser(context);
-			} catch (err: any) {
-				expect(err).toBeInstanceOf(moleculer.Errors.MoleculerClientError);
-			}
+			const result = await service.loginUser(context);
+			expect(result)
+				.toBeDefined()
+				.toBeObject()
+				.toContainEntries([
+					['code', 422],
+					['data', [{ field: 'login/password', message: 'not found' }]],
+				]);
 		});
 		it('login wrong password', async () => {
-			context.params = { login: simpleUser.login, password: randString() };
-			try {
-				await service.loginUser(context);
-			} catch (err: any) {
-				expect(err).toBeInstanceOf(moleculer.Errors.MoleculerClientError);
-			}
+			context.params = { login: String(simpleUser.login), password: randString() };
+			const result = await service.loginUser(context);
+			expect(result)
+				.toBeDefined()
+				.toBeObject()
+				.toContainEntries([
+					['code', 422],
+					['data', [{ field: 'login/password', message: 'not found' }]],
+				]);
 		});
 		it('login disabled', async () => {
-			context.params = { login: disabledUser.login, password: '123456' };
-			try {
-				await service.loginUser(context);
-			} catch (err: any) {
-				expect(err).toBeInstanceOf(moleculer.Errors.MoleculerClientError);
-			}
+			context.params = { login: String(disabledUser.login), password: '123456' };
+			const result = await service.loginUser(context);
+			expect(result)
+				.toBeDefined()
+				.toBeObject()
+				.toContainEntries([
+					['code', 403],
+					['data', [{ field: 'disabled', message: 'user not active' }]],
+				]);
 		});
 		it('login good', async () => {
-			context.params = { login: simpleUser.login, password: '123456' };
-			try {
-				const response = await service.loginUser(context);
-				expect(response)
-					.toBeDefined()
-					.toBeObject()
-					.toContainEntry(['token', expect.any(String)]);
-				// .toContainEntries([
-				//   ['login', simpleUser.login],
-				//   ['email', simpleUser.email]
-				// ]);
-			} catch (err: any) {
-				throw new Error(err);
-			}
+			context.params = { login: String(simpleUser.login), password: '123456' };
+			const response = await service.loginUser(context);
+			const context2 = new Context<UserTokenParams, Record<string, unknown>>(
+				broker,
+				endpoint,
+			);
+			context2.params = { ...response };
+			const resolve = await authService.resolveToken(context2);
+			// check for token
+			expect(response)
+				.toBeDefined()
+				.toBeObject()
+				.toContainEntry(['token', expect.any(String)]);
+			// check token resolves to user
+			expect(resolve)
+				.toBeDefined()
+				.toBeObject()
+				.toContainEntries([
+					['_id', simpleUser._id],
+					['login', simpleUser.login],
+				]);
 		});
 	});
 
@@ -375,19 +392,18 @@ describe('Unit tests for User service', () => {
 				firstName: firstName,
 				lastName: lastName,
 			};
-			try {
-				const response = await service.updateUser(context);
-				expect(response)
-					.toBeDefined()
-					.toBeObject()
-					.toContainEntries([
-						['login', simpleUser.login],
-						['email', simpleUser.email],
-					]);
-			} catch (err: any) {
-				throw new Error(err);
-			}
-			calledCacheClean(spyBroadcast);
+			const response = await service.updateUser(context);
+			expect(response)
+				.toBeDefined()
+				.toBeObject()
+				.toContainEntries([
+					['_id', simpleUser._id],
+					['firstName', firstName],
+					['lastName', lastName],
+					['login', simpleUser.login],
+					['email', simpleUser.email],
+				]);
+			// calledCacheClean(spyBroadcast);
 		});
 	});
 

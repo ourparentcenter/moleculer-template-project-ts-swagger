@@ -130,6 +130,7 @@
     "helmet": "^5.1.1",
     {{/apiGW}}
     "json2typescript": "^1.5.1",
+    "jose": "^4.9.2",
 		"jsonwebtoken": "^8.5.1",
 		"lodash": "^4.17.21",
 		"moleculer": "^0.14.23",
@@ -144,6 +145,7 @@
     {{/apiGW}}
     "mongodb": "^4.8.1",
 		"mongoose": "^6.5.2",
+    "randomstring": "^1.2.2",
 		"reflect-metadata": "^0.1.13",
     {{#if_eq httptransport "SOCKET"}}
     "socket.io": "^4.1.3",

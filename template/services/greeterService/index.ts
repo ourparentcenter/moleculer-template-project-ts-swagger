@@ -23,7 +23,7 @@ import EncryptionUtil from '../../helpers/encryption.helper';
 		idField: '_id',
 		// Available fields in the responses
 		fields: ['_id', 'name', 'quantity', 'price'],
-		// rest endpoint
+		// Base path
 		rest: '/',
 		// rest: '/v1/greeter',
 		// Validator for the `create` & `insert` actions.

@@ -39,6 +39,12 @@ const definition: definitionType<IUser> = (collection?: string) => ({
 		unique: true,
 		index: true,
 	},
+	verificationToken: {
+		type: String,
+		max: 100,
+		required: false,
+		index: true,
+	},
 	active: {
 		type: Boolean,
 		default: false,

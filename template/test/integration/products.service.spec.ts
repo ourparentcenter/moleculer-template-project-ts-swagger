@@ -5,7 +5,7 @@
 import { clearDB } from '../helpers/helper';
 import { Config } from '../../common';
 import { ServiceBroker } from 'moleculer';
-import TestService from '../../services/productService/products.service';
+import TestService from '../../services/productService';
 
 describe("Test 'products' service", () => {
 	beforeEach(async () => {

@@ -308,7 +308,7 @@ export default class ApiService extends moleculer.Service {
 
 			if (token) {
 				const user = await ctx.call<UserJWT | undefined, UserTokenParams>(
-					'v1.user.resolveToken',
+					'v1.auth.resolveToken',
 					{ token },
 				);
 				if (user && user.active) {
@@ -357,7 +357,7 @@ export default class ApiService extends moleculer.Service {
 			: [req.$route.opts.roles];
 		const allRoles = [...aroles, ...oroles].filter(Boolean);
 		const roles = [...new Set(allRoles)];
-		const valid = await ctx.call<boolean, UserRolesParams>('v1.user.validateRole', { roles });
+		const valid = await ctx.call<boolean, UserRolesParams>('v1.auth.validateRole', { roles });
 		if (!valid) {
 			return this.rejectAuth(
 				ctx,

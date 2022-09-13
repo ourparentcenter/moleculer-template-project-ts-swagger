@@ -7,6 +7,7 @@ import {
 	DbContextParameters,
 	FilterOptions,
 	CountOptions,
+	QueryFilters,
 } from 'moleculer-db';
 
 export const listActionConfig = {

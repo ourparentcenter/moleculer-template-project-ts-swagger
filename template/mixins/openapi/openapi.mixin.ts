@@ -38,16 +38,6 @@ export const openAPIMixin = (mixinOptions?: any) => {
 			generateOpenAPISchema(): any {
 				try {
 					const swaggerDefinition = {
-						/* swagger: '2.0',
-						info: {
-							title: `${pkg.name} API Documentation`, // Title of the documentation
-							version: pkg.version, // Version of the app
-							description:
-								// eslint-disable-next-line max-len
-								'Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects..', // Short description of the app
-						},
-						host: `${Config.SWAGGER_HOST}:${Config.SWAGGER_PORT}`, // The host or url of the app
-						basePath: `${Config.SWAGGER_BASEPATH}`, // The basepath of your endpoint */
 						openapi: '3.0.1',
 						info: {
 							title: `${pkg.name} API Documentation`, // Title of the documentation
@@ -67,6 +57,104 @@ export const openAPIMixin = (mixinOptions?: any) => {
 									type: 'http',
 									scheme: 'bearer',
 									bearerFormat: 'JWT',
+								},
+							},
+							schemas: {
+								VerificationToken: {
+									type: 'object',
+									properties: {
+										verificationToken: {
+											type: 'string',
+											description: 'Token to activate user',
+											example:
+												'pl9A3MLkTRy7O7fVyIG5WUmdKDxvYPH14on3lQ7G31Clwhmhcd6Nqv4OeM9l5hDS',
+										},
+									},
+								},
+								Product: {
+									type: 'object',
+									properties: {
+										name: {
+											type: 'string',
+											description: 'Name of product',
+											example: 'Samsung Galaxy S20 Edge',
+										},
+										quantity: {
+											type: 'number',
+											description: 'Quantity of product',
+											example: 10,
+										},
+										price: {
+											type: 'number',
+											description: 'Cost of product',
+											example: 875,
+										},
+									},
+								},
+								User: {
+									type: 'object',
+									properties: {
+										login: {
+											type: 'string',
+											description: 'Login to be used',
+											example: 'joeLogin',
+										},
+										firstName: {
+											type: 'string',
+											description: 'First Name',
+											default: 'Joe',
+										},
+										lastName: {
+											type: 'string',
+											description: 'Surname',
+											example: 'Doe',
+										},
+										email: {
+											type: 'string',
+											description: 'Email',
+											example: 'joedoe@test.com',
+										},
+										password: {
+											type: 'string',
+											description: 'Password',
+											example: 'testPass1234',
+										},
+										langKey: {
+											type: 'string',
+											description: 'User language',
+											example: 'en',
+										},
+									},
+								},
+								UserAdditional: {
+									type: 'object',
+									properties: {
+										active: {
+											type: 'boolean',
+											description: 'user enabled',
+											example: false,
+										},
+										createdBy: {
+											type: 'string',
+											description: 'User id',
+											example: '5eb71ba74676dfca3fef434f',
+										},
+										createdDate: {
+											type: 'string',
+											description: 'Created date',
+											default: '2022-09-12T17:22:32.243Z',
+										},
+										lastModifiedBy: {
+											type: 'string',
+											description: 'User id',
+											example: '5eb71ba74676dfca3fef434f',
+										},
+										lastModifiedDate: {
+											type: 'string',
+											description: 'Last modified date',
+											example: '2022-09-12T17:43:28.957Z',
+										},
+									},
 								},
 							},
 						},

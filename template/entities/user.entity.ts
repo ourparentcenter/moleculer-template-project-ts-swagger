@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import { Any, JsonObject, JsonProperty } from 'json2typescript';
+import { Any, JsonObject, JsonProperty, PropertyConvertingMode } from 'json2typescript';
 import { Types } from 'mongoose';
 import { IUserBase, ObjectId, ObjectIdNull, UserLang, UserRole } from '../types';
 import { Config } from '../common';
@@ -9,52 +9,56 @@ import { UserLangConverter } from './converters/user/user-lang.converter';
 
 export interface IUser extends IUserBase {
 	_id: ObjectIdNull;
-	password: string;
-	createdBy: ObjectId;
-	createdDate: Date | null;
+	password?: string;
+	verificationToken?: string;
+	createdBy?: ObjectIdNull;
+	createdDate?: Date | null;
 	lastModifiedBy?: ObjectIdNull;
 	lastModifiedDate?: Date | null;
 }
 
 @JsonObject('User')
 export class UserEntity implements IUser {
-	@JsonProperty('_id', String, true)
+	@JsonProperty('_id', String, PropertyConvertingMode.PASS_NULLABLE)
 	public _id = Config.DB_USER.dialect === 'local' ? new Types.ObjectId() : null;
 
-	@JsonProperty('login', String)
-	public login = '';
+	@JsonProperty('login', String, PropertyConvertingMode.IGNORE_NULLABLE)
+	public login? = '';
 
-	@JsonProperty('password', String, true)
-	public password = '';
+	@JsonProperty('password', String, PropertyConvertingMode.IGNORE_NULLABLE)
+	public password? = '';
 
-	@JsonProperty('firstName', String)
-	public firstName = '';
+	@JsonProperty('firstName', String, PropertyConvertingMode.IGNORE_NULLABLE)
+	public firstName? = '';
 
-	@JsonProperty('lastName', String, true)
-	public lastName = '';
+	@JsonProperty('lastName', String, PropertyConvertingMode.IGNORE_NULLABLE)
+	public lastName? = '';
 
-	@JsonProperty('email', String)
-	public email = '';
+	@JsonProperty('email', String, PropertyConvertingMode.IGNORE_NULLABLE)
+	public email? = '';
 
-	@JsonProperty('langKey', UserLangConverter, true)
+	@JsonProperty('langKey', UserLangConverter, PropertyConvertingMode.IGNORE_NULLABLE)
 	public langKey? = UserLang.ES;
 
-	@JsonProperty('roles', UserRoleConverter)
-	public roles = [UserRole.USER];
+	@JsonProperty('roles', UserRoleConverter, PropertyConvertingMode.IGNORE_NULLABLE)
+	public roles? = [UserRole.USER];
 
-	@JsonProperty('active', Boolean, true)
+	@JsonProperty('verificationToken', PropertyConvertingMode.PASS_NULLABLE)
+	public verificationToken?: string;
+
+	@JsonProperty('active', Boolean, PropertyConvertingMode.IGNORE_NULLABLE)
 	public active? = false;
 
-	@JsonProperty('createdBy', Any, true)
-	public createdBy = '';
+	@JsonProperty('createdBy', Any, PropertyConvertingMode.PASS_NULLABLE)
+	public createdBy? = null;
 
-	@JsonProperty('createdDate', DateConverter, true)
-	public createdDate = null;
+	@JsonProperty('createdDate', DateConverter, PropertyConvertingMode.PASS_NULLABLE)
+	public createdDate? = null;
 
-	@JsonProperty('lastModifiedBy', Any, true)
+	@JsonProperty('lastModifiedBy', Any, PropertyConvertingMode.PASS_NULLABLE)
 	public lastModifiedBy? = null;
 
-	@JsonProperty('lastModifiedDate', DateConverter, true)
+	@JsonProperty('lastModifiedDate', DateConverter, PropertyConvertingMode.PASS_NULLABLE)
 	public lastModifiedDate? = null;
 
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

@@ -1,6 +1,6 @@
 import { Context, Endpoint, ServiceBroker } from 'moleculer';
 import ApiGatewayService from 'moleculer-web';
-import TestingService from '../../../services/apiService/api.service';
+import TestingService from '../../../services/apiService';
 import { UserAuthMeta, UserLang, UserRole } from '../../../types';
 import { UserEntity } from '../../../entities';
 import { testConfig } from '../../helpers/helper';

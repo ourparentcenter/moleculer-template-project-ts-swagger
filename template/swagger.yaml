@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: newtestdev API Documentation
+  title: testmainrepo API Documentation
   description: Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects..
   version: 1.0.0
 servers:
@@ -11,6 +11,79 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  schemas:
+    VerificationToken:
+      type: object
+      properties:
+        verificationToken:
+          type: string
+          description: Token to activate user
+          example: pl9A3MLkTRy7O7fVyIG5WUmdKDxvYPH14on3lQ7G31Clwhmhcd6Nqv4OeM9l5hDS
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of product
+          example: Samsung Galaxy S20 Edge
+        quantity:
+          type: number
+          description: Quantity of product
+          example: 10
+        price:
+          type: number
+          description: Cost of product
+          example: 875
+    User:
+      type: object
+      properties:
+        login:
+          type: string
+          description: Login to be used
+          example: joeLogin
+        firstName:
+          type: string
+          description: First Name
+          default: Joe
+        lastName:
+          type: string
+          description: Surname
+          example: Doe
+        email:
+          type: string
+          description: Email
+          example: joedoe@test.com
+        password:
+          type: string
+          description: Password
+          example: testPass1234
+        langKey:
+          type: string
+          description: User language
+          example: en
+    UserAdditional:
+      type: object
+      properties:
+        active:
+          type: boolean
+          description: user enabled
+          example: false
+        createdBy:
+          type: string
+          description: User id
+          example: 5eb71ba74676dfca3fef434f
+        createdDate:
+          type: string
+          description: Created date
+          default: '2022-09-12T17:22:32.243Z'
+        lastModifiedBy:
+          type: string
+          description: User id
+          example: 5eb71ba74676dfca3fef434f
+        lastModifiedDate:
+          type: string
+          description: Last modified date
+          example: '2022-09-12T17:43:28.957Z'
 security:
   - bearerAuth: []
 paths:
@@ -68,7 +141,9 @@ paths:
           required: true
           schema:
             type: string
+            example: 5ec51b33ead6ef2b423e4089
       requestBody:
+        required: true
         content:
           application/json; charset=utf-8:
             schema:
@@ -79,11 +154,18 @@ paths:
                 value:
                   type: number
                   description: Quantity to increase
-        required: false
       responses:
         '200':
           description: Increased quantity result
-          content: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/Product'
         '422':
           description: Missing parameters
           content: {}
@@ -103,6 +185,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -113,11 +196,18 @@ paths:
                 value:
                   type: number
                   description: Quantity to increase
-        required: false
       responses:
         '200':
           description: Decreased quantity result
-          content: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/Product'
         '422':
           description: Missing parameters
           content: {}
@@ -131,7 +221,32 @@ paths:
       responses:
         '200':
           description: Products result
-          content: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            _id:
+                              type: string
+                        - $ref: '#/components/schemas/Product'
+                  total:
+                    type: number
+                    description: Products result count
+                  page:
+                    type: number
+                    description: Products result page
+                  pageSize:
+                    type: number
+                    description: Products result page size max
+                  totalPages:
+                    type: number
+                    description: Products result total pages
         '403':
           description: Server error
           content: {}
@@ -141,6 +256,7 @@ paths:
       summary: Create a product (auto generated)
       description: Create a product
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -152,16 +268,23 @@ paths:
                 name:
                   type: string
                   description: Name to be used
-                  default: product name
+                  example: product name
                 price:
                   type: number
                   description: Price of product
-                  default: 5
-        required: false
+                  example: 5
       responses:
         '200':
           description: Create product result
-          content: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/Product'
         '422':
           description: Missing parameters
           content: {}
@@ -179,10 +302,19 @@ paths:
           required: true
           schema:
             type: string
+            example: 5ec51b33ead6ef2b423e4089
       responses:
         '200':
           description: Products result
-          content: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/Product'
         '403':
           description: Server error
           content: {}
@@ -198,27 +330,26 @@ paths:
           required: true
           schema:
             type: string
+            example: 5ec51b33ead6ef2b423e4089
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              required:
-                - name
-              type: object
-              properties:
-                name:
-                  type: string
-                  description: Name of product
-                  default: product name
-                price:
-                  type: number
-                  description: Price of product
-                  default: 5
-        required: false
+              anyOf:
+                - $ref: '#/components/schemas/Product'
       responses:
         '200':
           description: Product update result
-          content: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/Product'
         '403':
           description: Server error
           content: {}
@@ -238,6 +369,7 @@ paths:
           required: true
           schema:
             type: string
+            example: 5ec51b33ead6ef2b423e4089
       responses:
         '200':
           description: Delete result
@@ -245,6 +377,45 @@ paths:
         '403':
           description: Server error
           content: {}
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register user
+      description: Register a user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/User'
+                - required:
+                    - login
+                    - firstName
+                    - lastName
+                    - email
+                    - password
+                    - langKey
+      responses:
+        '200':
+          description: Register user result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/User'
+                  - $ref: '#/components/schemas/VerificationToken'
+                  - $ref: '#/components/schemas/UserAdditional'
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
   /auth/login:
     post:
       tags:
@@ -253,6 +424,7 @@ paths:
       description: Login a user.
       operationId: loginUser
       requestBody:
+        required: true
         content:
           application/json; charset=utf-8:
             schema:
@@ -264,12 +436,11 @@ paths:
                 login:
                   type: string
                   description: user login name
-                  default: superadmin
+                  example: superadmin
                 password:
                   type: string
                   description: user password
-                  default: 123456
-        required: false
+                  example: 123456
       responses:
         '200':
           description: Login user result
@@ -278,6 +449,87 @@ paths:
           description: Missing parameters
           content: {}
       x-codegen-request-body-name: params
+  /api/v1/user/logout:
+    get:
+      tags:
+        - Users
+      summary: Logout user
+      description: Logout current user.
+      operationId: logout
+      responses:
+        '200':
+          description: Logout user result
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
+  /api/v1/user:
+    post:
+      tags:
+        - Users
+      summary: Create user
+      description: Create a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/User'
+                - required:
+                    - login
+                    - firstName
+                    - lastName
+                    - email
+                    - password
+                    - langKey
+              anyOf:
+                - type: object
+                  properties:
+                    requireRegToken:
+                      type: boolean
+                      description: Require registration token
+                      example: true
+      responses:
+        '200':
+          description: Create user result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/User'
+                  - $ref: '#/components/schemas/VerificationToken'
+                  - $ref: '#/components/schemas/UserAdditional'
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
+    get:
+      tags:
+        - Users
+      summary: get me
+      description: get me.
+      operationId: getMe
+      responses:
+        '200':
+          description: Get me result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/User'
+        '422':
+          description: Missing parameters
+          content: {}
   /api/v1/user/{id}:
     get:
       tags:
@@ -292,11 +544,19 @@ paths:
           required: true
           schema:
             type: string
-            default: 5eb71ba74676dfca3fef434f
+            example: 5eb71ba74676dfca3fef434f
       responses:
         '200':
           description: Get user result
-          content: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/User'
         '422':
           description: Missing parameters
           content: {}
@@ -313,53 +573,26 @@ paths:
           required: true
           schema:
             type: string
-            default: 5eb71ba74676dfca3fef434f
+            example: 5eb71ba74676dfca3fef434f
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              required:
-                - login
-                - email
-                - password
-                - firstName
-                - lastName
-                - langKey
-                - roles
-              type: object
-              properties:
-                login:
-                  type: string
-                  description: user login name
-                email:
-                  type: string
-                  description: user email
-                  format: email
-                password:
-                  type: string
-                  description: user password
-                firstName:
-                  type: string
-                  description: user first name
-                lastName:
-                  type: string
-                  description: user last name
-                langKey:
-                  type: string
-                  description: user language key
-                roles:
-                  type: array
-                  description: user roles
-                  items:
-                    type: string
-                active:
-                  type: boolean
-                  description: user enabled
-        required: false
+              anyOf:
+                - $ref: '#/components/schemas/User'
       responses:
         '200':
           description: Update user result
-          content: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/User'
         '422':
           description: Missing parameters
           content: {}
@@ -377,7 +610,7 @@ paths:
           required: true
           schema:
             type: string
-            default: 5eb725a7ada22e664c83e634
+            example: 5eb725a7ada22e664c83e634
       responses:
         '200':
           description: Delete user result
@@ -385,6 +618,36 @@ paths:
         '422':
           description: Missing parameters
           content: {}
+  /api/v1/user/removeMany:
+    post:
+      tags:
+        - Users
+      summary: Delete users
+      description: Delete multiple users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - userIDs
+              type: object
+              properties:
+                userIDs:
+                  type: array
+                  description: user ids
+                  items:
+                    type: string
+                  example:
+                    - 5eb725a7ada22e664c83e634
+                    - 5eb71c1e9662c4530b2e9d2a
+      responses:
+        '200':
+          description: Delet users result
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
   /api/v1/user/list:
     get:
       tags:
@@ -395,7 +658,32 @@ paths:
       responses:
         '200':
           description: Get user result
-          content: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            _id:
+                              type: string
+                        - $ref: '#/components/schemas/User'
+                  total:
+                    type: number
+                    description: Users result count
+                  page:
+                    type: number
+                    description: Users result page
+                  pageSize:
+                    type: number
+                    description: Users result page size max
+                  totalPages:
+                    type: number
+                    description: Users result total pages
         '422':
           description: Missing parameters
           content: {}
