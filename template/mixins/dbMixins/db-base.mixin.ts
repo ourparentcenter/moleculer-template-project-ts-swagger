@@ -2,11 +2,12 @@
 import fs from 'fs';
 import path from 'path';
 import { sync as mkdir } from 'mkdirp';
-import DbService, { DbAdapter } from 'moleculer-db';
+import DbService /* , { DbAdapter } */ from 'moleculer-db';
+import TypeORMDbAdapter, { DbAdapter } from '@tyrsolutions/moleculer-db-typeorm-adapter';
 import { Context, ServiceSchema } from 'moleculer';
 import { Model } from 'mongoose';
-import { Config } from '../../common';
-import { DBInfo } from '../../types';
+import { Config } from '@Common';
+import { DBInfo } from '@CoreTypes';
 
 export interface BaseMixinConfig {
 	name: string;
@@ -31,7 +32,7 @@ export class DbBaseMixin {
 		this.cacheCleanEventName = `cache.clean.${this.dbInfo.dbname}.${this.dbInfo.collection}`;
 	}
 
-	public getMixin(seedDBFunction?: (adapter: DbAdapter) => Promise<void>): ServiceSchema {
+	public getMixin(seedDBFunction?: (adapter: DbAdapter<any>) => Promise<void>): ServiceSchema {
 		const schema: ServiceSchema = this.getMixinBase(seedDBFunction);
 
 		switch (this.dbInfo.dialect) {
@@ -41,6 +42,8 @@ export class DbBaseMixin {
 				return this.getLocalAdapter(schema, true);
 			case 'mongodb':
 				return this.getMongoAdapter(schema);
+			case 'typeorm':
+				return this.getTypeORMAdapter(schema);
 			// Case 'mysql':
 			// Case 'postgres':
 			// Case 'mariadb':
@@ -71,7 +74,9 @@ export class DbBaseMixin {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/naming-convention
-	private getMixinBase(seedDBFunction?: (adapter: DbAdapter) => Promise<void>): ServiceSchema {
+	private getMixinBase(
+		seedDBFunction?: (adapter: DbAdapter<any>) => Promise<void>,
+	): ServiceSchema {
 		return {
 			name: this.mixName,
 			mixins: [DbService],
@@ -114,17 +119,19 @@ export class DbBaseMixin {
 				// Check the count of items in the DB. If it's empty,
 				// Call the `seedDB` method of the service.
 				if (seedDBFunction) {
+					// const count = await this.adapter.repository.count();
 					const count = await this.adapter.count();
-					if (!count) {
-						this.logger.info(
-							`The collection for '${this.name}' is empty. Seeding the collection...`,
-						);
-						await seedDBFunction(this.adapter);
-						this.logger.info(
-							'Seeding is done. Number of records:',
-							await this.adapter.count(),
-						);
-					}
+					// const count = false;
+					!count
+						? (this.logger.warn(
+								`The collection for '${this.name}' is empty. Seeding the collection...`,
+						  ),
+						  await seedDBFunction(this.adapter),
+						  this.logger.warn('The collection', await this.adapter.count()))
+						: this.logger.warn(
+								`The collection for '${this.name}' is not empty. Seeding not needed.`,
+								// await this.adapter.repository.count(),
+						  );
 				}
 			},
 		};
@@ -156,9 +163,13 @@ export class DbBaseMixin {
 	private getMongoAdapter(schema: ServiceSchema) {
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		let MongoAdapter: any;
-		import('moleculer-db-adapter-mongoose').then(
-			(AdapterMongo) => (MongoAdapter = AdapterMongo),
-		);
+		import('moleculer-db-adapter-mongoose')
+			.then((AdapterMongo) => (MongoAdapter = AdapterMongo))
+			.catch((err) => {
+				// @ts-ignore
+				this.logger.error(err);
+				throw err;
+			});
 		return {
 			...schema,
 			adapter: new MongoAdapter(this.getDBUri(), {
@@ -167,6 +178,32 @@ export class DbBaseMixin {
 				dbName: this.dbInfo.dbname,
 			}),
 			collection: this.collection,
+			model: this.mixModel,
+		};
+	}
+
+	private getTypeORMAdapter(schema: ServiceSchema) {
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		/* let TypeORMAdapter: any = (...args: any) =>
+			import('@tyrsolutions/moleculer-db-typeorm-adapter')
+				.then(({ default: TypeORMDbAdapter }) => new TypeORMDbAdapter(...args))
+				.catch((err) => {
+					// @ts-ignore
+					this.logger.error(err);
+					throw err;
+				});
+		console.log('TypeORMAdapter: ', TypeORMAdapter()); */
+		return {
+			...schema,
+			adapter: new TypeORMDbAdapter({
+				name: 'default',
+				type: 'better-sqlite3',
+				database: `temp/${this.dbInfo.dbname}_${this.collection}.db`,
+				synchronize: true,
+				logging: [/* 'query', */ 'error'],
+				entities: [this.mixModel],
+			}),
+			mixins: [DbService],
 			model: this.mixModel,
 		};
 	}

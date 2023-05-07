@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import { Any, JsonObject, JsonProperty, PropertyConvertingMode } from 'json2typescript';
 import { Types } from 'mongoose';
-import { IUserBase, ObjectId, ObjectIdNull, UserLang, UserRole } from '../types';
+import { IUserBase, ObjectId, ObjectIdNull, UserLang, UserRoleDefault } from '../types';
 import { Config } from '../common';
 import { DateConverter } from './converters/date.converter';
 import { UserRoleConverter } from './converters/user/user-role.converter';
@@ -38,10 +38,10 @@ export class UserEntity implements IUser {
 	public email? = '';
 
 	@JsonProperty('langKey', UserLangConverter, PropertyConvertingMode.IGNORE_NULLABLE)
-	public langKey? = UserLang.ES;
+	public langKey? = UserLang.ENUS;
 
 	@JsonProperty('roles', UserRoleConverter, PropertyConvertingMode.IGNORE_NULLABLE)
-	public roles? = [UserRole.USER];
+	public roles? = [UserRoleDefault.USER];
 
 	@JsonProperty('verificationToken', PropertyConvertingMode.PASS_NULLABLE)
 	public verificationToken?: string;
@@ -64,7 +64,7 @@ export class UserEntity implements IUser {
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 	public getMongoEntity() {
 		// eslint-disable-next-line no-underscore-dangle
-		const result: IUser = { ...this, _id: this._id && (this._id as Types.ObjectId).toString() };
+		const result: IUser = { ...this, _id: this._id && this._id.toString() };
 		// eslint-disable-next-line no-underscore-dangle
 		if (!result._id) {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment

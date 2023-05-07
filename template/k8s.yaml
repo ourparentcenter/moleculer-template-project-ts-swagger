@@ -40,19 +40,21 @@ spec:
 #########################################################
 # Ingress for Moleculer API Gateway
 #########################################################
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress
 spec:
   rules:
-  - host: {{projectName}}.127.0.0.1.nip.io
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: api
-          servicePort: 3000
+    - host: mqpb.127.0.0.1.nip.io
+      http:
+        paths:
+          - path: /
+            backend:
+              service:
+                name: api
+                port:
+                  number: 3000
 
 ---
 #########################################################
@@ -75,6 +77,7 @@ spec:
       containers:
       - name: api
         image: {{projectName}}
+        imagePullPolicy: IfNotPresent
         envFrom:
         - configMapRef:
             name: common-env

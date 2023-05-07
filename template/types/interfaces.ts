@@ -2,7 +2,7 @@ import { IncomingMessage } from 'http';
 import { ActionSchema, ActionParamSchema } from 'moleculer';
 import { ActionOptions } from '@ourparentcenter/moleculer-decorators-extended';
 import { Schema, SchemaType, SchemaTypeOptions, Types } from 'mongoose';
-import { UserRole } from './user';
+import { UserRoleDefault } from './roles';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export type definitionType<T> = (
@@ -12,7 +12,7 @@ export type definitionType<T> = (
 export type ObjectId = Types.ObjectId | string;
 export type ObjectIdNull = ObjectId | null;
 
-export type DBDialog = 'local' | 'file' | 'mongodb';
+export type DBDialog = 'local' | 'file' | 'mongodb' | 'typeorm';
 
 export interface DBInfo {
 	dialect: DBDialog;
@@ -29,7 +29,7 @@ export interface RouteSchemaOpts {
 	whitelist?: string[];
 	authorization?: boolean;
 	authentication?: boolean;
-	roles?: UserRole[];
+	roles?: UserRoleDefault[];
 	aliases?: any;
 }
 
@@ -57,7 +57,7 @@ export interface RequestMessage extends IncomingMessage {
 
 export interface RestOptions extends ActionOptions {
 	auth?: boolean;
-	roles?: UserRole | UserRole[];
+	roles?: UserRoleDefault | UserRoleDefault[];
 }
 
 export interface ApiGatewayMeta {

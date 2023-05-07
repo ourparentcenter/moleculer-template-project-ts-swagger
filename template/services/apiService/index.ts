@@ -2,26 +2,26 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { IncomingMessage, ServerResponse } from 'http';
-import moleculer, { Context, Errors } from 'moleculer';
+import { ServerResponse } from 'http';
+import { Context, Errors } from 'moleculer';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import ApiGateway from 'moleculer-web';
-import { Service, Method } from '@ourparentcenter/moleculer-decorators-extended';
+import { Service, Method, Action } from '@ourparentcenter/moleculer-decorators-extended';
 import pick from 'lodash/pick';
-{{#swagger}}import { openAPIMixin } from '../../mixins/openapi/openapi.mixin';{{/swagger}}
-{{#swaggereditor}}import { editorMixin } from '../../mixins/editor/editor.mixin';{{/swaggereditor}}
-import { Config } from '../../common';
+{{#swagger}}import { openAPIMixin, {{#swaggereditor}}editorMixin,{{/swaggereditor}} {{#swaggerstats}}swMiddleware, swStats{{/swaggerstats}} } from '@Mixins';{{/swagger}}
+import { Config } from '@Common';
 import {
 	RequestMessage,
 	UserJWT,
-	UserRole,
+	// UserRole,
 	UserRolesParams,
 	UserTokenParams,
 	UserAuthMeta,
 } from '../../types';
 import { serviceRoutes } from '../serviceroutes';
-{{#swaggerstats}} import { swMiddleware, swStats } from '../../mixins/swstats'; {{/swaggerstats}}
+// {{#swaggerstats}} import { swMiddleware, swStats } from '../../mixins/swstats'; {{/swaggerstats}}
+import { BaseService } from '@Factories';
 {{#if_eq httptransport "SOCKET"}}
 import { Server, Socket } from 'socket.io';
 {{/if_eq}}
@@ -123,17 +123,16 @@ import { Server, Socket } from 'socket.io';
 					{{#swaggerstats}}
 					// swagger stats dashboard route at root
 					'GET /'(req: any, res: any) {
-						res.statusCode = 302;
-						res.setHeader('Location', '/api/dashboard/');
-						return res.end();
+						// @ts-ignore
+						this.apiDashboard(res);
 					},
 					'GET /stats'(req: any, res: any) {
-						res.setHeader('Content-Type', 'application/json; charset=utf-8');
-						return res.end(JSON.stringify(swStats.getCoreStats()));
+						// @ts-ignore
+						this.getStats(res);
 					},
 					'GET /metrics'(req: any, res: any) {
-						res.setHeader('Content-Type', 'application/json; charset=utf-8');
-						return res.end(JSON.stringify(swStats.getPromStats()));
+						// @ts-ignore
+						this.getMetrics(res);
 					},
 					{{/swaggerstats}}
 				},
@@ -214,26 +213,48 @@ import { Server, Socket } from 'socket.io';
 	},
 	{{/if_eq}}
 })
-export default class ApiService extends moleculer.Service {
+export default class ApiService extends BaseService {
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 	public onError(req: RequestMessage, res: ServerResponse, err: any): void {
 		// Return with the error as JSON object
-		res.setHeader('Content-type', 'application/json; charset=utf-8');
-		res.writeHead(err.code || 500);
-
-		if (err.code === 422) {
+		res.setHeader('Content-type', 'application/json; charset=utf-8').writeHead(err.code || 500);
+		const error422 = () => {
 			const o: any = {};
 			err.data.forEach((e: any) => {
 				const field = e.field.split('.').pop();
 				o[field] = e.message;
 			});
-
-			res.end(JSON.stringify({ errors: o }, null, 2));
-		} else {
+			this.sendResponse(req, res, JSON.stringify({ errors: o }, null, 2));
+		};
+		const nonError422 = () => {
 			const errObj = pick(err, ['name', 'message', 'code', 'type', 'data']);
-			res.end(JSON.stringify(errObj, null, 2));
-		}
-		this.logResponse(req, res, err ? err.ctx : null);
+			// deepcode ignore ServerLeak: errorObj is reduced to only necessary information relayed
+			// res.end(JSON.stringify(errObj, null, 2));
+			this.sendResponse(req, res, JSON.stringify(errObj, null, 2));
+		};
+
+		err.code === 422 ? error422() : nonError422();
+		return this.logResponse(req, res, err ? err.ctx : null);
+	}
+
+	@Method
+	apiDashboard(res: any): void {
+		this.logger.debug('♻ Redirecting to api dashboard');
+		this.sendRedirect(res, '/api/dashboard/', 302);
+	}
+
+	@Method
+	getStats(res: any) {
+		this.logger.debug('♻ Sending sw stats');
+		res.setHeader('Content-Type', 'application/json; charset=utf-8');
+		return res.end(JSON.stringify(swStats.getCoreStats()));
+	}
+
+	@Method
+	getMetrics(res: any) {
+		this.logger.debug('♻ Sending sw metrics');
+		res.setHeader('Content-Type', 'application/json; charset=utf-8');
+		return res.end(JSON.stringify(swStats.getPromStats()));
 	}
 
 	/**
@@ -248,34 +269,35 @@ export default class ApiService extends moleculer.Service {
 		ctx: Context<Record<string, unknown>, UserAuthMeta>,
 		error: Errors.MoleculerError,
 	): Promise<unknown> {
+		const action = pick(ctx.action, 'rawName', 'name', 'params', 'rest');
+		const context = pick(
+			ctx,
+			'nodeID',
+			'id',
+			'event',
+			'eventName',
+			'eventType',
+			'eventGroups',
+			'parentID',
+			'requestID',
+			'caller',
+			'params',
+			'meta',
+			'locals',
+		);
+		const logInfo = {
+			action: 'Authorize connection',
+			details: {
+				error,
+				context,
+				action,
+				meta: ctx.meta,
+			},
+		};
 		if (ctx.meta.user) {
-			const context = pick(
-				ctx,
-				'nodeID',
-				'id',
-				'event',
-				'eventName',
-				'eventType',
-				'eventGroups',
-				'parentID',
-				'requestID',
-				'caller',
-				'params',
-				'meta',
-				'locals',
-			);
-			const action = pick(ctx.action, 'rawName', 'name', 'params', 'rest');
-			const logInfo = {
-				action: 'AUTH_FAILURE',
-				details: {
-					error,
-					context,
-					action,
-					meta: ctx.meta,
-				},
-			};
 			this.logger.error(logInfo);
 		}
+		this.logger.error('♻ Error authenticating: ', logInfo);
 		return Promise.reject(error);
 	}
 
@@ -299,19 +321,23 @@ export default class ApiService extends moleculer.Service {
 	): Promise<unknown> {
 		const auth = req.headers.authorization;
 
+		this.logger.debug('♻ Attempting to authenticte request...');
 		if (auth) {
 			const type = auth.split(' ')[0];
 			let token: string | undefined;
 			if (type === 'Token' || type === 'Bearer') {
+				this.logger.debug('♻ Aquired token');
 				token = auth.split(' ')[1];
 			}
 
 			if (token) {
+				this.logger.debug('♻ Attempting to get user from token...');
 				const user = await ctx.call<UserJWT | undefined, UserTokenParams>(
 					'v1.auth.resolveToken',
 					{ token },
 				);
 				if (user && user.active) {
+					this.logger.debug('♻ Returning user from token...');
 					return Promise.resolve(user);
 				}
 			}
@@ -342,10 +368,13 @@ export default class ApiService extends moleculer.Service {
 	): Promise<unknown> {
 		const user = ctx.meta.user;
 
+		this.logger.debug('♻ Attempting to authorize request...');
 		if (req.$action.auth === false) {
+			this.logger.debug('♻ Not authorized');
 			return Promise.resolve(null);
 		}
 		if (!user) {
+			this.logger.debug('♻ No useer to request');
 			return this.rejectAuth(
 				ctx,
 				new ApiGateway.Errors.UnAuthorizedError(ApiGateway.Errors.ERR_NO_TOKEN, null),
@@ -357,13 +386,16 @@ export default class ApiService extends moleculer.Service {
 			: [req.$route.opts.roles];
 		const allRoles = [...aroles, ...oroles].filter(Boolean);
 		const roles = [...new Set(allRoles)];
+		this.logger.debug('♻ Attempting to validate user role...');
 		const valid = await ctx.call<boolean, UserRolesParams>('v1.auth.validateRole', { roles });
 		if (!valid) {
+			this.logger.debug('♻ User role not valid');
 			return this.rejectAuth(
 				ctx,
 				new ApiGateway.Errors.UnAuthorizedError(ApiGateway.Errors.ERR_INVALID_TOKEN, null),
 			);
 		}
+		this.logger.debug('♻ Forwarding authorized request');
 		return Promise.resolve(ctx);
 	}
 	{{#if_eq httptransport "SOCKET"}}
@@ -468,7 +500,4 @@ export default class ApiService extends moleculer.Service {
 		});
 	}
 	{{/if_eq}}
-	async stopped() {
-		{{#swaggerstats}}swStats.stop();{{/swaggerstats}}
-	}
 }

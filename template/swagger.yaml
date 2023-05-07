@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: testmainrepo API Documentation
+  title: mediacenterbackend API Documentation
   description: Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects..
   version: 1.0.0
 servers:
@@ -34,6 +34,10 @@ components:
           type: number
           description: Cost of product
           example: 875
+        active:
+          type: boolean
+          description: Product active
+          example: false
     User:
       type: object
       properties:
@@ -60,7 +64,30 @@ components:
         langKey:
           type: string
           description: User language
-          example: en
+          example: en-us
+    Roles:
+      type: object
+      properties:
+        role:
+          type: string
+          description: Name of role
+          example: Admin
+        value:
+          type: string
+          description: Value of role
+          default: ROLE_ADMIN
+        active:
+          type: boolean
+          description: Active role
+          example: true
+        langKey:
+          type: string
+          description: User language
+          example: en-us
+        systemLocked:
+          type: boolean
+          description: Locked by system for deletion
+          example: true
     UserAdditional:
       type: object
       properties:
@@ -127,6 +154,181 @@ paths:
           description: Missing parameters
           content: {}
       x-codegen-request-body-name: params
+  /api/v1/products:
+    post:
+      tags:
+        - Products
+      summary: Create a product
+      description: Create a product
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name to be used
+                  example: product name
+                price:
+                  type: number
+                  description: Price of product
+                  example: 5
+                quantity:
+                  type: number
+                  description: Quantity of product
+                  example: 5
+                active:
+                  type: boolean
+                  description: Quantity of product
+                  example: false
+      responses:
+        '200':
+          description: Create product result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/Product'
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
+    get:
+      tags:
+        - Products
+      summary: Get all products (auto generated)
+      description: Get all products
+      responses:
+        '200':
+          description: Products result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            _id:
+                              type: string
+                        - $ref: '#/components/schemas/Product'
+                  total:
+                    type: number
+                    description: Products result count
+                  page:
+                    type: number
+                    description: Products result page
+                  pageSize:
+                    type: number
+                    description: Products result page size max
+                  totalPages:
+                    type: number
+                    description: Products result total pages
+        '403':
+          description: Server error
+          content: {}
+  /api/v1/products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get product by id
+      description: Get product by id
+      operationId: getProductById
+      parameters:
+        - name: id
+          in: path
+          description: Id of product
+          required: true
+          schema:
+            type: string
+            example: 5ec51b33ead6ef2b423e4089
+      responses:
+        '200':
+          description: Products result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/Product'
+        '403':
+          description: Server error
+          content: {}
+    put:
+      tags:
+        - Products
+      summary: Update a product (auto generated)
+      description: Update product.
+      parameters:
+        - name: id
+          in: path
+          description: Id of product
+          required: true
+          schema:
+            type: string
+            example: 5ec51b33ead6ef2b423e4089
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Product update result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                  - $ref: '#/components/schemas/Product'
+        '403':
+          description: Server error
+          content: {}
+        '422':
+          description: Missing parameters
+          content: {}
+      x-codegen-request-body-name: params
+    delete:
+      tags:
+        - Products
+      summary: Delete a product
+      description: Delete product by id
+      operationId: removeProduct
+      parameters:
+        - name: id
+          in: path
+          description: Id of product
+          required: true
+          schema:
+            type: string
+            example: 5ec51b33ead6ef2b423e4089
+      responses:
+        '200':
+          description: Delete result
+          content: {}
+        '403':
+          description: Server error
+          content: {}
   /api/v1/products/{id}/quantity/increase:
     put:
       tags:
@@ -212,171 +414,37 @@ paths:
           description: Missing parameters
           content: {}
       x-codegen-request-body-name: params
-  /api/v1/products:
-    get:
-      tags:
-        - Products
-      summary: Get all products (auto generated)
-      description: Get all products
-      responses:
-        '200':
-          description: Products result
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  rows:
-                    type: array
-                    items:
-                      allOf:
-                        - type: object
-                          properties:
-                            _id:
-                              type: string
-                        - $ref: '#/components/schemas/Product'
-                  total:
-                    type: number
-                    description: Products result count
-                  page:
-                    type: number
-                    description: Products result page
-                  pageSize:
-                    type: number
-                    description: Products result page size max
-                  totalPages:
-                    type: number
-                    description: Products result total pages
-        '403':
-          description: Server error
-          content: {}
+  /auth/activate/{verificationToken}:
     post:
       tags:
-        - Products
-      summary: Create a product (auto generated)
-      description: Create a product
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              required:
-                - name
-                - price
-              type: object
-              properties:
-                name:
-                  type: string
-                  description: Name to be used
-                  example: product name
-                price:
-                  type: number
-                  description: Price of product
-                  example: 5
+        - Auth
+      summary: Activate User
+      description: Activate user by verification token
+      operationId: activateUser
+      parameters:
+        - name: verificationToken
+          in: path
+          description: Verification Token of user
+          required: true
+          schema:
+            type: string
+            example: 5ec51b33ead6ef2b423e4089
       responses:
         '200':
-          description: Create product result
+          description: Activate user result
           content:
             application/json:
               schema:
                 allOf:
                   - type: object
                     properties:
-                      _id:
+                      id:
                         type: string
-                  - $ref: '#/components/schemas/Product'
+                  - $ref: '#/components/schemas/Roles'
         '422':
           description: Missing parameters
           content: {}
       x-codegen-request-body-name: params
-  /api/v1/products/{id}:
-    get:
-      tags:
-        - Products
-      summary: Get product by id (auto generated)
-      description: Get product by id
-      parameters:
-        - name: id
-          in: path
-          description: Id of product
-          required: true
-          schema:
-            type: string
-            example: 5ec51b33ead6ef2b423e4089
-      responses:
-        '200':
-          description: Products result
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - type: object
-                    properties:
-                      _id:
-                        type: string
-                  - $ref: '#/components/schemas/Product'
-        '403':
-          description: Server error
-          content: {}
-    put:
-      tags:
-        - Products
-      summary: Update a product (auto generated)
-      description: Update product.
-      parameters:
-        - name: id
-          in: path
-          description: Id of product
-          required: true
-          schema:
-            type: string
-            example: 5ec51b33ead6ef2b423e4089
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              anyOf:
-                - $ref: '#/components/schemas/Product'
-      responses:
-        '200':
-          description: Product update result
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - type: object
-                    properties:
-                      _id:
-                        type: string
-                  - $ref: '#/components/schemas/Product'
-        '403':
-          description: Server error
-          content: {}
-        '422':
-          description: Missing parameters
-          content: {}
-      x-codegen-request-body-name: params
-    delete:
-      tags:
-        - Products
-      summary: Delete a product (auto generated)
-      description: Delete product by id
-      parameters:
-        - name: id
-          in: path
-          description: Id of product
-          required: true
-          schema:
-            type: string
-            example: 5ec51b33ead6ef2b423e4089
-      responses:
-        '200':
-          description: Delete result
-          content: {}
-        '403':
-          description: Server error
-          content: {}
   /auth/register:
     post:
       tags:
@@ -407,7 +475,7 @@ paths:
                 allOf:
                   - type: object
                     properties:
-                      _id:
+                      id:
                         type: string
                   - $ref: '#/components/schemas/User'
                   - $ref: '#/components/schemas/VerificationToken'
@@ -500,7 +568,7 @@ paths:
                 allOf:
                   - type: object
                     properties:
-                      _id:
+                      id:
                         type: string
                   - $ref: '#/components/schemas/User'
                   - $ref: '#/components/schemas/VerificationToken'
@@ -524,7 +592,7 @@ paths:
                 allOf:
                   - type: object
                     properties:
-                      _id:
+                      id:
                         type: string
                   - $ref: '#/components/schemas/User'
         '422':
@@ -554,7 +622,7 @@ paths:
                 allOf:
                   - type: object
                     properties:
-                      _id:
+                      id:
                         type: string
                   - $ref: '#/components/schemas/User'
         '422':
@@ -590,7 +658,7 @@ paths:
                 allOf:
                   - type: object
                     properties:
-                      _id:
+                      id:
                         type: string
                   - $ref: '#/components/schemas/User'
         '422':
@@ -669,7 +737,7 @@ paths:
                       allOf:
                         - type: object
                           properties:
-                            _id:
+                            id:
                               type: string
                         - $ref: '#/components/schemas/User'
                   total:

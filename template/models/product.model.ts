@@ -13,18 +13,47 @@ const definition: definitionType<IProduct> = () => ({
 	},
 	quantity: {
 		type: Number,
-		required: true,
 		min: 0,
 	},
 	price: {
 		type: Number,
+	},
+	active: {
+		type: Boolean,
+		default: false,
+	},
+	createdBy: {
+		type: Types.ObjectId,
+		ref: collection,
 		required: true,
+	},
+	createdDate: {
+		type: Date,
+		default: Date.now,
+	},
+	lastModifiedBy: {
+		type: Types.ObjectId,
+		ref: collection,
+		required: false,
+	},
+	lastModifiedDate: {
+		type: Date,
+		required: false,
+	},
+	deletedDate: {
+		type: Date,
+		required: false,
 	},
 });
 
 export const productMongoModel = (collection: string): unknown => {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	const schema = new Schema<IProduct>(definition(), { autoIndex: true });
-	return models[collection] || model(collection, schema);
+	try {// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		const schema = new Schema<IProduct>(definition(), { autoIndex: true });
+		return models[collection] || model(collection, schema);
+	} catch (err) {
+		console.log('Product Model error: ', err);
+		return;
+	}
+
 };

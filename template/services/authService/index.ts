@@ -3,74 +3,22 @@
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 'use strict';
-// import { constants } from 'http2';
-import moleculer, { ActionParams, Context } from 'moleculer';
-import {
-	Action,
-	// Delete,
-	Get,
-	Method,
-	// Post,
-	// Put,
-	Service,
-} from '@ourparentcenter/moleculer-decorators-extended';
-import bcrypt from 'bcryptjs';
-// import jwt, { VerifyErrors } from 'jsonwebtoken';
+import moleculer, { Context, ServiceSchema } from 'moleculer';
+import { Action, Method, Service } from '@ourparentcenter/moleculer-decorators-extended';
 import { EncryptJWT, jwtDecrypt } from 'jose';
-// import { JsonConvert } from 'json2typescript';
-// import { DbContextParameters } from 'moleculer-db';
-import { dbAuthMixin, eventsAuthMixin } from '../../mixins/dbMixins';
-import { Config } from '../../common';
-import randomstring from 'randomstring';
+import { Config } from '@Common';
 import {
-	getActionConfig,
 	IUser,
-	IUserBase,
-	// listActionConfig,
-	MoleculerDBService,
-	RestOptions,
 	UserAuthMeta,
-	UserCreateParams,
-	// UserDeleteParams,
-	// UserEvent,
-	// UserGetParams,
-	// UserJWT,
-	// UserLoginMeta,
-	// UserLoginParams,
-	UserRole,
+	UserRoleDefault,
 	UserRolesParams,
 	UserServiceSettingsOptions,
-	// UsersServiceOptions,
 	UserTokenParams,
-	// UserUpdateParams,
-} from '../../types';
-
-// import { UserEntity } from '../../entities';
-
-import { userErrorCode, userErrorMessage } from '../../types/errors';
-
-/* const validateUserBase: ActionParams = {
-	login: 'string',
-	email: 'email',
-	firstName: 'string',
-	lastName: { type: 'string', optional: true },
-	active: { type: 'boolean', optional: true },
-	roles: { type: 'array', items: 'string' },
-	langKey: { type: 'string', min: 2, max: 2, optional: true },
-};
-
-const validateUserBaseOptional: ActionParams = {
-	login: { type: 'string', optional: true },
-	email: { type: 'email', optional: true },
-	firstName: { type: 'string', optional: true },
-	lastName: { type: 'string', optional: true },
-	active: { type: 'boolean', optional: true },
-	roles: { type: 'array', items: 'string', optional: true },
-	langKey: { type: 'string', min: 2, max: 2, optional: true },
-};
-
-const encryptPassword = (password: string) =>
-	bcrypt.hashSync(password, JSON.parse(Config.SALT_VALUE)); */
+	userErrorCode,
+	userErrorMessage,
+} from '@CoreTypes';
+import { BaseServiceWithDB } from '@Factories';
+import { JsonObject } from 'jose/dist/types/types';
 
 @Service({
 	name: 'auth',
@@ -82,7 +30,7 @@ const encryptPassword = (password: string) =>
 	/**
 	 * Mixins
 	 */
-	mixins: [dbAuthMixin, eventsAuthMixin],
+	// mixins: [],
 	/**
 	 * Settings
 	 */
@@ -92,7 +40,6 @@ const encryptPassword = (password: string) =>
 		pageSize: 10,
 		// Base path
 		rest: '/',
-		// rest: '/v1/user',
 		// user jwt secret
 		JWT_SECRET: Config.JWT_SECRET,
 		// Available fields in the responses
@@ -127,7 +74,10 @@ const encryptPassword = (password: string) =>
 	},
 	dependencies: 'v1.user',
 })
-export default class AuthService extends MoleculerDBService<UserServiceSettingsOptions, IUser> {
+export default class AuthService extends BaseServiceWithDB<
+	Partial<ServiceSchema<UserServiceSettingsOptions>>,
+	IUser
+> {
 	@Action({
 		name: 'resolveToken',
 		restricted: ['api'],
@@ -141,6 +91,7 @@ export default class AuthService extends MoleculerDBService<UserServiceSettingsO
 	})
 	async resolveToken(ctx: Context<UserTokenParams, Record<string, unknown>>) {
 		try {
+			this.logger.debug('♻ Attempting to resolve token...');
 			const key = Buffer.from(this.settings.JWT_SECRET, 'hex');
 			const { payload, protectedHeader }: { payload: any; protectedHeader: any } =
 				await jwtDecrypt(
@@ -151,11 +102,21 @@ export default class AuthService extends MoleculerDBService<UserServiceSettingsO
 					} */,
 				);
 			if (protectedHeader && payload.data._id) {
-				// returns user from payload _id
-				return await this._get(ctx, { id: payload.data._id });
+				/* returns user from payload _id */
+				const user = await ctx.call('v1.user.id', { id: payload.data._id });
+				if (!user) {
+					this.logger.error('♻ Error: User not found or disabled');
+					throw new moleculer.Errors.MoleculerClientError(
+						userErrorMessage.NOT_FOUND,
+						userErrorCode.NOT_FOUND,
+						'500',
+						[{ message: 'Error: User not found or disabled' }],
+					);
+				}
+				return user;
 			}
 		} catch (err) {
-			this.logger.error('Error resolving token', ctx.params.token, err);
+			this.logger.error('♻ Error resolving token', ctx.params.token, err);
 			return err;
 		}
 	}
@@ -167,10 +128,11 @@ export default class AuthService extends MoleculerDBService<UserServiceSettingsO
 			keys: ['roles', 'user'],
 		},
 		params: {
-			roles: { type: 'array', items: 'string', enum: Object.values(UserRole) },
+			roles: { type: 'array', items: 'string', enum: Object.values(UserRoleDefault) },
 		},
 	})
 	async validateRole(ctx: Context<UserRolesParams, UserAuthMeta>) {
+		this.logger.debug('♻ Attempting to validate roles...');
 		const roles = ctx.params.roles;
 		const userRoles = ctx.meta.user.roles;
 		return !roles || !roles.length || roles.some((r) => userRoles!.includes(r));
@@ -183,36 +145,38 @@ export default class AuthService extends MoleculerDBService<UserServiceSettingsO
 			keys: ['roles', 'user'],
 		},
 		params: {
-			roles: { type: 'array', items: 'string', enum: Object.values(UserRole) },
+			roles: { type: 'array', items: 'string', enum: Object.values(UserRoleDefault) },
 		},
 	})
 	async createJWT(ctx: Context<IUser>) {
-		try {
-			const user: IUser = ctx.params as IUser;
-			if (user && typeof user === 'object') {
-				if (!user.active) {
-					throw new moleculer.Errors.MoleculerClientError(
-						userErrorMessage.WRONG,
-						userErrorCode.WRONG,
-						'',
-						[{ message: 'Error: User not found or disabled' }],
-					);
-				} else {
-					return await this.generateJWT(user);
-				}
+		this.logger.debug('♻ Attempting to create user JWT...');
+		const user: IUser = ctx.params;
+		if (user && typeof user === 'object') {
+			if (!user.active) {
+				this.logger.error('♻ User not found or disabled');
+				throw new moleculer.Errors.MoleculerClientError(
+					userErrorMessage.WRONG,
+					userErrorCode.WRONG,
+					'500',
+					[{ message: 'Error: User not found or disabled' }],
+				);
 			}
-		} catch (err) {
-			return err;
 		}
+
+		this.logger.debug('♻ Generating user JWT...');
+		return await this.generateJWT(user);
 	}
 
 	@Method
-	async generateJWT(user: IUser) {
+	async generateJWT(user: IUser): Promise<string> {
+		this.logger.debug('♻ Generating JWT');
 		const exp = new Date();
+		this.logger.debug('♻ Creating key');
 		const key = Buffer.from(this.settings.JWT_SECRET, 'hex');
+		this.logger.debug('♻ Setting JWT exiration date');
 		exp.setDate(exp.getDate() + 60);
-		return await new EncryptJWT({
-			data: user,
+		const userJWT = await new EncryptJWT({
+			data: user as unknown as JsonObject,
 			// exp: Math.floor(exp.getTime() / 1000),
 		})
 			.setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
@@ -220,6 +184,15 @@ export default class AuthService extends MoleculerDBService<UserServiceSettingsO
 			// .setIssuer()
 			// .setAudience()
 			.setExpirationTime(Math.floor(exp.getTime() / 1000))
-			.encrypt(key);
+			.encrypt(key)
+			.then((jwt) => {
+				this.logger.debug('♻ JWT generated');
+				return jwt;
+			})
+			.catch((err: any) => {
+				this.logger.debug('♻ Error generating JWT: ', err);
+				return err;
+			});
+		return userJWT;
 	}
 }

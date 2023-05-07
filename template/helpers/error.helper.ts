@@ -1,7 +1,7 @@
 import pick from 'lodash/pick';
 import { Context } from 'moleculer';
 
-const errorHandler = (
+export const errorHandler = (
 	info: Context<Record<string, never>>,
 	message?: string,
 	err?: unknown,
@@ -23,7 +23,7 @@ const errorHandler = (
 		// 'meta',
 		'locals',
 	);
-	const action = pick(info.action, 'rawName', 'name', 'params.services', 'rest');
+	const action = pick(info.action, ['rawName', 'name', 'params.services', 'rest']);
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	info.service.logger.error(
@@ -37,4 +37,3 @@ const errorHandler = (
 		err,
 	);
 };
-export default errorHandler;

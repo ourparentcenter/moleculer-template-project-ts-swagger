@@ -1,7 +1,7 @@
 'use strict';
 import { verify } from 'jsonwebtoken';
 import { Context, Errors } from 'moleculer';
-import EncryptionUtil from '../helpers/encryption.helper';
+import { EncryptionUtils } from '@ServiceHelpers';
 import { Config } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -15,7 +15,7 @@ const MoleculerClientError = Errors.MoleculerClientError;
  * @returns {Object} DB Connection Options
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const ServiceConnection = async (
+export const ServiceConnection = async (
 	entity: unknown,
 	ctx: Context,
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
@@ -36,7 +36,7 @@ const ServiceConnection = async (
 			// url: process.env.URL,
 			type: String(Config.DBENGINE),
 			username: String(options.dbUsername),
-			password: EncryptionUtil.decrypt(options.dbPass),
+			password: EncryptionUtils.decrypt(options.dbPass),
 			host: String(Config.DBHOST),
 			port: Number(Config.DBPORT),
 			authSource: String(options.database),
@@ -59,4 +59,3 @@ const ServiceConnection = async (
 		return connection;
 	}
 };
-export default ServiceConnection;

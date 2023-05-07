@@ -1,5 +1,5 @@
 import { model, models, Schema, Types } from 'mongoose';
-import { definitionType, IUser, UserLang, UserRole } from '../types';
+import { definitionType, IUser, UserLang, UserRoleDefault } from '../types';
 
 const definition: definitionType<IUser> = (collection?: string) => ({
 	_id: Types.ObjectId,
@@ -17,9 +17,9 @@ const definition: definitionType<IUser> = (collection?: string) => ({
 	},
 	roles: {
 		type: [String],
-		enum: Object.values(UserRole),
+		enum: Object.values(UserRoleDefault),
 		required: true,
-		default: [UserRole.USER.toString()],
+		default: [UserRoleDefault.USER.toString()],
 	},
 	firstName: {
 		type: String,
@@ -52,7 +52,7 @@ const definition: definitionType<IUser> = (collection?: string) => ({
 	langKey: {
 		type: String,
 		enum: Object.values(UserLang),
-		default: 'es',
+		default: 'en-us',
 	},
 	createdBy: {
 		type: Types.ObjectId,
@@ -75,8 +75,13 @@ const definition: definitionType<IUser> = (collection?: string) => ({
 });
 
 export const userMongoModel = (collection: string): unknown => {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	const schema = new Schema<IUser>(definition(collection), { autoIndex: true });
-	return models[collection] || model(collection, schema);
+	try {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		const schema = new Schema<IUser>(definition(collection), { autoIndex: true });
+		return models[collection] || model(collection, schema);
+	} catch (err) {
+		console.log('User Model error: ', err);
+		return;
+	}
 };

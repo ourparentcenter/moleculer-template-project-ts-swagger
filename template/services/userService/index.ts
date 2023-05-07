@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 'use strict';
 import { constants } from 'http2';
-import moleculer, { ActionParams, Context } from 'moleculer';
+import moleculer, { ActionParams, Context, ServiceSchema } from 'moleculer';
 import {
 	Action,
 	Delete,
@@ -17,14 +17,12 @@ import {
 import bcrypt from 'bcryptjs';
 import { JsonConvert } from 'json2typescript';
 import { DbContextParameters } from 'moleculer-db';
-import { dbUserMixin, eventsUserMixin } from '../../mixins/dbMixins';
-import { Config } from '../../common';
+import { Config } from '@Common';
 import randomstring from 'randomstring';
 import {
 	getActionConfig,
 	IUser,
 	listActionConfig,
-	MoleculerDBService,
 	RestOptions,
 	UserAuthMeta,
 	UserCreateParams,
@@ -32,21 +30,19 @@ import {
 	UsersDeleteParams,
 	UserEvent,
 	UserGetParams,
-	UserJWT,
 	UserLoginMeta,
 	UserLoginParams,
-	UserRole,
-	UserRolesParams,
+	UserRoleDefault,
 	UserServiceSettingsOptions,
 	UsersServiceOptions,
-	UserTokenParams,
 	UserUpdateParams,
 	UserActivateParams,
-} from '../../types';
+	userErrorCode,
+	userErrorMessage,
+} from '@CoreTypes';
 
-import { UserEntity } from '../../entities';
-
-import { userErrorCode, userErrorMessage } from '../../types/errors';
+import { UserEntity } from '@Entities';
+import { BaseServiceWithDB, DBMixinFactory } from '@Factories';
 
 const validateUserBase: ActionParams = {
 	login: 'string',
@@ -55,7 +51,7 @@ const validateUserBase: ActionParams = {
 	lastName: { type: 'string', optional: true },
 	active: { type: 'boolean', optional: true },
 	roles: { type: 'array', items: 'string', optional: true },
-	langKey: { type: 'string', min: 2, max: 2, optional: true },
+	langKey: { type: 'string', min: 2, max: 5, optional: true },
 };
 
 const validateUserBaseOptional: ActionParams = {
@@ -65,7 +61,7 @@ const validateUserBaseOptional: ActionParams = {
 	lastName: { type: 'string', optional: true },
 	active: { type: 'boolean', optional: true },
 	roles: { type: 'array', items: 'string', optional: true },
-	langKey: { type: 'string', min: 2, max: 2, optional: true },
+	langKey: { type: 'string', min: 2, max: 5, optional: true },
 	requireRegToken: { type: 'boolean', optional: true },
 };
 
@@ -75,6 +71,7 @@ const encryptPassword = (password: string) =>
 @Service<UsersServiceOptions>({
 	name: 'user',
 	version: 1,
+	mergeActions: true,
 	/**
 	 * Service guard token
 	 */
@@ -82,7 +79,7 @@ const encryptPassword = (password: string) =>
 	/**
 	 * Mixins
 	 */
-	mixins: [dbUserMixin, eventsUserMixin],
+	mixins: [...new DBMixinFactory('User').createMixin()],
 	/**
 	 * Settings
 	 */
@@ -91,7 +88,6 @@ const encryptPassword = (password: string) =>
 		pageSize: 10,
 		// Base path
 		rest: '/',
-		// rest: '/v1/user',
 		// user jwt secret
 		JWT_SECRET: Config.JWT_SECRET,
 		// Available fields in the responses
@@ -114,29 +110,73 @@ const encryptPassword = (password: string) =>
 		populates: {
 			createdBy: {
 				action: 'v1.user.id',
-				params: { fields: ['login', 'firstName', 'lastName'] },
+				params: { fields: ['_id', 'login', 'firstName', 'lastName'] },
 				// params: { fields: 'login firstName lastName' },
 			},
 			lastModifiedBy: {
 				action: 'v1.user.id',
-				params: { fields: ['login', 'firstName', 'lastName'] },
-				// params: { fields: 'login firstName lastName' },
+				params: { fields: ['_id', 'login', 'firstName', 'lastName'] },
 			},
 		},
 	},
 })
-export default class UserService extends MoleculerDBService<UserServiceSettingsOptions, IUser> {
+export default class UserService extends BaseServiceWithDB<
+	Partial<ServiceSchema<UserServiceSettingsOptions>>,
+	IUser
+> {
+	/**
+	 * Needed for population of created by and modified by.
+	 * Use this action for any call from broker to this service for population.
+	 * using the get action getUser will cause a populaiton loop.
+	 */
 	@Action({
 		name: 'id',
-		restricted: ['api', 'user'],
+		restricted: ['api', 'user', 'roles', 'products', 'auth'],
 		...getActionConfig,
 	})
 	async getUserId(ctx: Context<UserGetParams, UserAuthMeta>) {
 		const params = this.sanitizeParams(ctx, ctx.params);
+		this.logger.debug('♻ Attempting to get user by id...');
 		const result = await this._get(ctx, await params);
+		this.logger.debug('♻ Returning result');
 		return result;
 	}
 
+	/**
+	 *  @swagger
+	 *
+	 *  /auth/activate/{verificationToken}:
+	 *    post:
+	 *      tags:
+	 *      - "Auth"
+	 *      summary: Activate User
+	 *      description: Activate user by verification token
+	 *      operationId: activateUser
+	 *      parameters:
+	 *      - name: verificationToken
+	 *        in: path
+	 *        description: Verification Token of user
+	 *        required: true
+	 *        schema:
+	 *          type: string
+	 *          example: '5ec51b33ead6ef2b423e4089'
+	 *      responses:
+	 *        200:
+	 *          description: Activate user result
+	 *          content:
+	 *            application/json:
+	 *              schema:
+	 *                allOf:
+	 *                - type: object
+	 *                  properties:
+	 *                    _id:
+	 *                      type: string
+	 *                - $ref: '#/components/schemas/Roles'
+	 *        422:
+	 *          description: Missing parameters
+	 *          content: {}
+	 *      x-codegen-request-body-name: params
+	 */
 	@Action({
 		name: 'activate',
 		restricted: ['api'],
@@ -145,10 +185,31 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 		},
 	})
 	async activateUser(ctx: Context<UserActivateParams, UserAuthMeta>) {
-		const foundUser: Record<string, unknown> = (await this.adapter.findOne({
-			verificationToken: ctx.params.verificationToken,
-		})) as Record<string, unknown>;
+		this.logger.debug('♻ Attempting to activate user...');
+		const foundUser: Record<string, unknown> = (await this.adapter
+			.findOne<UserActivateParams>({
+				verificationToken: ctx.params.verificationToken,
+			})
+			.then((user) => {
+				if (!user) {
+					this.logger.error('♻ User not found');
+					throw new moleculer.Errors.MoleculerClientError(
+						userErrorMessage.NOT_FOUND,
+						userErrorCode.NOT_FOUND,
+					);
+				}
+				return user;
+			})
+			.catch((err) => {
+				this.logger.error('♻ Error while activating user', err);
+				throw new moleculer.Errors.MoleculerClientError(
+					userErrorMessage.NOT_FOUND,
+					userErrorCode.NOT_FOUND,
+				);
+			})) as Record<string, unknown>;
+		this.logger.debug('♻ User found, activating user...');
 		const activateUser = await ctx.call('v1.user.update', { id: foundUser._id, active: true });
+		this.logger.debug('♻ Returning activated user object');
 		return activateUser;
 	}
 
@@ -206,42 +267,67 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	})
 	async registerUser(ctx: Context<UserCreateParams, UserAuthMeta>) {
 		const entity = ctx.params;
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		const foundLogin = await this.adapter.findOne<IUser>({ login: entity.login });
-		if (foundLogin) {
-			throw new moleculer.Errors.MoleculerClientError(
-				userErrorMessage.DUPLICATED_LOGIN,
-				userErrorCode.DUPLICATED_LOGIN,
-				'',
-				[{ field: 'login', message: 'duplicated' }],
-			);
-		}
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		const foundEmail = await this.adapter.findOne<IUser>({ email: entity.email });
-		if (foundEmail) {
-			throw new moleculer.Errors.MoleculerClientError(
-				userErrorMessage.DUPLICATED_EMAIL,
-				userErrorCode.DUPLICATED_EMAIL,
-				'',
-				[{ field: 'email', message: 'duplicated' }],
-			);
-		}
+		this.logger.debug('♻ Checking if user login or email already exist...');
+		await this.adapter
+			.findOne<IUser>({ login: entity.login } as IUser)
+			.then((user) => {
+				if (user) {
+					this.logger.error(`♻ User ${entity.login} already registered`);
+					throw new moleculer.Errors.MoleculerClientError(
+						userErrorMessage.DUPLICATED_LOGIN,
+						userErrorCode.DUPLICATED_LOGIN,
+						'',
+						[{ field: 'login', message: 'duplicated' }],
+					);
+				}
+			})
+			.catch((err) => {
+				this.logger.error('♻ Error while registering user', err);
+				throw new moleculer.Errors.MoleculerClientError(
+					userErrorMessage.DUPLICATED_LOGIN,
+					userErrorCode.DUPLICATED_LOGIN,
+					'',
+					[{ field: 'login', message: 'duplicated' }],
+				);
+			});
+		await this.adapter
+			.findOne<IUser>({ email: entity.email } as IUser)
+			.then((user) => {
+				if (user) {
+					this.logger.error(`♻ User ${entity.email} already registered`);
+					throw new moleculer.Errors.MoleculerClientError(
+						userErrorMessage.DUPLICATED_EMAIL,
+						userErrorCode.DUPLICATED_EMAIL,
+						'',
+						[{ field: 'email', message: 'duplicated' }],
+					);
+				}
+			})
+			.catch((err) => {
+				this.logger.error('♻ Error while registering user', err);
+				throw new moleculer.Errors.MoleculerClientError(
+					userErrorMessage.DUPLICATED_EMAIL,
+					userErrorCode.DUPLICATED_EMAIL,
+					'',
+					[{ field: 'email', message: 'duplicated' }],
+				);
+			});
 
+		this.logger.debug('♻ User login and email not duplicated, continuing with user creation');
 		entity.password = encryptPassword(entity.password);
-		entity.roles = JSON.parse(Config.defaultRoles);
+		entity.roles = JSON.parse(Config.DEFAULT_ROLES);
 
-		const parsedEntity = this.removeForbiddenFields(
+		const parsedEntity = this.removeForbiddenFields<IUser>(
 			new JsonConvert().deserializeObject(entity, UserEntity).getMongoEntity(),
+			['_id', 'createdBy', 'createdDate', 'lastModifiedBy', 'lastModifiedDate'],
 		);
 		const modEntity = this.updateAuthor(parsedEntity, { creator: ctx.meta.user || null });
 		const addVerificationToken = this.addVerificationToken(
 			modEntity,
-			Boolean(Config.registrationTokenRequired),
+			Boolean(Config.REGISTRATION_TOKEN_REQUIRED),
 		);
+		this.logger.debug('♻ Creating user...');
 		return this._create(ctx, addVerificationToken);
-		// return this._create(ctx, modEntity);
 	}
 
 	/**
@@ -290,20 +376,40 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 		},
 	})
 	async loginUser(ctx: Context<UserLoginParams, UserLoginMeta>) {
+		this.logger.debug('♻ Attempting to login user...');
 		try {
 			const { login, password } = ctx.params;
 
+			const usrLogin = login.includes('@') ? 'email' : 'login';
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
-			const result: any = await this.adapter.findOne<IUser>({ login: login });
-			if (!result) {
-				throw new moleculer.Errors.MoleculerClientError(
-					userErrorMessage.WRONG,
-					userErrorCode.WRONG,
-					'',
-					[{ field: 'login/password', message: 'not found' }],
-				);
-			} else if (!result.active) {
+			const result: any = await this.adapter
+				.findOne<IUser>({ [usrLogin]: login } as any)
+				.then((res) => {
+					if (res) {
+						this.logger.debug('♻ User found');
+						return res;
+					}
+					this.logger.error('♻ login/password incorrect');
+					throw new moleculer.Errors.MoleculerClientError(
+						userErrorMessage.WRONG,
+						userErrorCode.WRONG,
+						'',
+						[{ field: 'login/password', message: 'login/password incorrect' }],
+					);
+				})
+				.catch((err) => {
+					this.logger.error('♻ login/password incorrect: ', err);
+					throw new moleculer.Errors.MoleculerClientError(
+						userErrorMessage.WRONG,
+						userErrorCode.WRONG,
+						'',
+						[{ field: 'login/password', message: 'login/password incorrect' }],
+					);
+				});
+
+			if (!result.active) {
+				this.logger.error('♻ User not active');
 				throw new moleculer.Errors.MoleculerClientError(
 					userErrorMessage.NOT_ACTIVE,
 					userErrorCode.NOT_ACTIVE,
@@ -311,26 +417,31 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 					[{ field: 'disabled', message: 'user not active' }],
 				);
 			}
-
+			this.logger.debug('♻ Attempting to validate password');
 			const valid = await bcrypt.compare(password, result.password);
 			if (!valid) {
+				this.logger.error('♻ User credentials incorrect');
 				throw new moleculer.Errors.MoleculerClientError(
 					userErrorMessage.WRONG,
 					userErrorCode.WRONG,
 					'',
-					[{ field: 'login/password', message: 'not found' }],
+					[{ field: 'login/password', message: 'login/password incorrect' }],
 				);
 			}
 
 			const user: IUser = (await this.transformDocuments(ctx, {}, result)) as IUser;
+			this.logger.debug('♻ Generating user JWT...');
 			const token: any = await ctx.call('v1.auth.createJWT', user);
 			if (token.code) {
 				return token;
 			}
 
+			this.logger.debug('♻ Setting Authorization Bearer to request');
 			ctx.meta.$responseHeaders = { Authorization: `Bearer ${token}` };
-			return { token };
+			this.logger.debug('♻ Returning user and token object');
+			return { user: user, token };
 		} catch (err) {
+			this.logger.error('♻ Login error occured: ', err);
 			return err;
 		}
 	}
@@ -359,6 +470,7 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 		restricted: ['api'],
 	})
 	logout(ctx: Context<Record<string, unknown>, UserAuthMeta>) {
+		this.logger.debug('♻ Logging user out');
 		console.log('user logout', ctx.meta.user);
 		console.log('headers: ', ctx.meta);
 		return { logout: true, user: ctx.meta.user };
@@ -415,7 +527,7 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	 */
 	@Post<RestOptions>('/', {
 		name: 'create',
-		roles: UserRole.SUPERADMIN,
+		roles: UserRoleDefault.SUPERADMIN,
 		restricted: ['api'],
 		params: {
 			...validateUserBase,
@@ -425,10 +537,12 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	})
 	async createUser(ctx: Context<UserCreateParams, UserAuthMeta>) {
 		const entity = ctx.params;
+		this.logger.debug('♻ Attempting to find if user login already exists...');
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		const foundLogin = await this.adapter.findOne<IUser>({ login: entity.login });
 		if (foundLogin) {
+			this.logger.error('♻ User login already exists...');
 			throw new moleculer.Errors.MoleculerClientError(
 				userErrorMessage.DUPLICATED_LOGIN,
 				userErrorCode.DUPLICATED_LOGIN,
@@ -436,10 +550,12 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 				[{ field: 'login', message: 'login not available' }],
 			);
 		}
+		this.logger.debug('♻ Attempting to find if user email already exists...');
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		const foundEmail = await this.adapter.findOne<IUser>({ email: entity.email });
 		if (foundEmail) {
+			this.logger.error('♻ User email already exists...');
 			throw new moleculer.Errors.MoleculerClientError(
 				userErrorMessage.DUPLICATED_EMAIL,
 				userErrorCode.DUPLICATED_EMAIL,
@@ -449,21 +565,19 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 		}
 
 		entity.password = encryptPassword(entity.password);
-		const parsedEntity = this.removeForbiddenFields(
+		const parsedEntity = this.removeForbiddenFields<IUser>(
 			new JsonConvert().deserializeObject(entity, UserEntity).getMongoEntity(),
+			['_id', 'createdBy', 'createdDate', 'lastModifiedBy', 'lastModifiedDate'],
 		);
-		const modEntity = this.updateAuthor(parsedEntity, { creator: ctx.meta.user });
+		const modEntity = this.updateAuthor<IUser>(parsedEntity, { creator: ctx.meta.user });
 		const requireToken = () => {
-			if (
-				entity.hasOwnProperty('requireRegToken') &&
+			return entity.hasOwnProperty('requireRegToken') &&
 				typeof entity.requireRegToken === 'boolean'
-			) {
-				return entity.requireRegToken;
-			} else {
-				return JSON.parse(Config.registrationTokenRequired);
-			}
+				? entity.requireRegToken
+				: JSON.parse(Config.REGISTRATION_TOKEN_REQUIRED);
 		};
 		const addVerificationToken = this.addVerificationToken(modEntity, requireToken());
+		this.logger.debug('♻ Creating user');
 		return await this._create(ctx, addVerificationToken);
 	}
 
@@ -497,14 +611,14 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 		name: 'getMe',
 		restricted: ['api'],
 		cache: getActionConfig.cache,
-		params: {
-			...getActionConfig.params,
-			id: { type: 'string', optional: true },
-		},
+		// ...getActionConfig.params,
 	})
 	async getMe(ctx: Context<DbContextParameters, UserAuthMeta>) {
-		const params = this.sanitizeParams(ctx, ctx.params);
-		return await this._get(ctx, { ...params, id: ctx.meta.user._id });
+		this.logger.debug('♻ Attempting to get logged in user by id');
+		return await this._get(ctx, {
+			id: ctx.meta.user._id,
+			populate: ['createdBy', 'lastModifiedBy'],
+		});
 	}
 
 	/**
@@ -542,13 +656,14 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	 *          content: {}
 	 */
 	@Get<RestOptions>('/:id', {
-		name: 'get.id',
+		name: 'get',
 		restricted: ['api'],
-		roles: UserRole.SUPERADMIN,
-		...getActionConfig,
+		roles: [UserRoleDefault.SUPERADMIN, UserRoleDefault.ADMIN],
+		...getActionConfig.params,
 	})
 	async getUser(ctx: Context<UserGetParams, UserAuthMeta>) {
 		const params = this.sanitizeParams(ctx, ctx.params);
+		this.logger.debug('♻ Attempting to find user by id');
 		return await this._get(ctx, await { ...params, populate: ['createdBy', 'lastModifiedBy'] });
 	}
 
@@ -597,7 +712,7 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	@Put<RestOptions>('/:id', {
 		name: 'update',
 		restricted: ['api', 'user'],
-		roles: UserRole.SUPERADMIN,
+		roles: UserRoleDefault.SUPERADMIN,
 		params: {
 			...validateUserBaseOptional,
 			password: { type: 'string', optional: true },
@@ -606,22 +721,27 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	})
 	async updateUser(ctx: Context<UserUpdateParams, UserAuthMeta>) {
 		const { id } = ctx.params;
+		this.logger.debug('♻ Deleting param id');
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		delete ctx.params.id;
-		// const user = await this.getById(id);
+		this.logger.debug('♻ Attempting to find if user to update by id');
 		const user = (await this.adapter.findById(id)) as IUser;
 		if (!user) {
+			this.logger.error('♻ User to update not found');
 			throw new moleculer.Errors.MoleculerClientError(
 				userErrorMessage.NOT_FOUND,
 				userErrorCode.NOT_FOUND,
 			);
 		}
-		const parsedEntity = this.removeForbiddenFields(
+		this.logger.debug('♻ Removing forbidden fields from found user');
+		const parsedEntity = this.removeForbiddenFields<IUser>(
 			new JsonConvert()
 				.deserializeObject({ ...user, ...ctx.params }, UserEntity)
 				.getMongoEntity(),
+			['_id', 'createdBy', 'createdDate', 'lastModifiedBy', 'lastModifiedDate'],
 		);
+		this.logger.debug('♻ Updating modified by...');
 		const newUser = this.updateAuthor(
 			{
 				...user,
@@ -633,11 +753,11 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 		);
 		const { password } = ctx.params;
 		if (password) {
+			this.logger.debug('♻ Encrypting password');
 			newUser.password = encryptPassword(password);
 		}
-		// const result = { test: 'result check' };
+		this.logger.debug('♻ Updating user by id...');
 		const result = await this.adapter.updateById(id, newUser);
-		// const result = await this._update(ctx, newUser);
 		const transform = await this.transformDocuments(
 			ctx,
 			{ populate: ['createdBy', 'lastModifiedBy'] },
@@ -676,30 +796,48 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	@Delete<RestOptions>('/:id', {
 		name: 'remove',
 		restricted: ['api'],
-		roles: UserRole.SUPERADMIN,
+		roles: UserRoleDefault.SUPERADMIN,
 		params: { id: 'string' },
 	})
 	async deleteUser(ctx: Context<UserDeleteParams, UserAuthMeta>) {
+		this.logger.debug('♻ Checking if user account to be deleted is self');
 		if (ctx.params.id === ctx.meta.user._id) {
+			this.logger.error('♻ Cannot delete own user account');
 			throw new moleculer.Errors.MoleculerClientError(
 				userErrorMessage.DELETE_ITSELF,
 				userErrorCode.DELETE_ITSELF,
 			);
 		}
 		const params = await this.sanitizeParams(ctx, ctx.params);
-		try {
-			let recordToDelete: IUser = (await this._get(ctx, { id: ctx.params.id })) as IUser;
+		this.logger.debug('♻ Attempting to delete user...');
+		const recordToDelete = await this._get(ctx, {
+			id: ctx.params.id,
+			populate: ['createdBy', 'lastModifiedBy'],
+		}).catch((err) => {
+			this.logger.error('♻ User not found:', err);
+			throw new moleculer.Errors.MoleculerClientError(
+				userErrorMessage.NOT_FOUND,
+				userErrorCode.NOT_FOUND,
+				'500',
+				{ err },
+			);
+		});
 
-			return await this._remove(ctx, params)
-				.then(async (record) => {
-					ctx.meta.$statusCode = constants.HTTP_STATUS_ACCEPTED;
-					await this.broker.emit(UserEvent.DELETED, { id: ctx.params.id });
-					return { recordsDeleted: record, record: recordToDelete };
-				})
-				.catch((err) => console.log('Deletion error:', err));
-		} catch (err) {
-			return err;
-		}
+		return await this._remove(ctx, params)
+			.then(async (record) => {
+				ctx.meta.$statusCode = constants.HTTP_STATUS_ACCEPTED;
+				await this.broker.emit(UserEvent.DELETED, { id: ctx.params.id });
+				return { recordsDeleted: record, record: recordToDelete };
+			})
+			.catch((err) => {
+				this.logger.error('♻ User deletion error:', err);
+				throw new moleculer.Errors.MoleculerClientError(
+					userErrorMessage.DELETE_ERROR,
+					userErrorCode.DELETE_ERROR,
+					'500',
+					{ err },
+				);
+			});
 	}
 
 	/**
@@ -737,79 +875,97 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	@Post<RestOptions>('/removeMany', {
 		name: 'removeMany',
 		restricted: ['api'],
-		roles: UserRole.SUPERADMIN,
+		roles: [UserRoleDefault.SUPERADMIN, UserRoleDefault.ADMIN],
 		params: { userIDs: { type: 'array', items: 'string' } },
 	})
 	async deleteManyUsers(ctx: Context<UsersDeleteParams, UserAuthMeta>) {
-		try {
-			const isArray = ctx.params.userIDs;
-			let recordsToDelete: any[] = [];
-			let deletionErrors: any[] = [];
-			if (Array.isArray(isArray) && isArray.length > 1) {
-				let recordsCount = 0;
-				let recordErrors = 0;
-				for (let i = 0; i < isArray.length; i++) {
-					if (isArray[i] === ctx.meta.user._id) {
-						deletionErrors.push({
-							error: {
-								message: 'Cannot delete self',
-								code: userErrorCode.DELETE_ITSELF,
-								type: userErrorMessage.DELETE_ITSELF,
-							},
-							record: await this._get(ctx, { id: isArray[i] }),
-						});
-						recordErrors++;
-					} else {
-						await this._get(ctx, { id: isArray[i] })
+		// try {
+		const isArray = ctx.params.userIDs;
+		let recordsToDelete: any[] = [];
+		let deletionErrors: any[] = [];
+		let recordsCount = 0;
+		let recordErrors = 0;
+		this.logger.debug('♻ Checking that more than one id is in array...');
+		if (Array.isArray(isArray) && isArray.length === 1) {
+			this.logger.warn(
+				`♻ Deletion skipped. API called with 1 item in array. Use DELETE /api/v${this.version}/user/:id instead.`,
+			);
+			throw new moleculer.Errors.MoleculerClientError(
+				`Deletion skipped. API removemany called with 1 item in array. Use DELETE /api/v${this.version}/user/:id instead.`,
+				userErrorCode.WRONG,
+			);
+		}
+		if (!Array.isArray(isArray) || (Array.isArray(isArray) && isArray.length < 1)) {
+			this.logger.error(`♻ API removemany called with unprocessable parameter array`);
+			throw new moleculer.Errors.MoleculerClientError(
+				`API removemany called with unprocessable parameters`,
+				userErrorCode.WRONG,
+			);
+		}
+		if (Array.isArray(isArray) && isArray.length > 1) {
+			const deleteSelfError = async (id: any) => {
+				this.logger.error(
+					'♻ User id array contains id of current user, cannot delete self',
+				);
+				deletionErrors.push({
+					error: {
+						message: 'Cannot delete self',
+						code: userErrorCode.DELETE_ITSELF,
+						type: userErrorMessage.DELETE_ITSELF,
+					},
+					record: await this._get(ctx, { id: id }),
+				});
+				recordErrors++;
+			};
+			for (const element of isArray) {
+				element === ctx.meta.user._id
+					? deleteSelfError(element)
+					: await this._get(ctx, { id: element })
 							.then(async (userRecord) => {
 								recordsToDelete.push(userRecord);
-								await this._remove(ctx, { id: isArray[i] });
+								this.logger.debug('♻ Deleting users in array: ', isArray);
+								await this._remove(ctx, { id: element });
 								recordsCount++;
 							})
 							.catch(async (err) => {
+								this.logger.error('♻ Error deleting user: ', element);
 								deletionErrors.push({
 									error: err,
 									record: {
-										id: isArray[i],
+										id: element,
 									},
 								});
 								recordErrors++;
 							});
-					}
-				}
-
-				if (deletionErrors.length > 0) {
-					return {
-						recordsDeleted: {
-							deletionCount: recordsCount,
-							deletedRecords: recordsToDelete,
-						},
-						deletionErrors: { errorCount: recordErrors, records: deletionErrors },
-					};
-				} else {
-					return {
-						recordsDeleted: {
-							deletionCount: recordsCount,
-							deletedRecords: recordsToDelete,
-						},
-					};
-				}
 			}
-			if (Array.isArray(isArray) && isArray.length === 1) {
-				return {
-					code: userErrorCode.WRONG,
-					message: `Deletion skipped. API removemany called with 1 item in array. Use DELETE /api/v${this.version}/user/:id instead.`,
-				};
-			}
-			if (!Array.isArray(isArray) || (Array.isArray(isArray) && isArray.length) < 1) {
-				return {
-					code: userErrorCode.WRONG,
-					message: 'API removemany called with unprocessable parameter',
-				};
-			}
-		} catch (err) {
-			return err;
 		}
+		if (deletionErrors.length > 0) {
+			this.logger.error(
+				`♻ API removemany error: ${deletionErrors.length} errors occured of ${isArray.length} records`,
+			);
+			throw new moleculer.Errors.MoleculerClientError(
+				`♻ API removemany error: ${deletionErrors.length} errors occured of ${isArray.length} records`,
+				userErrorCode.DELETE_ERROR,
+				'200',
+				{
+					recordsDeleted: {
+						deletionCount: recordsCount,
+						deletedRecords: recordsToDelete,
+					},
+					deletionErrors: { errorCount: recordErrors, records: deletionErrors },
+				},
+			);
+		}
+		return {
+			recordsDeleted: {
+				deletionCount: recordsCount,
+				deletedRecords: recordsToDelete,
+			},
+		};
+		/* } catch (err) {
+			this.logger.error('♻ API removemany error: ', err);
+			return err;
+		} */
 	}
 
 	/**
@@ -858,72 +1014,24 @@ export default class UserService extends MoleculerDBService<UserServiceSettingsO
 	@Get<RestOptions>('/list', {
 		name: 'list',
 		restricted: ['api'],
-		roles: UserRole.SUPERADMIN,
+		roles: UserRoleDefault.SUPERADMIN,
 		...listActionConfig,
 	})
 	async listAllUsers(ctx: Context<DbContextParameters, UserAuthMeta>) {
 		const params = this.sanitizeParams(ctx, ctx.params);
-		return await this._list(ctx, await { ...params });
-	}
-
-	@Method
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	private updateAuthor(
-		user: IUser,
-		mod: {
-			creator?: UserJWT;
-			modifier?: UserJWT;
-		},
-	) {
-		const { creator, modifier } = mod;
-		let result = { ...user } as IUser;
-		if (creator || creator === null || undefined) {
-			if (creator !== null || undefined) {
-				result = { ...result, createdBy: creator!._id, createdDate: new Date() };
-			} else {
-				result = { ...result, createdBy: null, createdDate: new Date() };
-			}
-		}
-		if (modifier || modifier === null || undefined) {
-			if (creator !== null || undefined) {
-				result = { ...result, lastModifiedBy: modifier!._id, lastModifiedDate: new Date() };
-			} else {
-				result = { ...result, lastModifiedBy: null, lastModifiedDate: new Date() };
-			}
-		}
-		return result;
+		this.logger.debug('♻ Listing users...');
+		const userList = await this._list(ctx, await { ...params });
+		return userList;
 	}
 
 	@Method
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	private addVerificationToken(user: IUser, requireToken: boolean) {
 		let result = { ...user } as IUser;
-		if (requireToken) {
-			result = { ...result, verificationToken: randomstring.generate(64) };
-		} else {
-			result.active = true;
-		}
-		return result;
-	}
-
-	@Method
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	private removeForbiddenFields(user: IUser) {
-		const result = { ...user };
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		delete result._id;
-		// delete (user as any).id;
-
-		// delete result.login;
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		delete result.createdDate;
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		delete result.createdBy;
-		delete result.lastModifiedDate;
-		delete result.lastModifiedBy;
+		requireToken
+			? (this.logger.debug('♻ Adding verification token'),
+			  (result = { ...result, verificationToken: randomstring.generate(64) }))
+			: (this.logger.debug('♻ Setting user to active'), (result.active = true));
 		return result;
 	}
 }

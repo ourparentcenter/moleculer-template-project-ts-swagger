@@ -1,9 +1,9 @@
 import { Context, Endpoint, ServiceBroker } from 'moleculer';
 import ApiGatewayService from 'moleculer-web';
 import TestingService from '../../../services/apiService';
-import { UserAuthMeta, UserLang, UserRole } from '../../../types';
+import { UserAuthMeta, UserLang, UserRoleDefault } from '../../../types';
 import { UserEntity } from '../../../entities';
-import { testConfig } from '../../helpers/helper';
+import { testConfig, wait } from '../../helpers/helper';
 import 'jest-extended';
 import 'jest-chain';
 const JEST_TIMEOUT = 35 * 1000;
@@ -11,7 +11,7 @@ jest.setTimeout(JEST_TIMEOUT);
 
 describe('Unit tests for Api service', () => {
 	const broker = new ServiceBroker(testConfig);
-	const service = broker.createService(TestingService) as TestingService;
+	const service = broker.createService(TestingService);
 	const endpoint: Endpoint = {
 		broker,
 		id: Math.random().toString(36).slice(2),
@@ -20,6 +20,7 @@ describe('Unit tests for Api service', () => {
 		state: true,
 	};
 	beforeAll(async () => {
+		await wait(1);
 		await broker.start();
 		await broker.waitForServices(service.name);
 	});
@@ -59,7 +60,7 @@ describe('Unit tests for Api service', () => {
 					authorization: 'WrongToken_header',
 				},
 			};
-			service.authenticate(context, undefined, mockRequest).catch((err) => {
+			service.authenticate(context, undefined, mockRequest).catch((err: any) => {
 				expect(err).toBeInstanceOf(ApiGatewayService.Errors.UnAuthorizedError);
 				done();
 			});
@@ -90,7 +91,7 @@ describe('Unit tests for Api service', () => {
 					authorization: `Bearer ${token}`,
 				},
 			};
-			service.authenticate(context, undefined, mockRequest).catch((err) => {
+			service.authenticate(context, undefined, mockRequest).catch((err: any) => {
 				expect(err).toBeInstanceOf(ApiGatewayService.Errors.UnAuthorizedError);
 				done();
 			});
@@ -113,12 +114,12 @@ describe('Unit tests for Api service', () => {
 		let context: Context<Record<string, unknown>, UserAuthMeta>;
 		const user = {
 			_id: '1234',
-			roles: [UserRole.USER],
+			roles: [UserRoleDefault.USER],
 			login: 'mock',
 			firstName: 'mock',
 			lastName: 'mock',
 			email: 'mock@mock.com',
-			langKey: UserLang.ES,
+			langKey: UserLang.ENUS,
 		};
 
 		beforeEach(() => {

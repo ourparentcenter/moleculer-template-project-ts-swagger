@@ -2,6 +2,7 @@ import { Options } from '@ourparentcenter/moleculer-decorators-extended';
 import { DbContextParameters, DbServiceSettings } from 'moleculer-db';
 import { IUser } from '../entities';
 import { ApiGatewayMeta } from './interfaces';
+import { UserRoleDefault } from './roles';
 
 export interface UserServiceSettingsOptions extends DbServiceSettings {
 	rest?: string;
@@ -16,18 +17,10 @@ export interface UsersServiceOptions extends Options {
 	settings: UserServiceSettingsOptions;
 }
 
-export enum UserRole {
-	SUPERADMIN = 'ROLE_SUPERADMIN',
-	ADMIN = 'ROLE_ADMIN',
-	APPROVER = 'ROLE_APPROVER',
-	MODIFIER = 'ROLE_MODIFIER',
-	USER = 'ROLE_USER',
-}
-
 export enum UserLang {
 	ES = 'es',
 	CA = 'ca',
-	EN = 'en',
+	ENUS = 'en-us',
 	IT = 'it',
 	FR = 'fr',
 }
@@ -38,12 +31,13 @@ export interface IUserBase {
 	lastName?: string;
 	email?: string;
 	langKey?: UserLang;
-	roles?: UserRole[];
+	roles?: UserRoleDefault[];
 	active?: boolean;
 }
 
 export interface UserJWT extends IUserBase {
-	_id: string;
+	// _id: string;
+	id: string;
 }
 
 // PARAMS
@@ -62,7 +56,7 @@ export interface UserTokenParams {
 }
 
 export interface UserRolesParams {
-	roles: UserRole[];
+	roles: UserRoleDefault[];
 }
 
 export interface UserUpdateParams extends Partial<IUser> {
@@ -79,7 +73,7 @@ export interface UserActivateParams extends DbContextParameters {
 }
 
 export interface UserDeleteParams extends DbContextParameters {
-	id: string;
+	id?: string;
 }
 
 export interface UsersDeleteParams extends DbContextParameters {

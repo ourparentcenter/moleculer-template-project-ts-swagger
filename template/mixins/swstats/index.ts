@@ -1,6 +1,7 @@
-import swStats from 'swagger-stats';
+import * as swStats from 'swagger-stats';
 import swaggerSpec from '../../swagger.json';
-import * as promClient from 'prom-client';
+
+const promClient = swStats.getPromClient();
 const tlBucket = 60000;
 const swMiddleware = swStats.getMiddleware({
 	name: 'swagger-stats',
@@ -10,11 +11,17 @@ const swMiddleware = swStats.getMiddleware({
 });
 
 // clears the promclient registry
-const clearPrometheusMetrics = promClient.register.getMetricsAsJSON().then((metrics) =>
-	metrics.forEach((metric: Record<string, any>) => {
-		// let metric = metrics[metricId];
-		promClient.register.removeSingleMetric(metric.name);
-	}),
-);
+const clearPrometheusMetrics = promClient.register
+	.getMetricsAsJSON()
+	.then((metrics) =>
+		metrics.forEach((metric: Record<string, any>) => {
+			promClient.register.removeSingleMetric(metric.name);
+		}),
+	)
+	.catch((err) => {
+		// @ts-ignore
+		this.logger.error(err);
+		throw err;
+	});
 
 export { swMiddleware, swStats, clearPrometheusMetrics };

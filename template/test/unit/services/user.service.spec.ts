@@ -4,6 +4,7 @@ import AuthService from '../../../services/authService';
 import {
 	IUser,
 	IUserBase,
+	UserActivateParams,
 	UserAuthMeta,
 	UserCreateParams,
 	UserDeleteParams,
@@ -12,13 +13,13 @@ import {
 	UserLang,
 	UserLoginMeta,
 	UserLoginParams,
-	UserRole,
+	UserRoleDefault,
 	UserRolesParams,
 	UserTokenParams,
 	UserUpdateParams,
 } from '../../../types';
 import { adminUser, disabledUser, simpleUser, superAdminUser } from '../../helpers/user.helper';
-import { clearDB, randString, testConfig } from '../../helpers/helper';
+import { clearDB, randString, testConfig, wait } from '../../helpers/helper';
 import { Config } from '../../../common';
 import 'jest-extended';
 import 'jest-chain';
@@ -35,11 +36,12 @@ function calledCacheClean(mockFn: jest.SpyInstance) {
 describe('Unit tests for User service', () => {
 	let broker: ServiceBroker;
 	let endpoint: Endpoint;
-	let service: TestingService;
-	let authService: AuthService;
+	let service: any;
+	let authService: any;
 	const spyBroadcast = jest.spyOn(Context.prototype, 'broadcast');
 
-	beforeEach(async () => {
+	beforeAll(async () => {
+		await wait(1);
 		broker = new ServiceBroker(testConfig);
 		// broker = new ServiceBroker();
 		endpoint = {
@@ -49,8 +51,8 @@ describe('Unit tests for User service', () => {
 			node: {},
 			state: true,
 		};
-		authService = broker.createService(AuthService) as AuthService;
-		service = broker.createService(TestingService) as TestingService;
+		authService = broker.createService(AuthService);
+		service = broker.createService(TestingService);
 		// version = `vv${service.version}`;
 		await clearDB(Config.DB_USER);
 		await broker.start();
@@ -137,7 +139,7 @@ describe('Unit tests for User service', () => {
 			}
 		});
 		it('validate valid role', async () => {
-			context.params = { roles: [UserRole.USER] };
+			context.params = { roles: [UserRoleDefault.USER] };
 			context.meta.user = simpleUser;
 			try {
 				const response = await authService.validateRole(context);
@@ -147,7 +149,7 @@ describe('Unit tests for User service', () => {
 			}
 		});
 		it('validate wrong role', async () => {
-			context.params = { roles: [UserRole.SUPERADMIN] };
+			context.params = { roles: [UserRoleDefault.SUPERADMIN] };
 			context.meta.user = simpleUser;
 			try {
 				const response = await authService.validateRole(context);
@@ -160,7 +162,7 @@ describe('Unit tests for User service', () => {
 
 	describe('create user', () => {
 		let user: IUserBase;
-		let context: Context<UserCreateParams, UserAuthMeta>;
+		let context: any;
 		beforeEach(() => {
 			const str = randString();
 			user = {
@@ -168,11 +170,14 @@ describe('Unit tests for User service', () => {
 				email: `${str}@test.com`,
 				firstName: str,
 				lastName: str,
-				roles: [UserRole.USER],
-				langKey: UserLang.ES,
-				active: true,
+				roles: [UserRoleDefault.USER],
+				langKey: UserLang.ENUS,
+				active: false,
 			};
-			context = new Context<UserCreateParams, UserAuthMeta>(broker, endpoint);
+			context = new Context<UserCreateParams, UserActivateParams, UserAuthMeta>(
+				broker,
+				endpoint,
+			);
 		});
 		it('create user with wrong data', async () => {
 			context.params = {} as UserCreateParams;
@@ -185,7 +190,7 @@ describe('Unit tests for User service', () => {
 		});
 		it('create user', async () => {
 			context.params = { ...user, password: randString() };
-			context.meta = { user: superAdminUser };
+			context.meta = { user: superAdminUser } as UserAuthMeta;
 			try {
 				const response = await service.createUser(context);
 				expect(response)
@@ -234,6 +239,84 @@ describe('Unit tests for User service', () => {
 			}
 			expect(spyBroadcast).not.toHaveBeenCalled();
 		});
+		it('registers user', async () => {
+			try {
+				context.params = {
+					...user,
+					password: randString(),
+				} as UserCreateParams;
+				const result = await service.registerUser(context);
+				expect(spyBroadcast).toHaveBeenCalled();
+				expect(result)
+					.toBeDefined()
+					.toBeObject()
+					.toContainEntries([
+						['login', user.login],
+						['email', user.email],
+						['firstName', user.firstName],
+						['lastName', user.lastName],
+						['roles', user.roles],
+						['langKey', user.langKey],
+						['verificationToken', expect.any(String)],
+						['active', false],
+					]);
+			} catch (err: any) {
+				console.log(err);
+				expect(err).toBeInstanceOf(moleculer.Errors.MoleculerClientError);
+			}
+		});
+		it('activates user', async () => {
+			context.params = {
+				...user,
+				password: randString(),
+			} as UserCreateParams;
+			await service
+				.registerUser(context)
+				.then(async (res: IUser) => {
+					expect(spyBroadcast).toHaveBeenCalled();
+					expect(res)
+						.toBeDefined()
+						.toBeObject()
+						.toContainEntries([
+							['login', user.login],
+							['email', user.email],
+							['firstName', user.firstName],
+							['lastName', user.lastName],
+							['roles', user.roles],
+							['langKey', user.langKey],
+							['verificationToken', expect.any(String)],
+							['active', false],
+						]);
+					context.params = {
+						verificationToken: res.verificationToken,
+					};
+					await service
+						.activateUser(context)
+						.then((res: IUser) => {
+							expect(spyBroadcast).toHaveBeenCalled();
+							expect(res)
+								.toBeDefined()
+								.toBeObject()
+								.toContainEntries([
+									['login', user.login],
+									['email', user.email],
+									['firstName', user.firstName],
+									['lastName', user.lastName],
+									['roles', user.roles],
+									['langKey', user.langKey],
+									['verificationToken', expect.any(String)],
+									['active', true],
+								]);
+						})
+						.catch((err: any) => {
+							return err;
+						});
+				})
+				.catch((err: any) => {
+					console.log(err);
+					expect(err).toBeInstanceOf(moleculer.Errors.MoleculerClientError);
+				});
+		});
 	});
 
 	describe('login user', () => {
@@ -249,7 +332,7 @@ describe('Unit tests for User service', () => {
 				.toBeObject()
 				.toContainEntries([
 					['code', 422],
-					['data', [{ field: 'login/password', message: 'not found' }]],
+					['data', [{ field: 'login/password', message: 'login/password incorrect' }]],
 				]);
 		});
 		it('login wrong password', async () => {
@@ -260,7 +343,7 @@ describe('Unit tests for User service', () => {
 				.toBeObject()
 				.toContainEntries([
 					['code', 422],
-					['data', [{ field: 'login/password', message: 'not found' }]],
+					['data', [{ field: 'login/password', message: 'login/password incorrect' }]],
 				]);
 		});
 		it('login disabled', async () => {
@@ -275,6 +358,7 @@ describe('Unit tests for User service', () => {
 				]);
 		});
 		it('login good', async () => {
+			// file deepcode ignore NoHardcodedPasswords: password just for testing
 			context.params = { login: String(simpleUser.login), password: '123456' };
 			const response = await service.loginUser(context);
 			const context2 = new Context<UserTokenParams, Record<string, unknown>>(
@@ -334,7 +418,7 @@ describe('Unit tests for User service', () => {
 		let context: Context<UserGetParams, UserAuthMeta>;
 		beforeEach(() => {
 			context = new Context<UserGetParams, UserAuthMeta>(broker, endpoint);
-			context.action = { name: `v${service.version}.user.get.id` };
+			context.action = { name: `v${service.version}.user.get` };
 		});
 		it('not found', async () => {
 			context.meta = { user: superAdminUser };
@@ -437,7 +521,7 @@ describe('Unit tests for User service', () => {
 			try {
 				const contextUser = new Context<UserGetParams, UserAuthMeta>(broker, endpoint);
 				contextUser.meta = { user: superAdminUser };
-				contextUser.action = { name: `v${service.version}.user.get.id` };
+				contextUser.action = { name: `v${service.version}.user.get` };
 				contextUser.params = { id: adminUser._id };
 				// await broker.call('v${service.version}.user.get.id', { id: adminUser._id });
 				await service.getUserId(contextUser);

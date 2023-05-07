@@ -1,14 +1,14 @@
 'use strict';
-import { inspect } from 'util';
+import { inspect } from 'node:util';
 import { BrokerOptions, Errors, MetricRegistry } from 'moleculer';
 import 'reflect-metadata';
-import pick from 'lodash/pick';
-import ServiceGuard = require('./middlewares/ServiceGuard');
-import HotReloadMiddleware from './middlewares/HotReloadCHokidar';
-{{#apiGW}}
-import OpenInBrowserMiddleware from './middlewares/OpenInBrowser';
-{{/apiGW}}
 import { Config } from './common';
+import {
+	{{#swagger}}generateOpenAPIFile,{{/swagger}}
+	{{#apiGW}}OpenInBrowserMiddleware,{{/apiGW}}
+	ServiceGuard,
+	/* HotReloadMiddleware, */
+} from '@Middlewares';
 import MoleculerRetryableError = Errors.MoleculerRetryableError;
 
 /**
@@ -60,6 +60,38 @@ const brokerConfig: BrokerOptions = {
 			objectPrinter: (o: never) => inspect(o, { depth: 4, colors: true, breakLength: 100 }),
 			// Auto-padding the module name in order to messages begin at the same column.
 			autoPadding: JSON.parse(Config.LOGGERAUTOPADDING) || false,
+		},
+		{
+			type: 'Log4js',
+			options: {
+				// Logging level
+				level: 'debug',
+
+				log4js: {
+					// More info: https://github.com/log4js-node/log4js-node#usage
+					appenders: {
+						app: {
+							type: 'multiFile',
+							base: './logs/',
+							property: 'categoryName',
+							extension: '.log',
+						},
+						appError: {
+							type: 'multiFile',
+							base: './logs/',
+							property: 'categoryName',
+							extension: '.error.log',
+						},
+						// app: { type: 'file', filename: './logs/moleculer.log' },
+						// allErrors: { type: 'file', filename: './logs/errors.log' },
+						errors: { type: 'logLevelFilter', appender: 'appError', level: 'error' },
+						// errors: { type: 'logLevelFilter', appender: 'app', level: 'error' },
+					},
+					categories: {
+						default: { appenders: ['errors', 'app'], level: 'debug' },
+					},
+				},
+			},
 		},
 	},
 	// Default log level for built-in console logger. It can be overwritten in logger options above.
@@ -412,7 +444,12 @@ const brokerConfig: BrokerOptions = {
 	},
 
 	// Register custom middlewares
-	middlewares: [/* HotReloadMiddleware, */ ServiceGuard{{#apiGW}}, OpenInBrowserMiddleware{{/apiGW}}],
+	middlewares: [
+		/* HotReloadMiddleware, */
+		ServiceGuard{{#apiGW}},
+		OpenInBrowserMiddleware,{{/apiGW}}
+		{{#swagger}}generateOpenAPIFile,{{/swagger}}
+	],
 
 	// Register custom REPL commands.
 	// replCommands: [],

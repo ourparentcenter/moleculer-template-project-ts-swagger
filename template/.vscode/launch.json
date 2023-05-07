@@ -8,18 +8,8 @@
 			"type": "node",
 			"request": "launch",
 			"name": "Debug",
-			"program": "${workspaceRoot}/node_modules/moleculer/bin/moleculer-runner.js",
-			"sourceMaps": true,
-			"runtimeArgs": [
-				"--nolazy",
-				"-r",
-				"ts-node/register"
-			],
-			"cwd": "${workspaceRoot}",
-			"args": [
-				"**/*.service.ts",
-				"services"
-			]
+			"runtimeExecutable": "yarn",
+			"runtimeArgs": ["dev"]
 		},
 		{
 			"type": "node",

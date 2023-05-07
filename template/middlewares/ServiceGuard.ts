@@ -7,8 +7,10 @@ module.exports = {
 	// Wrap local action handlers (legacy middleware handler)
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	localAction(next: any, action: Record<string, unknown>) {
+		this.logger.debug(`♻ Checking if action ${action.name} is restricted..`);
 		// If this feature enabled
 		if (action.restricted) {
+			this.logger.debug(`♻ Action ${action.name} is restricted, checking for token...`);
 			// Create new handler
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			const ServiceGuardMiddleware = (async (
@@ -18,6 +20,7 @@ module.exports = {
 				// Check the service auth token in Context meta
 				const token = ctx.meta.$authToken;
 				if (!token) {
+					this.logger.error('♻ Service token is missing.');
 					throw new MoleculerClientError(
 						'Service token is missing',
 						401,
@@ -25,6 +28,7 @@ module.exports = {
 					);
 				}
 
+				this.logger.debug(`♻ Verifing Service token for ${action.name}..`);
 				// Verify token & restricted services
 				// Tip: For better performance, you can cache the response because it won't change in runtime.
 				await ctx.call('v1.guard.check', { token, services: action.restricted });

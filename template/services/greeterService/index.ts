@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 'use strict';
-import moleculer, { Context } from 'moleculer';
+import { Context } from 'moleculer';
 import { Get, Post, Service } from '@ourparentcenter/moleculer-decorators-extended';
-import { Config } from '../../common';
-import { GreeterWelcomeParams, RestOptions } from '../../types';
-import EncryptionUtil from '../../helpers/encryption.helper';
+import { Config } from '@Common';
+import { GreeterWelcomeParams, RestOptions } from '@CoreTypes';
+import { BaseService } from '@Factories';
+import { EncryptionUtils } from '@ServiceHelpers';
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  */
 @Service({
 	name: 'greeter',
 	version: 1,
+	mergeActions: true,
 	/**
 	 * Service guard token
 	 */
@@ -32,7 +34,7 @@ import EncryptionUtil from '../../helpers/encryption.helper';
 		},
 	},
 })
-export default class GreeterService extends moleculer.Service {
+export default class GreeterService extends BaseService {
 	/**
 	 *  @swagger
 	 *
@@ -58,6 +60,11 @@ export default class GreeterService extends moleculer.Service {
 		restricted: ['api'],
 	})
 	async hello() {
+		this.logger.debug('♻ Returning hello string');
+		const woman = EncryptionUtils.encrypt('Hot woman here, decrypt me!!');
+		const decryptedWoman = EncryptionUtils.decrypt(woman);
+		this.logger.warn('Encrypted woman: ', woman);
+		this.logger.warn('Explicit content: ', decryptedWoman);
 		return 'Hello Moleculer';
 	}
 	/**
@@ -102,8 +109,7 @@ export default class GreeterService extends moleculer.Service {
 		},
 	})
 	async welcome(ctx: Context<GreeterWelcomeParams, Record<string, unknown>>) {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
+		this.logger.debug('♻ Returning Welcome <user name> string');
 		return `Welcome, ${ctx.params.name}`;
 	}
 }

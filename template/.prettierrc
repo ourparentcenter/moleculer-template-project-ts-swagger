@@ -5,5 +5,15 @@
 	"printWidth": 100,
 	"tabWidth": 4,
 	"useTabs": true,
-	"endOfLine":"auto"
+	"endOfLine": "auto",
+	"overrides": [
+		{
+			"files": ["*.html"],
+			"options": { "parser": "vue" }
+		},
+		{
+			"files": ["*.{json,yml,yaml}"],
+			"options": { "tabWidth": 2 }
+		}
+	]
 }

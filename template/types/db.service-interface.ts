@@ -1,7 +1,7 @@
 /* eslint-disable no-shadow */
 import moleculer, { Context } from 'moleculer';
 import {
-	DbAdapter,
+	// DbAdapter,
 	QueryOptions,
 	DbContextSanitizedParams,
 	DbContextParameters,
@@ -9,6 +9,8 @@ import {
 	CountOptions,
 	QueryFilters,
 } from 'moleculer-db';
+import { ObjectLiteral } from 'typeorm';
+import { DbAdapter } from '@tyrsolutions/moleculer-db-typeorm-adapter';
 
 export const listActionConfig = {
 	cache: {
@@ -58,6 +60,23 @@ export const getActionConfig = {
 		mapping: { type: 'boolean', optional: true },
 	},
 };
+export const putActionConfig = {
+	cache: {
+		keys: ['id', 'populate', 'fields', 'mapping'],
+	},
+	params: {
+		id: [{ type: 'string' }, { type: 'number' }, { type: 'array' }],
+		populate: [
+			{ type: 'string', optional: true },
+			{ type: 'array', optional: true, items: 'string' },
+		],
+		fields: [
+			{ type: 'string', optional: true },
+			{ type: 'array', optional: true, items: 'string' },
+		],
+		mapping: { type: 'boolean', optional: true },
+	},
+};
 
 export interface DBPagination<T> {
 	rows: T[];
@@ -75,7 +94,7 @@ export class MoleculerDBService<T, R> extends moleculer.Service<T> {
 		$version: string;
 		$repo?: string;
 	};
-	public adapter!: DbAdapter;
+	public adapter!: DbAdapter<ObjectLiteral>;
 
 	public connect!: () => Promise<void>;
 

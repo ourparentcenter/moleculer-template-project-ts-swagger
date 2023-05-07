@@ -3,12 +3,12 @@
 /**
  * Service for tenant catalog data in db
  */
-import moleculer, { Context, Errors } from 'moleculer';
+import { Context, Errors } from 'moleculer';
 import { Action, Method, Service } from '@ourparentcenter/moleculer-decorators-extended';
 import { sign, verify } from 'jsonwebtoken';
-import errorHandler from '../../helpers/error.helper';
+import { errorHandler } from '@ServiceHelpers';
+import { BaseService } from '@Factories';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 const MoleculerClientError = Errors.MoleculerClientError;
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -17,7 +17,7 @@ const MoleculerClientError = Errors.MoleculerClientError;
 	name: 'guard',
 	version: 1,
 })
-class GuardService extends moleculer.Service {
+export default class GuardService extends BaseService {
 	/**
 	 * Actions
 	 */
@@ -38,6 +38,7 @@ class GuardService extends moleculer.Service {
 	})
 	public async check(ctx: Context<Record<string, never>>) {
 		const { token, services } = ctx.params;
+		this.logger.debug('♻ Attempting to check JWT...');
 		return await this._verifyJWT(ctx, token, services);
 	}
 
@@ -53,7 +54,7 @@ class GuardService extends moleculer.Service {
 	})
 	public async generate(ctx: Context<Record<string, string>>) {
 		const { service } = ctx.params;
-		this.logger.warn('Only for development!');
+		this.logger.warn('Generating service JWT. Use only for development!');
 		return await this._generateJWT(service);
 	}
 
@@ -64,12 +65,11 @@ class GuardService extends moleculer.Service {
 	 */
 	@Method
 	private async _generateJWT(service: string) {
+		this.logger.debug('♻ Attempting to generating service JWT...');
 		return new this.Promise((resolve, reject) =>
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			sign({ service }, process.env.API_JWT_SECRET, (err: unknown, token: unknown) => {
+			sign({ service }, process.env.API_JWT_SECRET!, (err: unknown, token: unknown) => {
 				if (err) {
-					this.logger.warn('JWT token generation error:', err);
+					this.logger.error('JWT service token generation error:', err);
 					return reject(
 						new MoleculerClientError(
 							'Unable to generate token',
@@ -78,7 +78,7 @@ class GuardService extends moleculer.Service {
 						),
 					);
 				}
-
+				this.logger.debug('♻ Returning generated service JWT');
 				resolve(token);
 			}),
 		);
@@ -91,6 +91,7 @@ class GuardService extends moleculer.Service {
 		services: unknown[],
 	) {
 		return new this.Promise((resolve, reject) => {
+			this.logger.debug('♻ Attempting to verify service JWT...');
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,9 +105,9 @@ class GuardService extends moleculer.Service {
 					errorHandler(ctx, 'Forbidden service call:');
 					return reject(new MoleculerClientError('Forbidden', 401, 'FORBIDDEN_SERVICE'));
 				}
+				this.logger.debug('♻ Verified service JWT');
 				resolve(token);
 			});
 		});
 	}
 }
-module.exports = GuardService;

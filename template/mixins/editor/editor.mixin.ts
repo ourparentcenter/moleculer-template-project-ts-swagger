@@ -4,21 +4,18 @@
 /**
  * Mixin for swagger
  */
-import { writeFileSync, readFileSync } from 'fs';
+import { writeFileSync, readFileSync, existsSync } from 'fs';
 import { Errors } from 'moleculer';
 import ApiGateway from 'moleculer-web';
-import _ from 'lodash';
+import _, { isEqual } from 'lodash';
 import { RequestMessage } from 'types';
 import { replaceInFile } from 'replace-in-file';
-import { isEqual } from 'lodash';
 import YAML from 'js-yaml';
 import { Config } from '../../common';
 import path from 'path';
-import swaggerJSDoc from 'swagger-jsdoc';
-import * as pkg from '../../package.json';
+import { generateOpenAPISchema } from '@ServiceHelpers';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MoleculerServerError = Errors.MoleculerServerError;
-// console.log(SwaggerUI.absolutePath());
 const isJSON = (str: any) => {
 	// basic test: "does this look like JSON?"
 	let regex = /^[ \r\n\t]*[{[]/;
@@ -64,160 +61,7 @@ export const editorMixin = (mixinOptions?: any) => {
 			/**
 			 * Generate OpenAPI Schema
 			 */
-			generateOpenAPISchema(): any {
-				try {
-					const swaggerDefinition = {
-						openapi: '3.0.1',
-						info: {
-							title: `${pkg.name} API Documentation`, // Title of the documentation
-							description:
-								// eslint-disable-next-line max-len
-								'Moleculer JS Microservice Boilerplate with Typescript, TypeORM, CLI, Service Clients, Swagger, Jest, Docker, Eslint support and everything you will ever need to deploy rock solid projects..', // Short description of the app
-							version: pkg.version, // Version of the app
-						},
-						servers: [
-							{
-								url: `//${Config.SWAGGER_HOST}:${Config.SWAGGER_PORT}`, // base url to server
-							},
-						],
-						components: {
-							securitySchemes: {
-								bearerAuth: {
-									type: 'http',
-									scheme: 'bearer',
-									bearerFormat: 'JWT',
-								},
-							},
-							schemas: {
-								VerificationToken: {
-									type: 'object',
-									properties: {
-										verificationToken: {
-											type: 'string',
-											description: 'Token to activate user',
-											example:
-												'pl9A3MLkTRy7O7fVyIG5WUmdKDxvYPH14on3lQ7G31Clwhmhcd6Nqv4OeM9l5hDS',
-										},
-									},
-								},
-								Product: {
-									type: 'object',
-									properties: {
-										name: {
-											type: 'string',
-											description: 'Name of product',
-											example: 'Samsung Galaxy S20 Edge',
-										},
-										quantity: {
-											type: 'number',
-											description: 'Quantity of product',
-											example: 10,
-										},
-										price: {
-											type: 'number',
-											description: 'Cost of product',
-											example: 875,
-										},
-									},
-								},
-								User: {
-									type: 'object',
-									properties: {
-										login: {
-											type: 'string',
-											description: 'Login to be used',
-											example: 'joeLogin',
-										},
-										firstName: {
-											type: 'string',
-											description: 'First Name',
-											default: 'Joe',
-										},
-										lastName: {
-											type: 'string',
-											description: 'Surname',
-											example: 'Doe',
-										},
-										email: {
-											type: 'string',
-											description: 'Email',
-											example: 'joedoe@test.com',
-										},
-										password: {
-											type: 'string',
-											description: 'Password',
-											example: 'testPass1234',
-										},
-										langKey: {
-											type: 'string',
-											description: 'User language',
-											example: 'en',
-										},
-									},
-								},
-								UserAdditional: {
-									type: 'object',
-									properties: {
-										active: {
-											type: 'boolean',
-											description: 'user enabled',
-											example: false,
-										},
-										createdBy: {
-											type: 'string',
-											description: 'User id',
-											example: '5eb71ba74676dfca3fef434f',
-										},
-										createdDate: {
-											type: 'string',
-											description: 'Created date',
-											default: '2022-09-12T17:22:32.243Z',
-										},
-										lastModifiedBy: {
-											type: 'string',
-											description: 'User id',
-											example: '5eb71ba74676dfca3fef434f',
-										},
-										lastModifiedDate: {
-											type: 'string',
-											description: 'Last modified date',
-											example: '2022-09-12T17:43:28.957Z',
-										},
-									},
-								},
-							},
-						},
-						security: [
-							{
-								bearerAuth: [],
-							},
-						],
-					};
-					// Options for the swagger docs
-					const options = {
-						// Import swaggerDefinitions
-						definition: swaggerDefinition,
-						explorer: true,
-						enableCORS: false,
-
-						// Path to the API docs
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore
-						apis: JSON.parse(Config.SWAGGER_APIS),
-					};
-					// Initialize swagger-jsdoc
-					const swaggerSpec = swaggerJSDoc(options);
-
-					return swaggerSpec;
-				} catch (err) {
-					throw new MoleculerServerError(
-						'Unable to compile OpenAPI schema',
-						500,
-						'UNABLE_COMPILE_OPENAPI_SCHEMA',
-						{ err },
-					);
-				}
-			},
+			generateOpenAPISchema,
 
 			/**
 			 * Generate OpenAPI Schema
@@ -254,6 +98,49 @@ export const editorMixin = (mixinOptions?: any) => {
 					);
 				}
 			},
+			// deepcode ignore NoRateLimitingForExpensiveWebOperation: rate limit handled by api gateway
+			async getSwaggerFile(req: any, res: any): Promise<any> {
+				try {
+					const ctx = req.$ctx;
+					const swJSON = await ctx.call('api.getOpenApiSchema');
+
+					ctx.meta.responseType = 'application/x-yaml';
+					// @ts-ignore
+					const generatedYAML = this.generateYAML(JSON.stringify(swJSON));
+					const YAMLFile = existsSync('./swagger.yaml');
+					let swYAML;
+
+					return !YAMLFile
+						? // @ts-ignore
+						  (this.logger.warn('♻ No YAML file found, creating it.'),
+						  writeFileSync('./swagger.yaml', generatedYAML, 'utf8'),
+						  res.end(generatedYAML))
+						: ((swYAML = YAML.load(readFileSync('./swagger.yaml', 'utf8'))),
+						  // @ts-ignore
+						  this.logger.debug('♻ Checking if Swagger YAML schema needs updating...'),
+						  isEqual(swYAML, swJSON)
+								? // @ts-ignore
+								  (this.logger.debug(
+										'♻ No changes needed, swagger YAML schema has the correct values',
+								  ),
+								  res.end(generatedYAML))
+								: // @ts-ignore
+								  (this.logger.debug(
+										'♻ Swagger YAML schema needs updating, updating file...',
+								  ),
+								  writeFileSync('./swagger.yaml', generatedYAML, 'utf8'),
+								  // @ts-ignore
+								  this.logger.debug('♻ Updated swagger YAML'),
+								  res.end(generatedYAML)));
+				} catch (err) {
+					throw new MoleculerServerError(
+						`♻ Error updating swagger YAML schema`,
+						500,
+						'UNABLE_UPDATE_YAML_SCHEME',
+						{ err },
+					);
+				}
+			},
 		},
 
 		async created() {
@@ -274,25 +161,23 @@ export const editorMixin = (mixinOptions?: any) => {
 					})`,
 				],
 			};
-			try {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				this.logger.info(
-					`♻ Testing for matches to modify in swagger editor html at ${pathToSwaggerEitorHtml}`,
-				);
-				const dryRun = replaceInFile({ dry: true, countMatches: true, ...options });
-				// check the sgwgger editor html to see if changes need to be mae, then make them.
-				dryRun
-					.then((results) => {
-						if (results[0]['hasChanged'] == true) {
-							// @ts-ignore
-							this.logger.info(
+
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			this.logger.debug(
+				`♻ Testing for matches to modify in swagger editor html at ${pathToSwaggerEitorHtml}`,
+			);
+			replaceInFile({ dry: true, countMatches: true, ...options })
+				.then((results) => {
+					results[0]['hasChanged'] === true
+						? // @ts-ignore
+						  (this.logger.debug(
 								`♻ Found matches in swagger editor html, updating file...`,
-							);
-							replaceInFile(options)
+						  ),
+						  replaceInFile(options)
 								.then(
 									// @ts-ignore
-									this.logger.info(
+									this.logger.debug(
 										`♻ Updated swagger editor html at ${pathToSwaggerEitorHtml}`,
 									),
 								)
@@ -301,32 +186,22 @@ export const editorMixin = (mixinOptions?: any) => {
 									this.logger.error(
 										`♻ Error updating swagger editor html at ${pathToSwaggerEitorHtml}: ${err}`,
 									),
-								);
-						} else {
-							// @ts-ignore
-							this.logger.info(
+								))
+						: // @ts-ignore
+						  this.logger.debug(
 								'♻ No changes needed, swagger editor html has the correct values',
-							);
-						}
-					})
-					.catch((err) => {
-						// @ts-ignore
-						this.logger.error(`♻ Error testing for matches: ${err}`);
-						throw new MoleculerServerError(
-							`♻ Error testing for matches in ${pathToSwaggerEitorHtml}`,
-							500,
-							'ERROR_TESTING_MATCHES',
-							{ err },
-						);
-					});
-			} catch (err) {
-				throw new MoleculerServerError(
-					`♻ Unable to update swagger editor html at ${pathToSwaggerEitorHtml}`,
-					500,
-					'UNABLE_EDIT_SWAGGER_HTML',
-					{ err },
-				);
-			}
+						  );
+				})
+				.catch((err) => {
+					// @ts-ignore
+					this.logger.error(`♻ Error testing for matches: ${err}`);
+					throw new MoleculerServerError(
+						`♻ Unable to update swagger editor html at ${pathToSwaggerEitorHtml}`,
+						500,
+						'UNABLE_EDIT_SWAGGER_HTML',
+						{ err },
+					);
+				});
 
 			// merge route with api gateway
 			const route = _.defaultsDeep(mixinOptions.routeOptions, {
@@ -353,75 +228,13 @@ export const editorMixin = (mixinOptions?: any) => {
 				aliases: {
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore
-					'GET /swagger.yaml'(req: any, res: any): void {
-						try {
-							const swJSON = require('../../swagger.json');
-							try {
-								const ctx = req.$ctx;
-								ctx.meta.responseType = 'application/json';
-								// @ts-ignore
-								const generatedScheme = this.generateOpenAPISchema();
-								// @ts-ignore
-								this.logger.info(
-									'♻ Checking if Swagger JSON schema needs updating...',
-								);
-								if (isEqual(swJSON, generatedScheme)) {
-									// @ts-ignore
-									this.logger.info(
-										'♻ No changes needed, swagger json schema has the correct values',
-									);
-								} else {
-									// @ts-ignore
-									this.logger.info(
-										'♻ Swagger JSON schema needs updating, updating file...',
-									);
-									writeFileSync(
-										'./swagger.json',
-										JSON.stringify(generatedScheme, null, 4),
-										'utf8',
-									);
-									// @ts-ignore
-									this.logger.info(`♻ Updated swagger JSON`);
-								}
-							} catch (err) {
-								throw new MoleculerServerError(
-									'♻ Error updating swagger JSON schema',
-									500,
-									'UNABLE_UPDATE_SWAGGER_JSON',
-									{ err },
-								);
-							}
-							const swYAML = YAML.load(readFileSync('./swagger.yaml', 'utf8'));
-							const ctx = req.$ctx;
-							ctx.meta.responseType = 'application/x-yaml';
-							// @ts-ignore
-							const generatedYAML = this.generateYAML(JSON.stringify(swJSON));
-							// @ts-ignore
-							this.logger.info('♻ Checking if Swagger YAML schema needs updating...');
-							if (isEqual(swYAML, swJSON)) {
-								// @ts-ignore
-								this.logger.info(
-									'♻ No changes needed, swagger YAML schema has the correct values',
-								);
-								return res.end(generatedYAML);
-							} else {
-								// @ts-ignore
-								this.logger.info(
-									'♻ Swagger YAML schema needs updating, updating file...',
-								);
-								writeFileSync('./swagger.yaml', generatedYAML, 'utf8');
-								// @ts-ignore
-								this.logger.info(`♻ Updated swagger YAML`);
-								return res.end(generatedYAML);
-							}
-						} catch (err) {
-							throw new MoleculerServerError(
-								`♻ Error updating swagger YAML schema`,
-								500,
-								'UNABLE_UPDATE_YAML_SCHEME',
-								{ err },
-							);
-						}
+					// deepcode ignore NoRateLimitingForExpensiveWebOperation: rate limited by api gateway
+					async 'GET /swagger.yaml'(req: any, res: any): void {
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore
+						this.logger.debug('♻ Serving swagger.yaml');
+						// @ts-ignore
+						this.getSwaggerFile(req, res);
 					},
 				},
 
@@ -437,11 +250,9 @@ export const editorMixin = (mixinOptions?: any) => {
 		async started() {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
-			this.logger.info(
+			this.logger.debug(
 				`♻ Swagger Editor server is available at ${mixinOptions.routeOptions.path}`,
 			);
 		},
 	};
 };
-
-module.exports = { editorMixin };

@@ -66,3 +66,6 @@ typings/
 # Don't track transpiled files
 dist/
 .dccache
+data/
+logs/
+junit.xml

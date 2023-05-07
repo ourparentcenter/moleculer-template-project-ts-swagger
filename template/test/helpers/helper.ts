@@ -54,7 +54,7 @@ export function wait(secs: number) {
 
 interface CheckWrongInfo {
 	token?: string;
-	method?: 'get' | 'post' | 'put' | 'patch' | 'delete';
+	method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options' | 'head' | 'connect' | 'trace';
 	body?: string | any;
 	attach?: string;
 }
@@ -67,15 +67,15 @@ export async function checkWrongToken(server: string, infoUrl: string, info: Che
 		attach = undefined,
 	} = info;
 	let response: request.Response;
-	if (attach) {
+	/* if (attach) {
 		response = await request(server)
 			[method](infoUrl)
 			.send(body)
 			.attach('file', attach)
 			.set(AUTHORIZATION_KEY, token);
-	} else {
-		response = await request(server)[method](infoUrl).send(body).set(AUTHORIZATION_KEY, token);
-	}
+	} else { */
+	response = await request(server)[method](infoUrl).send(body).set(AUTHORIZATION_KEY, token);
+	// }
 	expect(response.status).toBe(constants.HTTP_STATUS_UNAUTHORIZED);
 	expect(response.body)
 		.toBeDefined()
@@ -95,18 +95,18 @@ export async function checkCorrectToken(
 		token = 'Bearer WrongToken',
 		method = 'get',
 		body = undefined,
-		attach = undefined,
+		// attach = undefined,
 	} = info;
 	let response: request.Response;
-	if (attach) {
+	/* if (attach) {
 		response = await request(server)
 			[method](infoUrl)
 			.send(body)
 			.attach('file', attach)
 			.set(AUTHORIZATION_KEY, token);
-	} else {
-		response = await request(server)[method](infoUrl).send(body).set(AUTHORIZATION_KEY, token);
-	}
+	} else { */
+	response = await request(server)[method](infoUrl).send(body).set(AUTHORIZATION_KEY, token);
+	// }
 	expect(response.status).toBe(constants.HTTP_STATUS_OK);
 	expect(response.body)
 		.toBeDefined()
