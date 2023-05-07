@@ -18,10 +18,11 @@
 - Typescript decorators for moleculer [https://github.com/ourparentcenter/moleculer-decorators-extended](https://github.com/ourparentcenter/moleculer-decorators-extended)
 - Configuration for development/production/testing using environment variables
 - (**New features**) Optional Swagger embedded with demo api and jsdoc http://localhost:3000/openapi for standard swagger ui and http://localhost:3000/editor for swagger editor. Both accept auth JWT token and auto update swagger.json & swagger.ymal. OpenAPI 3.0.1 schema.
-- Optional Swagger-Stats with dashboaed at http://localhost:3000/api
+- Optional Swagger-Stats with dashboard at http://localhost:3000/api
 - Auto generation and regeneration of swagger.json spec, needed for swager-stats and swagger
 - (**New**) Added jest tests for all services
 - (**New**) Implementing apps directory for plugin apps (still under development)
+- (**New**) User service & roles service (still under development)
 
 
 ## Install
