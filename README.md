@@ -23,6 +23,7 @@
 - (**New**) Added jest tests for all services
 - (**New**) Implementing apps directory for plugin apps (still under development)
 - (**New**) User service & roles service (still under development)
+- (**New**) Log4js implemented for log files by service
 
 
 ## Install
