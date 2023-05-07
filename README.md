@@ -15,12 +15,13 @@
 - Lint with [ESLint](http://eslint.org/).
 - Launch file for debugging in [VSCode](https://code.visualstudio.com/).
 <!-- - User auth with JWT authentication sample -->
-- Typescript decorators for moleculer [https://github.com/d0whc3r/moleculer-decorators](https://github.com/d0whc3r/moleculer-decorators)
+- Typescript decorators for moleculer [https://github.com/ourparentcenter/moleculer-decorators-extended](https://github.com/ourparentcenter/moleculer-decorators-extended)
 - Configuration for development/production/testing using environment variables
 - (**New features**) Optional Swagger embedded with demo api and jsdoc http://localhost:3000/openapi for standard swagger ui and http://localhost:3000/editor for swagger editor. Both accept auth JWT token and auto update swagger.json & swagger.ymal. OpenAPI 3.0.1 schema.
-- Optionall Swagger-Stats with dashboaed at http://localhost:3000/api
-- Auto generation and regeneration of swagger.json spec, needed for swager-stats
+- Optional Swagger-Stats with dashboaed at http://localhost:3000/api
+- Auto generation and regeneration of swagger.json spec, needed for swager-stats and swagger
 - (**New**) Added jest tests for all services
+- (**New**) Implementing apps directory for plugin apps (still under development)
 
 
 ## Install
@@ -91,7 +92,7 @@ The frontend is built with Quasar v2 and compiled into the public folder of api 
 Docker images now have moleculer-repl added to them. To use, open docker cli of a container, like api container, and run the following command `moleculer --ns {enter your namespace here}`, e.g. `moleculer --ns test-template2-docker`. This will start a new broker serviece node and add it to your existing nodes so that you can use the repl commands in docker.
 
 ## Current issues
-If using swagger-stats, running npm install will fail due to swagger-stats dependency of prom-client, which is `"prom-client": ">= 10 <= 13",` and we are using 14.0.1. Until this is changed in swagger-stats either use yarn or remove prom-client from package.json, npm install, then add it back and do npm install.
+(fixed) - If using swagger-stats, running npm install will fail due to swagger-stats dependency of prom-client, which is `"prom-client": ">= 10 <= 13",` and we are using 14.0.1. Until this is changed in swagger-stats either use yarn or remove prom-client from package.json, npm install, then add it back and do npm install.
 
 If you found this project useful, buy me a beer! 😁
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?business=NNWZXRYD4FMNL&no_recurring=0&item_name=If+you+found+this+project+useful%2C+please+by+me+a+beer+to+show+your+gratitude.+%5E_%5E&currency_code=USD)
@@ -100,6 +101,6 @@ If you found this project useful, buy me a beer! 😁
 moleculer-template-project-ts-swagger is available under the [MIT license](https://tldrlegal.com/license/mit-license).
 
 ## Contact
-Copyright (c) 2022 Our Parent Center
+Copyright (c) 2023 Our Parent Center
 
 [![@moleculerjs](https://img.shields.io/badge/github-moleculerjs-green.svg)](https://github.com/moleculerjs) [![@MoleculerJS](https://img.shields.io/badge/twitter-MoleculerJS-blue.svg)](https://twitter.com/MoleculerJS)
