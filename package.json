@@ -4,6 +4,8 @@
 	"description": "Project template for Moleculer-based projects with typescript & swagger",
 	"main": "meta.js",
 	"scripts": {
+    "preinstall": "npx -y only-allow pnpm",
+    "checkUpdates": "npx npm-check-updates",
 		"dev": "rimraf tmp && moleculer init . tmp",
 		"build": "moleculer init --answers test/now.sh/answers.json --no-install . tmp",
 		"test": "moleculer init --answers test/ci/answers.json --no-install . ci-test",
@@ -21,8 +23,8 @@
 	},
 	"homepage": "https://github.com/ourparentcenter/moleculer-template-project-ts-swagger#readme",
 	"devDependencies": {
-		"moleculer-cli": "^0.8.0",
-		"prettier": "^2.7.1",
-		"rimraf": "^3.0.2"
+		"moleculer-cli": "^0.8.1",
+		"prettier": "^3.0.2",
+		"rimraf": "^5.0.1"
 	}
 }
